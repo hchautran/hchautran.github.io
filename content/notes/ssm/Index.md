@@ -1,11 +1,9 @@
 ---
 longform:
   format: scenes
-  title: math
+  title: ssm
   workflow: Default Workflow
   sceneFolder: /
-  scenes:
-    - linear algebra
-  sceneTemplate: templates/Chapter.md
+  scenes: []
   ignoredFiles: []
 ---
