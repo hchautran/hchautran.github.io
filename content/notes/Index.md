@@ -5,10 +5,17 @@ longform:
   workflow: Default Workflow
   sceneFolder: /
   scenes:
-    - introduction to llm
-    - auto regressive
-    - hello world
-    - decoding algos
+    - Large Language Model
+    - Auto regressive decoding
+    - Transformer
+    - Transformer
+    - Residual Connection
+    - Layer Norm
+    - Batch Norm
+    - RNN
+    - Large Language Model
+    - GPUs and Other Accelerators
   sceneTemplate: templates/Chapter.md
-  ignoredFiles: []
+  ignoredFiles:
+    - normalization methods
 ---
