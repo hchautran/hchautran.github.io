@@ -1,5 +1,7 @@
 ---
 title: Residual Connection
-draft: true
+draft: false
 tags:
+  - regularlization
 ---
+## Introduction
