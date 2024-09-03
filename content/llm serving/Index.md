@@ -4,8 +4,8 @@ longform:
   title: llm serving
   workflow: Default Workflow
   sceneFolder: /
-  scenes:
-    - Introduction
+  scenes: []
   sceneTemplate: templates/Chapter.md
-  ignoredFiles: []
+  ignoredFiles:
+    - decoding algos
 ---
