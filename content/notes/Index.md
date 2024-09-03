@@ -1,11 +1,11 @@
 ---
 longform:
   format: scenes
-  title: llm serving
+  title: notes
   workflow: Default Workflow
   sceneFolder: /
-  scenes: []
+  scenes:
+    - introduction to llm
   sceneTemplate: templates/Chapter.md
-  ignoredFiles:
-    - decoding algos
+  ignoredFiles: []
 ---
