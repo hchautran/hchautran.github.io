@@ -8,6 +8,7 @@ longform:
     - introduction to llm
     - auto regressive
     - hello world
+    - decoding algos
   sceneTemplate: templates/Chapter.md
   ignoredFiles: []
 ---

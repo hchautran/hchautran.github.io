@@ -1,6 +1,5 @@
 ---
-title: "hello world"
-draft: true
+title: hello world
+draft: false
 tags:
-  - 
 ---
