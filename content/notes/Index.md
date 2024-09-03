@@ -6,6 +6,7 @@ longform:
   sceneFolder: /
   scenes:
     - introduction to llm
+    - auto regressive
   sceneTemplate: templates/Chapter.md
   ignoredFiles: []
 ---
