@@ -18,4 +18,5 @@ longform:
   sceneTemplate: templates/Chapter.md
   ignoredFiles:
     - normalization methods
+draft: false
 ---
