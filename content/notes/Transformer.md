@@ -61,12 +61,13 @@ The Position-wise FFN is applied to each position in the sequence separately and
 
 ## Other components
 
-Apart from the two main components mentioned above, the Transformer's strength also inherits several powerful features from previous architectures. These include the ability to handle sequential data like [[RNN]]-based models, while overcoming their limitations, such as vanishing gradients and slow training times
+Apart from the two main components mentioned above, the Transformer's strength also inherits several powerful features from previous architectures. These include the ability to handle sequential data like [[RNN]]-based models (using **position embeddings**), solving limitations, such as vanishing/exploding gradients ([[Layer Norm]],  [[Residual Connection]]). 
 ##### **Embedding Layer**
 
 The input tokens (words or subwords) are first converted into dense vectors (embeddings) that capture their meanings in a continuous space. These embeddings are learned during training or set fixed depending on the choice of the author.
 
-#####  **Positional Encoding**
+#####  **Positional Embeddings**
+Since the Transformer architecture processes all tokens in parallel, it's essential to inject positional information into each token. This is where positional embeddings become crucial.
 
 ![[positional encoding.png]]
 The positional encodings are defined using sine and cosine functions of different frequencies. For a given position $pos$ and dimension $i$, the positional encoding is computed as:
@@ -88,7 +89,7 @@ Where
 > - **Smooth Changes Across Positions:** The smooth variation in sine and cosine functions ensures that small position changes lead to small encoding changes, providing relative positioning.
 > - **Additive to Embeddings:** Positional encodings are added to token embeddings, merging positional and semantic information.
 
-
+This is the positional encoding implementation that is used in the original Transformer paper, however in recent  [[Large Language Model]]  variants, a more  popular type of positional encoding is [[Relative Positional Encoding]]
 ##### **Layer Normalization**
 
 [[Layer Norm]] is applied after the attention mechanism and the feed-forward network to stabilize and speed up training. It normalizes the outputs of these layers, ensuring that the model can learn effectively. 
