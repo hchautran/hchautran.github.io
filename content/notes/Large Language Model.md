@@ -4,6 +4,8 @@ draft: false
 tags:
   - llm
   - transformers
+  - decoder
+  - deep_learning
 ---
 ![[Large Language Model.png]] 
 

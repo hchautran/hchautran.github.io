@@ -11,7 +11,14 @@ longform:
     - Batch Norm
     - RNN
     - GPUs and Other Accelerators
-    - llm serving
+    - Transformer
+    - Large Language Model
+    - Relative Positional Encoding
+    - KV cache
+    - Gated Linear Unit (GLU)
+    - Multi-Query Attention
+    - Group-Query Attention
+    - LLaMA
   sceneTemplate: templates/Chapter.md
   ignoredFiles:
     - normalization methods
