@@ -4,7 +4,7 @@ draft: false
 tags:
   - transformers
 ---
-![[Transformer.png]]
+![[notes/images/Transformer.png]]
 
 Transformers are a type of deep learning model that revolutionized natural language processing (NLP) and other fields like computer vision. Introduced in the paper "Attention is All You Need" by Vaswani et al. in 2017, Transformers leverage self-attention mechanisms to process and generate data more efficiently than previous models like RNNs and LSTMs. They excel at handling sequential data, enabling breakthroughs in tasks such as machine translation, text generation, and even image recognition. The architecture's scalability and versatility have made it a foundational tool in modern AI research and applications.
 
@@ -12,8 +12,9 @@ In this post, I'll focus mainly on two main component of the Transformer archite
 - The  Multi-head Self-Attention mechanism 
 - Position-wise Feed-Forward Network
 
-## Multi-head Self Attention
 
+## Multi-head Self Attention
+![[Drawing 2024-09-08 11.20.25.excalidraw.png]]
 Multi-head attention is a core component of the Transformer architecture. The idea behind multi-head attention is to allow the model to focus on different parts of the input sequence from multiple perspectives simultaneously. This is achieved by using multiple attention heads, each of which computes scaled dot-product attention independently. Given an input sequence represented by a matrix $X \in \mathbb{R}^{n \times d}$, where $n$ is the sequence length and $d$ is the dimensionality of each input vector, multi-head attention is computed as follows: 
 1. **Linear Projections:** The input $X$ is linearly projected into queries, keys, and values using learned weight matrices $W_Q$, $W_K$, and $W_V$ respectively: 
 $$

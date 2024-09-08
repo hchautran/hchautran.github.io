@@ -1,6 +1,10 @@
 ---
-title: "<% tp.file.title %>"
+title: <% tp.file.title %>
 draft: true
 tags:
-  - 
 ---
+
+
+
+---
+## Reference
