@@ -19,6 +19,9 @@ longform:
     - Multi-Query Attention
     - Group-Query Attention
     - LLaMA
+    - Attention with Linear Biases (ALiBi)
+    - Rotary Position Embeddings (RoPE)
+    - Euler's Formula
   sceneTemplate: templates/Chapter.md
   ignoredFiles:
     - normalization methods

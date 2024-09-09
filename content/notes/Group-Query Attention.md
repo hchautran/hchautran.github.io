@@ -1,7 +1,8 @@
 ---
 title: Group-Query Attention
-draft: true
+draft: false
 tags:
+  - read_later
 ---
 
 

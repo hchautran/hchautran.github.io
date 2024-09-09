@@ -1,7 +1,8 @@
 ---
 title: <% tp.file.title %>
-draft: true
+draft: false
 tags:
+  - read_later
 ---
 
 

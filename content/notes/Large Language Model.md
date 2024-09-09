@@ -6,6 +6,7 @@ tags:
   - transformers
   - decoder
   - deep_learning
+  - read_later
 ---
 ![[Large Language Model.png]] 
 

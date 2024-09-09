@@ -1,6 +1,6 @@
 ---
-title: Gated Linear Unit (GLU)
-draft: true
+title: Euler's Formula
+draft: false
 tags:
   - read_later
 ---
