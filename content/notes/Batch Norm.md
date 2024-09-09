@@ -1,6 +1,6 @@
 ---
 title: Batch Norm
-draft: true
+draft: false
 tags:
   - read_later
 ---
