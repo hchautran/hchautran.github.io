@@ -4,6 +4,7 @@ draft: false
 tags:
   - normalization
   - regularlization
+  - deep_learning
 ---
 ![[normalization methods.png]]
 

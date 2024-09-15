@@ -2,10 +2,6 @@
 title: Large Language Model (llm)
 draft: false
 tags:
-  - llm
-  - transformers
-  - decoder
-  - deep_learning
   - read_later
 ---
 ![[Large Language Model.png]] 

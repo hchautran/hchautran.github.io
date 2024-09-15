@@ -2,7 +2,6 @@
 title: Rotary Position Embeddings (RoPE)
 draft: false
 tags:
-  - RPE
   - read_later
 ---
 ![[Rotary Position Embeddings (RoPE).png]]

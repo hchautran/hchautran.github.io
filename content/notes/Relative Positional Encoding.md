@@ -3,7 +3,6 @@ title: Relative Positional Encoding
 draft: false
 tags:
   - transformers
-  - deep_learning
   - llm
 ---
 ## Introduction

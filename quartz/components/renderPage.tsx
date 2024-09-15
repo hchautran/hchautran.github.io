@@ -201,6 +201,7 @@ export function renderPage(
       {left.map((BodyComponent) => (
         <BodyComponent {...componentData} />
       ))}
+      
     </div>
   )
 
@@ -209,6 +210,8 @@ export function renderPage(
       {right.map((BodyComponent) => (
         <BodyComponent {...componentData} />
       ))}
+      {/* <a href="https://clustrmaps.com/site/1c1ab"  title="Visit tracker"><img src="//www.clustrmaps.com/map_v2.png?d=VV_9AxgUp6rEn_vluenH0AQsjlWKPLdDalJIaJg96ms&cl=ffffff" /></a> */}
+      <script type="text/javascript" id="clustrmaps" src="//clustrmaps.com/map_v2.js?d=VV_9AxgUp6rEn_vluenH0AQsjlWKPLdDalJIaJg96ms&cl=ffffff&w=a"></script>
     </div>
   )
 
@@ -239,12 +242,14 @@ export function renderPage(
                 {afterBody.map((BodyComponent) => (
                   <BodyComponent {...componentData} />
                 ))}
+                
               </div>
             </div>
             {RightComponent}
           </Body>
           <Footer {...componentData} />
         </div>
+       
       </body>
       {pageResources.js
         .filter((resource) => resource.loadTime === "afterDOMReady")
