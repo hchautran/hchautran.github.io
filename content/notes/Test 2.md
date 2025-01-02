@@ -1,10 +1,10 @@
 ---
-title: LLaMA 3.1
+title: <% tp.file.title %>
 draft: false
 tags:
   - read_later
 ---
-
+This is test link [[Test]]
 
 
 ---
