@@ -1,5 +1,5 @@
 ---
-title: <% tp.file.title %>
+title: Test 2
 draft: false
 tags:
   - read_later

@@ -1,5 +1,5 @@
 ---
-title: <% tp.file.title %>
+title: Test
 draft: false
 tags:
   - read_later
@@ -8,6 +8,19 @@ tags:
 # Introduction
 
 
+> [!info] test
 
----
+
+$$ y = f(x)$$
+
+
+>[!example]  
+> Hello aflkdsjflsdjflskjflskfjsljfskfjsfs
+
+
+``` python
+print('hello world')
+print('hello world')
+print('hello world')
+```
 ## Reference
