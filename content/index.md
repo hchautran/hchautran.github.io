@@ -17,9 +17,9 @@ title: About
 
 ## 📰 News
 
-* **2025**: 🎓 Join [UIUC](https://siebelschool.illinois.edu/) as a graduate student.
-* **2025**: 📄 Our work "A statement-level code vulnerability detection for Python": [DetectVul](https://arxiv.org/abs/2405.16148) has been accepted at the Future Generation Computer Systems Journal (IF 6.2).
-* **2024**: 📄 Our paper [PiToMe](https://arxiv.org/abs/2405.16148) has been accepted to NeurIPS 2024.    
+* **2025**: 🎓 Joined [UIUC](https://siebelschool.illinois.edu/) as a graduate student.
+* **2025**: 📄 Our work "A statement-level code vulnerability detection for Python": [DetectVul](https://arxiv.org/abs/2405.16148) was accepted at the Future Generation Computer Systems Journal (IF 6.2).
+* **2024**: 📄 Our paper [PiToMe](https://arxiv.org/abs/2405.16148) was accepted to NeurIPS 2024.    
 
 ---
 
