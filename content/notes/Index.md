@@ -5,8 +5,8 @@ longform:
   workflow: Default Workflow
   sceneFolder: /
   scenes:
-    - Test
-    - Test 2
+    - Initialization in C
   sceneTemplate: templates/Chapter.md
-  ignoredFiles: []
+  ignoredFiles:
+    - Untitled
 ---
