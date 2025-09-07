@@ -7,10 +7,30 @@ tags:
 
 
 Matrix multiplication is one of the most fundamental operations in linear algebra and forms the backbone of many computational applications, from machine learning to scientific computing. While CPUs can handle matrix multiplication, GPUs excel at this task due to their parallel architecture. In this post, we'll explore how to implement the simplest version of matrix multiplication using CUDA.
-
-## Why Use GPU for Matrix Multiplication?
-
 Matrix multiplication involves computing the dot product of rows and columns, which can be done independently for each element of the result matrix. This makes it an ideal candidate for parallel processing. A GPU can execute thousands of threads simultaneously, making it much faster than a CPU for large matrices.
+
+> [!info]- Basic Linear Algebra Subprograms (BLAS)
+>
+> In the Basic Linear Algebra Subprograms (BLAS), a de facto
+standard for publishing libraries that perform basic algebra operations,
+there are three levels of linear algebra functions. As the level increases,
+the number of operations performed by the function increases. Level 1
+functions perform vector operations of the form y=αx+y, where x and y
+are vectors and α is a scalar. Our vector addition example is a special
+case of a level 1 function with α 5 1. Level 2 functions perform matrix-
+vector operations of the form y=αAx+βy, where A is a matrix, x and y
+are vectors, and α and β are scalars. We will be studying a form of level 2
+function in sparse linear algebra. Level 3 functions perform matrix-matrix
+operations in the form of C=αAB 1 βC, where A, B, and C are matrices
+and α and β are scalars. Our matrix-matrix multiplication example is a
+special case of a level 3 function where α 5 1 and β5 0. These BLAS
+functions are important because they are used as basic building blocks of
+higher-level algebraic functions, such as linear system solvers and eigen-
+value analysis. As we will discuss later, the performance of different imple-
+mentations of BLAS functions can vary by orders of magnitude in both
+sequential and parallel computers.
+
+
 
 ## The Mathematical Foundation
 
@@ -197,8 +217,6 @@ Future optimizations could include:
 ## Conclusion
 
 This simple CUDA matrix multiplication implementation demonstrates the basic concepts of GPU programming: thread organization, memory management, and kernel execution. While not optimized, it provides a solid foundation for understanding how GPUs can accelerate mathematical computations.
-
-The beauty of this approach lies in its simplicity - one thread per result element makes the mapping straightforward and the code easy to understand. As you progress in CUDA programming, you'll learn more sophisticated techniques, but this naive version will always remain a valuable reference point for understanding the fundamentals.
 
 
 ---
