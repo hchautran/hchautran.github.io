@@ -14,10 +14,8 @@ Initialization is one of the most fundamental concepts in C++ programming, yet i
 
 Initialization is the process of giving a variable an initial value at the time of its creation. This is different from assignment, which changes the value of an already-existing variable. Proper initialization helps prevent undefined behavior and makes your code more predictable.
 
-## Types of Initialization in C++
+## Types of Initialization
 
-
-## When to Use Each Type of Initialization
 
 ### 1. Default Initialization
 **Use when:**
