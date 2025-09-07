@@ -1,6 +1,6 @@
 ---
 title: Generic Pointers
-draft: false
+draft: true
 tags:
   - C
 ---
@@ -19,18 +19,18 @@ int main() {
     int number = 42;
     char letter = 'A';
     double pi = 3.14;
-    
+
     void* generic_ptr;  // Can point to anything
-    
+
     generic_ptr = &number;  // Points to int
     printf("Integer: %d\n", *(int*)generic_ptr);
-    
+
     generic_ptr = &letter;  // Points to char
     printf("Character: %c\n", *(char*)generic_ptr);
-    
+
     generic_ptr = &pi;      // Points to double
     printf("Double: %.2f\n", *(double*)generic_ptr);
-    
+
     return 0;
 }
 ```
@@ -53,7 +53,7 @@ Instead of writing separate swap functions for each type, write one generic vers
 void swap(void* a, void* b, size_t size) {
     // Create temporary buffer
     char temp[size];
-    
+
     // Copy a to temp, b to a, temp to b
     memcpy(temp, a, size);
     memcpy(a, b, size);
@@ -66,19 +66,19 @@ int main() {
     printf("Before: x=%d, y=%d\n", x, y);
     swap(&x, &y, sizeof(int));
     printf("After: x=%d, y=%d\n\n", x, y);
-    
+
     // Swap doubles
     double a = 3.14, b = 2.71;
     printf("Before: a=%.2f, b=%.2f\n", a, b);
     swap(&a, &b, sizeof(double));
     printf("After: a=%.2f, b=%.2f\n\n", a, b);
-    
+
     // Swap characters
     char c1 = 'X', c2 = 'Y';
     printf("Before: c1=%c, c2=%c\n", c1, c2);
     swap(&c1, &c2, sizeof(char));
     printf("After: c1=%c, c2=%c\n", c1, c2);
-    
+
     return 0;
 }
 ```
@@ -137,13 +137,13 @@ void array_free(GenericArray* arr) {
 int main() {
     // Create array for integers
     GenericArray* int_array = array_create(sizeof(int), 5);
-    
+
     // Add some integers
     int values[] = {10, 20, 30, 40, 50};
     for (int i = 0; i < 5; i++) {
         array_add(int_array, &values[i]);
     }
-    
+
     // Print integers
     printf("Integers: ");
     for (size_t i = 0; i < int_array->count; i++) {
@@ -151,26 +151,26 @@ int main() {
         printf("%d ", *value);
     }
     printf("\n");
-    
+
     array_free(int_array);
-    
+
     // Create array for doubles
     GenericArray* double_array = array_create(sizeof(double), 3);
-    
+
     double decimals[] = {1.1, 2.2, 3.3};
     for (int i = 0; i < 3; i++) {
         array_add(double_array, &decimals[i]);
     }
-    
+
     printf("Doubles: ");
     for (size_t i = 0; i < double_array->count; i++) {
         double* value = (double*)array_get(double_array, i);
         printf("%.1f ", *value);
     }
     printf("\n");
-    
+
     array_free(double_array);
-    
+
     return 0;
 }
 ```
@@ -213,12 +213,12 @@ int main() {
     double pi = 3.14159;
     char letter = 'A';
     char* message = "Hello, World!";
-    
+
     generic_print(&num, TYPE_INT);
     generic_print(&pi, TYPE_DOUBLE);
     generic_print(&letter, TYPE_CHAR);
     generic_print(message, TYPE_STRING);
-    
+
     return 0;
 }
 ```

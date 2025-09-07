@@ -35,16 +35,16 @@ __global__ void matrixMul(float* A, float* B, float* C, int M, int N, int K) {
     // Calculate the row and column index for this thread
     int row = blockIdx.y * blockDim.y + threadIdx.y;
     int col = blockIdx.x * blockDim.x + threadIdx.x;
-    
+
     // Check boundaries
     if (row < M && col < N) {
         float sum = 0.0f;
-        
+
         // Compute dot product for C[row][col]
         for (int k = 0; k < K; k++) {
             sum += A[row * K + k] * B[k * N + col];
         }
-        
+
         C[row * N + col] = sum;
     }
 }
@@ -71,7 +71,7 @@ __global__ void matrixMul(float* A, float* B, float* C, int M, int N, int K) {
 __global__ void matrixMul(float* A, float* B, float* C, int M, int N, int K) {
     int row = blockIdx.y * blockDim.y + threadIdx.y;
     int col = blockIdx.x * blockDim.x + threadIdx.x;
-    
+
     if (row < M && col < N) {
         for (int k = 0; k < K; k++) {
             C[row*N+ col] += A[row * K + k] * B[k * N + col];
@@ -88,34 +88,34 @@ void initializeMatrix(std::vector<float>& matrix, int rows, int cols) {
 int main() {
     // Matrix dimensions
     const int M = 1024;  // Rows in A and C
-    const int N = 1024;  // Columns in B and C  
+    const int N = 1024;  // Columns in B and C
     const int K = 1024;  // Columns in A, rows in B
-    
+
     // Host matrices
     std::vector<float> h_A(M * K);
     std::vector<float> h_B(K * N);
     std::vector<float> h_C(M * N);
-    
+
     // Initialize matrices with random values
     srand(time(nullptr));
     initializeMatrix(h_A, M, K);
     initializeMatrix(h_B, K, N);
-    
+
     // Device matrices
     float *d_A, *d_B, *d_C;
     size_t size_A = M * K * sizeof(float);
     size_t size_B = K * N * sizeof(float);
     size_t size_C = M * N * sizeof(float);
-    
+
     // Allocate device memory
     CUDA_CHECK(cudaMalloc((void**)&d_A, size_A));
     CUDA_CHECK(cudaMalloc((void**)&d_B, size_B));
     CUDA_CHECK(cudaMalloc((void**)&d_C, size_C));
-    
+
     // Copy data from host to device
     CUDA_CHECK(cudaMemcpy(d_A, h_A.data(), size_A, cudaMemcpyHostToDevice));
     CUDA_CHECK(cudaMemcpy(d_B, h_B.data(), size_B, cudaMemcpyHostToDevice));
-    
+
     // Define block and grid dimensions
     dim3 blockSize(16, 16);  // 16x16 = 256 threads per block
     dim3 gridSize(ceil( M/ (float)blockSize.x), ceil( N/ (float)blockSize.y));
@@ -123,20 +123,20 @@ int main() {
     auto start = std::chrono::high_resolution_clock::now();
     matrixMul<<<gridSize, blockSize>>>(d_A, d_B, d_C, M, N, K);
     CUDA_CHECK(cudaDeviceSynchronize());
-    
+
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    
+
     // Copy result back to host
     CUDA_CHECK(cudaMemcpy(h_C.data(), d_C, size_C, cudaMemcpyDeviceToHost));
-    
+
     std::cout << "Matrix multiplication completed in " << duration.count() << " ms" << std::endl;
-    
+
     // Cleanup
     cudaFree(d_A);
     cudaFree(d_B);
     cudaFree(d_C);
-    
+
     return 0;
 }
 ```
@@ -203,3 +203,4 @@ The beauty of this approach lies in its simplicity - one thread per result eleme
 
 ---
 ## Reference
+Hwu, W.-M. W., Kirk, D. B., & El Hajj, I. (2022). Programming massively parallel processors (4th ed.). doi:10.1016/c2020-0-02969-5
