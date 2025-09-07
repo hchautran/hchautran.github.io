@@ -209,11 +209,6 @@ export function renderPage(
       {right.map((BodyComponent) => (
         <BodyComponent {...componentData} />
       ))}
-      <script
-        type="text/javascript"
-        id="clustrmaps"
-        src="//clustrmaps.com/map_v2.js?d=VV_9AxgUp6rEn_vluenH0AQsjlWKPLdDalJIaJg96ms&cl=ffffff&w=a"
-      ></script>
     </div>
   )
 
