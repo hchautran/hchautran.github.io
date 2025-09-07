@@ -3,8 +3,9 @@ longform:
   format: scenes
   title: notes
   workflow: Default Workflow
-  sceneFolder: notes 
+  sceneFolder: ./
   scenes:
+    - matmul
     - Initialization in C
   sceneTemplate: templates/Chapter.md
   ignoredFiles:
