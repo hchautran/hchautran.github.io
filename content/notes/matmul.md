@@ -35,7 +35,6 @@ As we will discuss later, the performance of different implementations of BLAS f
 sequential and parallel computers.
 
 
-
 ## The Mathematical Foundation
 
 Before diving into code, let's recall matrix multiplication:
