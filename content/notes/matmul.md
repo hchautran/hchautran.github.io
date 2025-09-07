@@ -4,7 +4,7 @@ draft: false
 tags:
   - CUDA
 ---
-# Simple Matrix Multiplication with CUDA: A Beginner's Guide
+
 
 Matrix multiplication is one of the most fundamental operations in linear algebra and forms the backbone of many computational applications, from machine learning to scientific computing. While CPUs can handle matrix multiplication, GPUs excel at this task due to their parallel architecture. In this post, we'll explore how to implement the simplest version of matrix multiplication using CUDA.
 

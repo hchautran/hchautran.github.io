@@ -9,7 +9,6 @@ tags:
 Generic pointers (`void*`) are one of C's most useful features for writing flexible code. They allow you to create functions and data structures that work with any data type. Let's explore this concept with simple, practical examples.
 
 ## What is a Generic Pointer?
-
 A `void*` (void pointer) is a pointer that can point to any data type. Unlike regular pointers like `int*` or `char*`, it doesn't know what type of data it's pointing to.
 
 ```c
