@@ -264,9 +264,8 @@ Understanding initialization in C++ is crucial for writing safe, efficient, and 
 Remember that good initialization practices are not just about correctness—they're about writing code that clearly expresses your intent and is easy for others (and future you) to understand and maintain. You can refer to the following section for examples of good practices when initialize variables in C.
 
 
-## Common Pitfalls and Solutions
 
-### 🚨 Typical Initialization Errors
+## 🚨 Typical Initialization Errors
 
 #### 1. Uninitialized Variables (Undefined Behavior)
 ```cpp
