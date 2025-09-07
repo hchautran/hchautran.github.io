@@ -3,6 +3,7 @@ title: Matrix multiplication (Version 1)
 draft: false
 tags:
   - CUDA
+  - notes
 ---
 
 

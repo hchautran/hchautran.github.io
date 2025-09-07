@@ -3,6 +3,7 @@ title: "Initialization and assignment in C++"
 draft: false
 tags:
   - C
+  - notes
 ---
 
 
@@ -203,7 +204,7 @@ private:
     int health{100};        // In-class initializer
     std::string name{"Unknown"};
     bool isActive{true};
-    
+
 public:
     Player() = default;     // Uses in-class initializers
     Player(const std::string& playerName) : name{playerName} {}
@@ -219,11 +220,11 @@ class Rectangle {
 private:
     double width;
     double height;
-    
+
 public:
     // Preferred: initializer list
     Rectangle(double w, double h) : width{w}, height{h} {}
-    
+
     // Less efficient: assignment in body
     Rectangle(double w, double h) {
         width = w;   // Assignment, not initialization
@@ -312,7 +313,7 @@ public:
         name = n;    // Assignment after default construction
         value = v;   // Assignment after default construction
     }
-    
+
     // ✅ EFFICIENT - Proper initialization
     MyClass(const std::string& n, int v) : name{n}, value{v} {}
 };
@@ -359,10 +360,10 @@ void function() {
     // ❌ DANGEROUS - Automatic variables not initialized
     int x;
     std::cout << x;  // Undefined behavior
-    
+
     // ✅ CORRECT - Always initialize automatic variables
     int x{0};
-    
+
     // Static variables are zero-initialized by default
     static int y;  // This is actually safe (zero-initialized)
 }

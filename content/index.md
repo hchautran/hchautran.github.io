@@ -1,10 +1,10 @@
 ---
-title: About 
+title: About Me
 ---
 
 <div style="display: flex; align-items: flex-start; gap: 20px; margin: 20px 0;">
   <div style="flex: 1;">
-    <p>Hi! I am a 1st year PhD Student under supervision of   <a href="https://scholar.google.com/citations?user=z7GCqT4AAAAJ&hl=en&oi=ao" target="_blank">Prof. Heng Ji</a> at UIUC. I also work closely with <a href="https://scholar.google.com/citations?user=Zz2hMgcAAAAJ&hl=en&oi=ao" target="_blank">Prof. Khoa D Doan</a> from VinUniversity. Before that, I received my Bachelor degree from VNU - Ho Chi Minh City University of Science in 2018.  
+    <p>Hi! I am a 1st year PhD Student under supervision of   <a href="https://scholar.google.com/citations?user=z7GCqT4AAAAJ&hl=en&oi=ao" target="_blank">Prof. Heng Ji</a> at UIUC. I also work closely with <a href="https://scholar.google.com/citations?user=Zz2hMgcAAAAJ&hl=en&oi=ao" target="_blank">Prof. Khoa D Doan</a> from VinUniversity. Before that, I received my Bachelor degree from VNU - Ho Chi Minh City University of Science in 2018.
     My (current) research focuses on the intersection of machine learning and engineering, with particular emphasis on efficient foundation models (SAM, LLMs, ,etc), EdgeAI and AutoML.</p>
   </div>
   <div style="flex-shrink: 0; text-align: center; max-width: 250px;">
@@ -19,7 +19,7 @@ title: About
 
 * **2025**: 🎓 Joined [UIUC](https://siebelschool.illinois.edu/) as a graduate student.
 * **2025**: 📄 Our work "A statement-level code vulnerability detection for Python": [DetectVul](https://arxiv.org/abs/2405.16148) was accepted at the Future Generation Computer Systems Journal (IF 6.2).
-* **2024**: 📄 Our paper [PiToMe](https://arxiv.org/abs/2405.16148) was accepted to NeurIPS 2024.    
+* **2024**: 📄 Our paper [PiToMe](https://arxiv.org/abs/2405.16148) was accepted to NeurIPS 2024.
 
 ---
 
@@ -33,7 +33,7 @@ title: About
 
 <div style="border-top: 0.25px solid grey; margin: 10px auto; width: 95%;"></div>
 
-* 2024: <span style="background-color: #e8f5e8; color: #2e7d32; padding: 2px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold;">NeurIPS</span> <span style="background-color: #e8f5e8; color: #2e7d32; padding: 2px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold;">ICLR Workshop</span> **Hoai-Chau Tran**, Duy Minh Ho Nguyen, Manh-Duy Nguyen, TrungTin Nguyen, Ngan Hoang Le, Pengtao Xie, Daniel Sonntag, James Zou, Binh T. Nguyen, & Mathias Niepert (2024). Accelerating Transformers with Spectrum-Preserving Token Merging. 
+* 2024: <span style="background-color: #e8f5e8; color: #2e7d32; padding: 2px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold;">NeurIPS</span> <span style="background-color: #e8f5e8; color: #2e7d32; padding: 2px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold;">ICLR Workshop</span> **Hoai-Chau Tran**, Duy Minh Ho Nguyen, Manh-Duy Nguyen, TrungTin Nguyen, Ngan Hoang Le, Pengtao Xie, Daniel Sonntag, James Zou, Binh T. Nguyen, & Mathias Niepert (2024). Accelerating Transformers with Spectrum-Preserving Token Merging.
 
 ## 🛠️ Service
 
@@ -49,6 +49,11 @@ title: About
 <!-- ### 🏆 Awards & Recognition -->
 <!-- * **2024**: Outstanding Reviewer Award - [Conference Name](https://conference-website.com) -->
 <!-- * **2023**: Distinguished Service Award - [Organization Name](https://organization-website.com) -->
+
+## 📝 Notes
+
+Here you'll also find my #notes, which are continuously evolving as I learn and discover new ideas. Feel free to explore and refer back to them anytime!
+
 
 ---
 

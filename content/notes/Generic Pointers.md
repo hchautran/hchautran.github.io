@@ -3,6 +3,7 @@ title: Generic Pointers
 draft: true
 tags:
   - C
+  - notes
 ---
 
 
