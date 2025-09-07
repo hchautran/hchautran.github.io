@@ -266,6 +266,7 @@ int array[]{1, 2, 3, 4, 5};
 > int x{0};
 > int y = 42;
 > int z{};  // Zero-initialized
+> static int x;  // This is actually safe (zero-initialized)
 > ```
 
 > [!warning]- 2. The Most Vexing Parse
@@ -332,47 +333,7 @@ int array[]{1, 2, 3, 4, 5};
 > std::string s(5, '\0');    // 5 null characters (if that's what you want)
 > ```
 
-> [!warning]- 7. Container Initialization Errors
-> ```cpp
-> // ❌ WRONG - Creates vector with 10 elements, each = 5
-> std::vector<int> vec{10, 5};
->
-> // ✅ CORRECT - Use parentheses for size/value
-> std::vector<int> vec(10, 5);  // 10 elements, each = 5
-> std::vector<int> vec{10, 5};  // Vector with elements 10 and 5
-> ```
-
-> [!warning]- 8. Static vs Automatic Initialization
-> ```cpp
-> void function() {
->     // ❌ DANGEROUS - Automatic variables not initialized
->     int x;
->     std::cout << x;  // Undefined behavior
->
->     // ✅ CORRECT - Always initialize automatic variables
->     int x{0};
->
->     // Static variables are zero-initialized by default
->     static int y;  // This is actually safe (zero-initialized)
-> }
-> ```
-
-> [!warning]- 9. Reference Initialization Errors
-> ```cpp
-> // ❌ WRONG - References must be initialized
-> int& ref;  // Compiler error
->
-> // ❌ WRONG - Can't reassign references
-> int x = 5, y = 10;
-> int& ref = x;
-> ref = y;  // This assigns y's value to x, doesn't make ref point to y
->
-> // ✅ CORRECT - Initialize references properly
-> int x = 5;
-> int& ref = x;  // ref is an alias for x
-> ```
-
-> [!warning]- 10. Const Variable Initialization
+> [!warning]- 7. Const Variable Initialization
 > ```cpp
 > // ❌ WRONG - Const variables must be initialized
 > const int x;  // Compiler error
