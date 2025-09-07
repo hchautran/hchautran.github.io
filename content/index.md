@@ -2,13 +2,13 @@
 title: About Me
 ---
 
-<div style="display: flex; align-items: flex-start; gap: 20px; margin: 20px 0; flex-wrap: wrap;">
+<div style="display: flex; justify-content:center ;align-items: center; gap: 20px; margin: 20px 0; flex-wrap: wrap;">
   <div style="flex: 1; min-width: 300px; order: 2;">
     <p style="text-align: justify; line-height: 1.6;">Hi! I am a 1st year PhD Student under supervision of   <a href="https://scholar.google.com/citations?user=z7GCqT4AAAAJ&hl=en&oi=ao" target="_blank">Prof. Heng Ji</a> at UIUC. I also work closely with <a href="https://scholar.google.com/citations?user=Zz2hMgcAAAAJ&hl=en&oi=ao" target="_blank">Prof. Khoa D Doan</a> from VinUniversity. Before that, I received my Bachelor degree from VNU - Ho Chi Minh City University of Science in 2018.
     My (current) research focuses on the intersection of machine learning and engineering, with particular emphasis on efficient foundation models (SAM, LLMs, ,etc), EdgeAI and AutoML.</p>
   </div>
   <div style="flex-shrink: 0; text-align: center; max-width: 250px; width: 100%; order: 1; margin-bottom: 20px;">
-    <img src="./profile.PNG" alt="Profile Picture" style="width: 180px; height: 180px; border-radius: 50%; object-fit: cover; max-width: 100%;">
+    <img src="./profile.png" alt="Profile Picture" style="width: 180px; height: 180px; border-radius: 50%; object-fit: cover; max-width: 100%;">
   </div>
 </div>
 
@@ -19,25 +19,32 @@ title: About Me
     align-items: center !important;
     text-align: center !important;
   }
-  
+
   div[style*="flex: 1"] {
     order: 2 !important;
     min-width: unset !important;
+    width: 100% !important;
   }
-  
+
   p[style*="text-align: justify"] {
     text-align: center !important;
   }
-  
+
   div[style*="flex-shrink: 0"] {
     order: 1 !important;
     max-width: 200px !important;
-    margin-bottom: 20px !important;
+    width: 100% !important;
+    margin: 0 auto 20px auto !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
   }
-  
+
   img[alt="Profile Picture"] {
     width: 150px !important;
     height: 150px !important;
+    display: block !important;
+    margin: 0 auto !important;
   }
 }
 
@@ -46,7 +53,7 @@ title: About Me
     width: 120px !important;
     height: 120px !important;
   }
-  
+
   div[style*="margin: 20px 0"] {
     margin: 10px 0 !important;
   }
