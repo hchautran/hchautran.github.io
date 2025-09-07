@@ -8,7 +8,7 @@ title: About Me
     My (current) research focuses on the intersection of machine learning and engineering, with particular emphasis on efficient foundation models (SAM, LLMs, ,etc), EdgeAI and AutoML.</p>
   </div>
   <div style="flex-shrink: 0; text-align: center; max-width: 250px; width: 100%; order: 1; margin-bottom: 20px;">
-    <img src="./profile.png" alt="Profile Picture" style="width: 180px; height: 180px; border-radius: 50%; object-fit: cover; max-width: 100%;">
+    <img src="./profile.PNG" alt="Profile Picture" style="width: 180px; height: 180px; border-radius: 50%; object-fit: cover; max-width: 100%;">
   </div>
 </div>
 
