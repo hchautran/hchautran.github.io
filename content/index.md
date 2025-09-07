@@ -67,3 +67,4 @@ Here you'll also find my #notes, which are continuously evolving as I learn and 
     <a href="https://scholar.google.com/citations?user=FZH2vcEAAAAJ&hl=en" target="_blank" style="text-decoration: none; padding: 8px 16px; border: 1px solid #ddd; border-radius: 4px; color: #333; display: flex; align-items: center; gap: 6px;"><img src="./scholar.png" alt="Google Scholar" style="width: 16px; height: 16px;"> Google Scholar</a>
   </div>
 </div>
+<script type="text/javascript" id="clustrmaps" src="//clustrmaps.com/map_v2.js?d=VV_9AxgUp6rEn_vluenH0AQsjlWKPLdDalJIaJg96ms&cl=ffffff&w=a"></script>
