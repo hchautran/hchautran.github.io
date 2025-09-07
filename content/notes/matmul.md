@@ -11,8 +11,8 @@ Matrix multiplication involves computing the dot product of rows and columns, wh
 
 > [!info]- Basic Linear Algebra Subprograms (BLAS)
 >
-> In the Basic Linear Algebra Subprograms (BLAS), a de facto
-standard for publishing libraries that perform basic algebra operations,
+> Basic Linear Algebra Subprograms (BLAS) is
+a standard for publishing libraries that perform basic algebra operations,
 there are three levels of linear algebra functions. As the level increases,
 the number of operations performed by the function increases.
 >
