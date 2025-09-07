@@ -29,11 +29,8 @@ operations in the form of $C=αAB+βC$, where $A$, $B$, and $C$ are matrices
 and $α$ and $β$ are scalars.
 >
 > In this blog we will write a matrix-matrix multiplication kernel,  which is a
-special case of a level 3 function where $α=1$ and $β=0$. These BLAS
-functions are important because they are used as basic building blocks of
-higher-level algebraic functions, such as linear system solvers and eigenvalue analysis.
-As we will discuss later, the performance of different implementations of BLAS functions can vary by orders of magnitude in both
-sequential and parallel computers.
+special case of a level 3 function where $α=1$ and $β=0$.
+
 
 
 ## The Mathematical Foundation
