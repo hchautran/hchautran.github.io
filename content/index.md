@@ -100,7 +100,7 @@ title: About Me
 
 ## 📝 Notes
 
-Here you'll also find my #notes, which are continuously evolving as I learn and discover new ideas. Feel free to explore and refer back to them anytime!
+You'll also find my #notes, which are continuously evolving as I learn and discover new ideas. Feel free to explore and refer back to them anytime!
 
 
 ---
