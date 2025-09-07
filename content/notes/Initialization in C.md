@@ -254,7 +254,7 @@ int array[]{1, 2, 3, 4, 5};
 
 
 
-## 🚨 Typical Initialization Errors
+##  Typical Initialization Errors
 
 > [!danger]- 1. Uninitialized Variables (Undefined Behavior)
 > ```cpp
