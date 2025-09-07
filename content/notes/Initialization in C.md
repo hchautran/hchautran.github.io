@@ -64,6 +64,7 @@ bool isValid{false};      // Clear initial state
 - You want to be explicit about constructor calls
 - Performance matters (avoids potential copy operations)
 
+
 ```cpp
 // When you have constructor arguments
 int i(0);
