@@ -68,6 +68,7 @@ bool isValid{false};      // Clear initial state
 
 ```cpp
 // When you have constructor arguments
+int i(0);
 std::vector<int> vec(10, 5);        // 10 elements, each = 5
 std::unique_ptr<int> ptr(new int(42)); // Raw pointer constructor
 std::string s(5, 'A');              // 5 'A' characters
@@ -250,6 +251,138 @@ Point p2{.x = 1.0, .y = 2.0}; // Designated initializers (C++20)
 int array[]{1, 2, 3, 4, 5};
 ```
 
+
+
+## 🚨 Typical Initialization Errors
+
+> [!danger]- 1. Uninitialized Variables (Undefined Behavior)
+> ```cpp
+> // ❌ DANGEROUS - Undefined behavior
+> int x;
+> std::cout << x;  // Garbage value, undefined behavior!
+>
+> // ✅ CORRECT - Always initialize
+> int x{0};
+> int y = 42;
+> int z{};  // Zero-initialized
+> ```
+
+> [!warning]- 2. The Most Vexing Parse
+> ```cpp
+> // ❌ WRONG - This declares a function, not a variable!
+> std::vector<int> vec();
+>
+> // ✅ CORRECT - Use braces or parentheses with arguments
+> std::vector<int> vec{};     // Empty vector
+> std::vector<int> vec(0);    // Vector with 0 elements
+> auto vec = std::vector<int>{}; // Copy initialization
+> ```
+
+> [!danger]- 3. Narrowing Conversions
+> ```cpp
+> // ❌ DANGEROUS - Silent data loss
+> double pi = 3.14;
+> int truncated = pi;  // Loses decimal part silently
+>
+> // ✅ CORRECT - Use braces to prevent narrowing
+> int truncated{pi};  // Compiler error - prevents data loss
+> int explicit_cast = static_cast<int>(pi);  // Explicit conversion
+> ```
+
+> [!warning]- 4. Initialization vs Assignment Confusion
+> ```cpp
+> class MyClass {
+>     std::string name;
+>     int value;
+> public:
+>     // ❌ INEFFICIENT - Assignment, not initialization
+>     MyClass(const std::string& n, int v) {
+>         name = n;    // Assignment after default construction
+>         value = v;   // Assignment after default construction
+>     }
+>
+>     // ✅ EFFICIENT - Proper initialization
+>     MyClass(const std::string& n, int v) : name{n}, value{v} {}
+> };
+> ```
+
+> [!warning]- 5. Array Initialization Mistakes
+> ```cpp
+> // ❌ WRONG - Size mismatch
+> int arr[3] = {1, 2, 3, 4};  // Compiler error
+>
+> // ❌ WRONG - Partial initialization without zeros
+> int arr[5] = {1, 2};  // Last 3 elements are 0, but not obvious
+>
+> // ✅ CORRECT - Clear initialization
+> int arr[5] = {1, 2, 0, 0, 0};  // Explicit
+> int arr[5]{};  // All zeros
+> int arr[]{1, 2, 3};  // Size deduced
+> ```
+
+> [!warning]- 6. String Initialization Confusion
+> ```cpp
+> // ❌ CONFUSING - What does this create?
+> std::string s(5);  // String with 5 null characters
+>
+> // ✅ CLEAR - Be explicit about intent
+> std::string s(5, 'A');     // "AAAAA"
+> std::string s{"Hello"};    // "Hello"
+> std::string s(5, '\0');    // 5 null characters (if that's what you want)
+> ```
+
+> [!warning]- 7. Container Initialization Errors
+> ```cpp
+> // ❌ WRONG - Creates vector with 10 elements, each = 5
+> std::vector<int> vec{10, 5};
+>
+> // ✅ CORRECT - Use parentheses for size/value
+> std::vector<int> vec(10, 5);  // 10 elements, each = 5
+> std::vector<int> vec{10, 5};  // Vector with elements 10 and 5
+> ```
+
+> [!warning]- 8. Static vs Automatic Initialization
+> ```cpp
+> void function() {
+>     // ❌ DANGEROUS - Automatic variables not initialized
+>     int x;
+>     std::cout << x;  // Undefined behavior
+>
+>     // ✅ CORRECT - Always initialize automatic variables
+>     int x{0};
+>
+>     // Static variables are zero-initialized by default
+>     static int y;  // This is actually safe (zero-initialized)
+> }
+> ```
+
+> [!warning]- 9. Reference Initialization Errors
+> ```cpp
+> // ❌ WRONG - References must be initialized
+> int& ref;  // Compiler error
+>
+> // ❌ WRONG - Can't reassign references
+> int x = 5, y = 10;
+> int& ref = x;
+> ref = y;  // This assigns y's value to x, doesn't make ref point to y
+>
+> // ✅ CORRECT - Initialize references properly
+> int x = 5;
+> int& ref = x;  // ref is an alias for x
+> ```
+
+> [!warning]- 10. Const Variable Initialization
+> ```cpp
+> // ❌ WRONG - Const variables must be initialized
+> const int x;  // Compiler error
+>
+> // ✅ CORRECT - Initialize const variables
+> const int x{42};
+> const int y = 42;
+> const auto z = calculateValue();
+> ```
+
+
 ## Key Takeaways
 
 Understanding initialization in C++ is crucial for writing safe, efficient, and maintainable code. Here are the key takeaways:
@@ -262,138 +395,6 @@ Understanding initialization in C++ is crucial for writing safe, efficient, and 
 6. **Use `auto`** with proper initialization for type deduction
 
 Remember that good initialization practices are not just about correctness—they're about writing code that clearly expresses your intent and is easy for others (and future you) to understand and maintain. You can refer to the following section for examples of good practices when initialize variables in C.
-
-
-
-## 🚨 Typical Initialization Errors
-
-#### 1. Uninitialized Variables (Undefined Behavior)
-```cpp
-// ❌ DANGEROUS - Undefined behavior
-int x;
-std::cout << x;  // Garbage value, undefined behavior!
-
-// ✅ CORRECT - Always initialize
-int x{0};
-int y = 42;
-int z{};  // Zero-initialized
-```
-
-#### 2. The Most Vexing Parse
-```cpp
-// ❌ WRONG - This declares a function, not a variable!
-std::vector<int> vec();
-
-// ✅ CORRECT - Use braces or parentheses with arguments
-std::vector<int> vec{};     // Empty vector
-std::vector<int> vec(0);    // Vector with 0 elements
-auto vec = std::vector<int>{}; // Copy initialization
-```
-
-#### 3. Narrowing Conversions
-```cpp
-// ❌ DANGEROUS - Silent data loss
-double pi = 3.14;
-int truncated = pi;  // Loses decimal part silently
-
-// ✅ CORRECT - Use braces to prevent narrowing
-int truncated{pi};  // Compiler error - prevents data loss
-int explicit_cast = static_cast<int>(pi);  // Explicit conversion
-```
-
-#### 4. Initialization vs Assignment Confusion
-```cpp
-class MyClass {
-    std::string name;
-    int value;
-public:
-    // ❌ INEFFICIENT - Assignment, not initialization
-    MyClass(const std::string& n, int v) {
-        name = n;    // Assignment after default construction
-        value = v;   // Assignment after default construction
-    }
-
-    // ✅ EFFICIENT - Proper initialization
-    MyClass(const std::string& n, int v) : name{n}, value{v} {}
-};
-```
-
-#### 5. Array Initialization Mistakes
-```cpp
-// ❌ WRONG - Size mismatch
-int arr[3] = {1, 2, 3, 4};  // Compiler error
-
-// ❌ WRONG - Partial initialization without zeros
-int arr[5] = {1, 2};  // Last 3 elements are 0, but not obvious
-
-// ✅ CORRECT - Clear initialization
-int arr[5] = {1, 2, 0, 0, 0};  // Explicit
-int arr[5]{};  // All zeros
-int arr[]{1, 2, 3};  // Size deduced
-```
-
-#### 6. String Initialization Confusion
-```cpp
-// ❌ CONFUSING - What does this create?
-std::string s(5);  // String with 5 null characters
-
-// ✅ CLEAR - Be explicit about intent
-std::string s(5, 'A');     // "AAAAA"
-std::string s{"Hello"};    // "Hello"
-std::string s(5, '\0');    // 5 null characters (if that's what you want)
-```
-
-#### 7. Container Initialization Errors
-```cpp
-// ❌ WRONG - Creates vector with 10 elements, each = 5
-std::vector<int> vec{10, 5};
-
-// ✅ CORRECT - Use parentheses for size/value
-std::vector<int> vec(10, 5);  // 10 elements, each = 5
-std::vector<int> vec{10, 5};  // Vector with elements 10 and 5
-```
-
-#### 8. Static vs Automatic Initialization
-```cpp
-void function() {
-    // ❌ DANGEROUS - Automatic variables not initialized
-    int x;
-    std::cout << x;  // Undefined behavior
-
-    // ✅ CORRECT - Always initialize automatic variables
-    int x{0};
-
-    // Static variables are zero-initialized by default
-    static int y;  // This is actually safe (zero-initialized)
-}
-```
-
-#### 9. Reference Initialization Errors
-```cpp
-// ❌ WRONG - References must be initialized
-int& ref;  // Compiler error
-
-// ❌ WRONG - Can't reassign references
-int x = 5, y = 10;
-int& ref = x;
-ref = y;  // This assigns y's value to x, doesn't make ref point to y
-
-// ✅ CORRECT - Initialize references properly
-int x = 5;
-int& ref = x;  // ref is an alias for x
-```
-
-#### 10. Const Variable Initialization
-```cpp
-// ❌ WRONG - Const variables must be initialized
-const int x;  // Compiler error
-
-// ✅ CORRECT - Initialize const variables
-const int x{42};
-const int y = 42;
-const auto z = calculateValue();
-```
-
 
 
 
