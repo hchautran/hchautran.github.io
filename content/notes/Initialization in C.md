@@ -136,6 +136,7 @@ int scores[]{95, 87, 92, 78, 88};
 - Consistent initialization across all types
 - Preventing the "most vexing parse"
 
+
 ## Decision Matrix
 
 | Scenario | Recommended Type | Why |
