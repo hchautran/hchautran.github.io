@@ -27,7 +27,8 @@ Initialization is the process of giving a variable an initial value at the time 
 // Good uses of default initialization
 std::string filename;  // Will be assigned from user input
 std::vector<int> data; // Will be populated later
-int result;            // Will be calculated and assigned
+int result;            
+result=0; // Will be calculated and assigned immediately
 
 // Avoid for built-in types unless absolutely necessary
 int x;  // Dangerous - contains garbage value

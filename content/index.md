@@ -4,7 +4,7 @@ title: About Me
 
 <div style="display: flex; justify-content:center ;align-items: center; gap: 20px; margin: 20px 0; flex-wrap: wrap;">
   <div style="flex: 1; min-width: 300px; order: 2;">
-    <p> Hi 👋 ! I am Hoai-Chau Tran, a first-year PhD student in Computer Science at the University of Illinois Urbana-Champaign (UIUC). I am advised by   <a href="https://scholar.google.com/citations?user=z7GCqT4AAAAJ&hl=en&oi=ao" target="_blank">Professor Heng Ji</a> and <a href="https://scholar.google.com/citations?user=Zz2hMgcAAAAJ&hl=en&oi=ao" target="_blank">Professor Khoa D Doan</a> from VinUniversity. Before that, I received my Bachelor degree from VNU - Ho Chi Minh City University of Science in 2018.
+    <p> Hi 👋 ! I am Hoai-Chau Tran, a first-year PhD student in Computer Science at the University of Illinois Urbana-Champaign (UIUC). I am advised by   <a href="https://scholar.google.com/citations?user=z7GCqT4AAAAJ&hl=en&oi=ao" target="_blank">Professor Heng Ji</a> (UIUC) and <a href="https://scholar.google.com/citations?user=Zz2hMgcAAAAJ&hl=en&oi=ao" target="_blank">Professor Khoa D Doan</a> (VinUniversity). Before that, I received my Bachelor degree from VNU - Ho Chi Minh City University of Science in 2018.
     </p>
     <p>
     My (current) research focuses on the intersection of machine learning and engineering, with particular emphasis on efficient foundation models (SAM, LLMs, ,etc), EdgeAI and AutoML.</p>
@@ -88,7 +88,7 @@ title: About Me
 ## 🛠️ Service
 
 <!-- * **2025**: [International Conference on Machine Learning (ICML)](https://icml.cc) - Area Chair -->
-* **2025**: [NeurIPS](https://neurips.cc) - Reviewer
+* **2025**: [NeurIPS](https://neurips.cc) - Reviewer.
 <!-- * **2023**: [International Conference on Learning Representations (ICLR)](https://iclr.cc) - Reviewer -->
 <!-- * **2023**: [Association for the Advancement of Artificial Intelligence (AAAI)](https://aaai.org) - Senior Program Committee Member -->
 
@@ -103,8 +103,6 @@ title: About Me
 ## 📝 Notes
 
 You'll also find my #notes here, which are continuously evolving as I learn and discover new ideas. 
-
-
 ---
 
 ## 📧 Contact
