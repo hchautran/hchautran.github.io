@@ -16,6 +16,7 @@ title: About Me
   </div>
 </div>
 
+
 <style>
 @media (max-width: 768px) {
   div[style*="display: flex"] {
