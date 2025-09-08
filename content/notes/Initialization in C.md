@@ -14,6 +14,8 @@ Initialization is one of the most fundamental concepts in C++ programming, yet i
 
 Initialization is the process of giving a variable an initial value at the time of its creation. This is different from assignment, which changes the value of an already-existing variable. Proper initialization helps prevent undefined behavior and makes your code more predictable.
 
+--- 
+
 ## Types of Initialization
 
 
@@ -137,6 +139,8 @@ int scores[]{95, 87, 92, 78, 88};
 - Preventing the "most vexing parse"
 
 
+--- 
+
 ## Decision Matrix
 
 | Scenario | Recommended Type | Why |
@@ -148,6 +152,8 @@ int scores[]{95, 87, 92, 78, 88};
 | Aggregates (structs/arrays) | List initialization `Point p{1, 2}` | Only option, clear |
 | Auto type deduction | Copy initialization `auto x = 42` | Most readable |
 | Modern C++ (default choice) | List initialization `int x{42}` | Safest, most consistent |
+
+---
 
 ## Modern C++ Best Practices
 
@@ -194,7 +200,6 @@ auto name = std::string{"John"}; // std::string
 auto values = std::vector<int>{1, 2, 3}; // std::vector<int>
 ```
 
-## Class Member Initialization
 
 ### In-Class Member Initializers (C++11)
 
@@ -235,7 +240,7 @@ public:
 };
 ```
 
-## Aggregate Initialization
+### Aggregate Initialization
 
 Aggregates (arrays, structs with no user-defined constructors) can be initialized with brace-enclosed lists:
 
@@ -253,6 +258,8 @@ int array[]{1, 2, 3, 4, 5};
 ```
 
 
+
+---
 
 ##  Typical Initialization Errors
 

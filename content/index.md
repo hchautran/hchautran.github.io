@@ -2,6 +2,8 @@
 title: About Me
 ---
 
+---
+
 <div style="display: flex; justify-content:center ;align-items: center; gap: 20px; margin: 20px 0; flex-wrap: wrap;">
   <div style="flex: 1; min-width: 300px; order: 2;">
     <p> Hi 👋 ! I am Hoai-Chau Tran, a first-year PhD student in Computer Science at the University of Illinois Urbana-Champaign (UIUC). I am advised by   <a href="https://scholar.google.com/citations?user=z7GCqT4AAAAJ&hl=en&oi=ao" target="_blank">Professor Heng Ji</a> (UIUC) and <a href="https://scholar.google.com/citations?user=Zz2hMgcAAAAJ&hl=en&oi=ao" target="_blank">Professor Khoa D Doan</a> (VinUniversity). Before that, I received my Bachelor degree from VNU - Ho Chi Minh City University of Science in 2018.
@@ -85,6 +87,8 @@ title: About Me
 
 * 2024: <span style="background-color: #e8f5e8; color: #2e7d32; padding: 2px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold;">NeurIPS</span> <span style="background-color: #e8f5e8; color: #2e7d32; padding: 2px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold;">ICLR Workshop</span> [Accelerating Transformers with Spectrum-Preserving Token Merging](https://arxiv.org/abs/2405.16148). **_Hoai-Chau Tran_***, Duy Minh Ho Nguyen, Manh-Duy Nguyen, TrungTin Nguyen, Ngan Hoang Le, Pengtao Xie, Daniel Sonntag, James Zou, Binh T. Nguyen, & Mathias Niepert (2024).
 
+---
+
 ## 🛠️ Service
 
 <!-- * **2025**: [International Conference on Machine Learning (ICML)](https://icml.cc) - Area Chair -->
@@ -99,6 +103,8 @@ title: About Me
 <!-- ### 🏆 Awards & Recognition -->
 <!-- * **2024**: Outstanding Reviewer Award - [Conference Name](https://conference-website.com) -->
 <!-- * **2023**: Distinguished Service Award - [Organization Name](https://organization-website.com) -->
+
+---
 
 ## 📝 Notes
 
