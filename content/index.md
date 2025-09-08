@@ -103,6 +103,7 @@ title: About Me
 ## 📝 Notes
 
 You'll also find my #notes here, which are continuously evolving as I learn and discover new ideas. 
+
 ---
 
 ## 📧 Contact
