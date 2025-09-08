@@ -6,7 +6,7 @@ title: About Me
 
 <div style="display: flex; justify-content:center ;align-items: center; gap: 20px; margin: 20px 0; flex-wrap: wrap;">
   <div style="flex: 1; min-width: 300px; order: 2;">
-    <p> Hi 👋 ! I am Hoai-Chau Tran, a first-year PhD student in Computer Science at the University of Illinois Urbana-Champaign (UIUC). I am advised by   <a href="https://scholar.google.com/citations?user=z7GCqT4AAAAJ&hl=en&oi=ao" target="_blank">Professor Heng Ji</a> (UIUC) and <a href="https://scholar.google.com/citations?user=Zz2hMgcAAAAJ&hl=en&oi=ao" target="_blank">Professor Khoa D Doan</a> (VinUniversity). Before that, I received my Bachelor degree from VNU - Ho Chi Minh City University of Science in 2018.
+    <p> Hi 👋 ! I am Hoai-Chau Tran, a first-year PhD student in Computer Science at the University of Illinois Urbana-Champaign (UIUC). I am advised by professor <a href="https://scholar.google.com/citations?user=z7GCqT4AAAAJ&hl=en&oi=ao" target="_blank"> Heng Ji</a> (UIUC) and professor <a href="https://scholar.google.com/citations?user=Zz2hMgcAAAAJ&hl=en&oi=ao" target="_blank">Khoa D Doan</a> (VinUniversity). Before that, I received my Bachelor degree from VNU - Ho Chi Minh City University of Science in 2018.
     </p>
     <p>
     My (current) research focuses on the intersection of machine learning and engineering, with particular emphasis on efficient foundation models (SAM, LLMs, ,etc), EdgeAI and AutoML.</p>
