@@ -65,7 +65,6 @@ title: About Me
 }
 </style>
 
-
 ---
 
 ## 📰 News
@@ -87,7 +86,6 @@ title: About Me
 <div style="border-top: 0.25px solid grey; margin: 10px auto; width: 95%;"></div>
 
 * 2024: <span style="background-color: #e8f5e8; color: #2e7d32; padding: 2px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold;">NeurIPS</span> <span style="background-color: #e8f5e8; color: #2e7d32; padding: 2px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold;">ICLR Workshop</span> [Accelerating Transformers with Spectrum-Preserving Token Merging](https://arxiv.org/abs/2405.16148). <u>**Hoai-Chau Tran***</u>, Duy Minh Ho Nguyen, Manh-Duy Nguyen, TrungTin Nguyen, Ngan Hoang Le, Pengtao Xie, Daniel Sonntag, James Zou, Binh T. Nguyen, & Mathias Niepert (2024).
-
 
 ---
 
