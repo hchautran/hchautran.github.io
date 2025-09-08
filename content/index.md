@@ -4,7 +4,9 @@ title: About Me
 
 <div style="display: flex; justify-content:center ;align-items: center; gap: 20px; margin: 20px 0; flex-wrap: wrap;">
   <div style="flex: 1; min-width: 300px; order: 2;">
-    <p style="text-align: justify; line-height: 1.6;">Hi! I am a 1st year PhD Student under supervision of   <a href="https://scholar.google.com/citations?user=z7GCqT4AAAAJ&hl=en&oi=ao" target="_blank">Prof. Heng Ji</a> at <a href="https://blender.cs.illinois.edu/" target="_blank">Blender Lab (UIUC)</a> . I also work closely with <a href="https://scholar.google.com/citations?user=Zz2hMgcAAAAJ&hl=en&oi=ao" target="_blank">Prof. Khoa D Doan</a> from VinUniversity. Before that, I received my Bachelor degree from VNU - Ho Chi Minh City University of Science in 2018.
+    <p> Hi 👋 ! I am Hoai-Chau Tran, a first-year PhD student in Computer Science at the University of Illinois Urbana-Champaign (UIUC). I am advised by   <a href="https://scholar.google.com/citations?user=z7GCqT4AAAAJ&hl=en&oi=ao" target="_blank">Professor Heng Ji</a> and <a href="https://scholar.google.com/citations?user=Zz2hMgcAAAAJ&hl=en&oi=ao" target="_blank">Professor Khoa D Doan</a> from VinUniversity. Before that, I received my Bachelor degree from VNU - Ho Chi Minh City University of Science in 2018.
+    </p>
+    <p>
     My (current) research focuses on the intersection of machine learning and engineering, with particular emphasis on efficient foundation models (SAM, LLMs, ,etc), EdgeAI and AutoML.</p>
   </div>
   <div style="flex-shrink: 0; text-align: center; max-width: 250px; width: 100%; order: 1; margin-bottom: 20px;">
