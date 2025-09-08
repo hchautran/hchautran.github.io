@@ -81,7 +81,7 @@ title: About Me
 
 <div style="border-top: 0.25px solid grey; margin: 10px auto; width: 95%;"></div>
 
-* 2025: <span style="background-color: #e8f5e8; color: #2e7d32; padding: 2px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold;">Journal Article</span> [DetectVul: A statement-level code vulnerability detection for Python.](https://arxiv.org/abs/2405.16148). **_Hoai-Chau Tran_***, Anh-Duy Tran, & Kim-Hung Le (2025). DFuture Generation Computer Systems, 163, 107504.
+* 2025: <span style="background-color: #e8f5e8; color: #2e7d32; padding: 2px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold;">Journal Article</span> [DetectVul: A statement-level code vulnerability detection for Python.](https://arxiv.org/abs/2405.16148). **_Hoai-Chau Tran_***, Anh-Duy Tran, & Kim-Hung Le (2025). Future Generation Computer Systems, 163, 107504.
 
 <div style="border-top: 0.25px solid grey; margin: 10px auto; width: 95%;"></div>
 
