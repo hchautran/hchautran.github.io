@@ -82,7 +82,7 @@ $$
 P(Y | X) = \frac{P(X, Y)}{P(X)} 
 $$
 
-You might wonder: "what is the different between this and the joint distribution P(X,Y)". To advoid confusion, You can think of conditional probability as focusing on the “world” in which $X$ has occurred, and asking: "Within that restricted world, what’s the likelihood that $Y$ also occurs?"
+You might wonder: "what is the different between this and the joint distribution P(X,Y)?". You can think of conditional probability as focusing on the “world” in which $X$ has occurred, and asking: "Within that restricted world, what’s the likelihood that $Y$ also occurs?"
 
 ### Essential Properties
 Like join probability distribution, conditional distribution also satisfy the same fundamental properties
