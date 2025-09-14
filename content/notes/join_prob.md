@@ -39,9 +39,9 @@ As we add more variables, the dimensionality grows naturally:
 - 3D: $p_{X,Y,Z}(x,y,z)$ or $f_{X,Y,Z}(x,y,z)$
 - nD: $p_{\mathbf{X}}(\mathbf{x})$ or $f_{\mathbf{X}}(\mathbf{x})$ where $\mathbf{X} = (X_1, X_2, ..., X_n)$
 
-### Key Properties
+### Essential Properties
 
-Every joint distribution must satisfy these fundamental properties:
+Every joint distribution must satisfy these fundamental properties of probability distributions:
 
 1. **Non-negativity**: $p_{X,Y}(x,y) \geq 0$ for all $(x,y)$
 2. **Normalization**: $\sum_x \sum_y p_{X,Y}(x,y) = 1$ (discrete) or $\int_{-\infty}^{\infty} \int_{-\infty}^{\infty} f_{X,Y}(x,y) \, dx \, dy = 1$ (continuous)
