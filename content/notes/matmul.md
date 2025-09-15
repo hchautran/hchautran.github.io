@@ -221,5 +221,5 @@ This simple CUDA matrix multiplication implementation demonstrates the basic con
 
 
 ---
-## Reference
+## References
 Hwu, W.-M. W., Kirk, D. B., & El Hajj, I. (2022). Programming massively parallel processors (4th ed.). doi:10.1016/c2020-0-02969-5
