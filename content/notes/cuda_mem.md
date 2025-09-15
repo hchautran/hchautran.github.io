@@ -9,6 +9,7 @@ tags:
 
 Efficient parallel programming on GPUs requires not just raw compute power, but careful attention to how data is stored and accessed. CUDA exposes multiple distinct memory types, each with unique properties. This blog introduces each CUDA memory type and explains the essential concept of the **compute-to-memory access ratio**, a key metric for GPU performance optimization.
 
+
 ---
 
 ## CUDA Memory Types
