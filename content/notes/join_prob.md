@@ -279,6 +279,7 @@ Components of Bayes' Theorem
 >
 > Question: Should you stick with your original choice or switch doors?
 >
+>
 > I highly recommend that you try to work out a decision for this question on your own. I’ll be sharing my explanation in a future blog post about [MLE and MAP](MLE).
 
 
