@@ -273,13 +273,12 @@ Components of Bayes' Theorem
 >
 > **Problem Setup**: You are a contestant on a game show with three doors. Behind one door is a valuable prize (like a car), and behind the other two doors are less desirable prizes (like goats). The game proceeds as follows:
 >
+>
 > - You choose one of the three doors (but don't open it yet)
 > - The host, who knows what's behind all doors, opens one of the remaining doors that contains a goat
 > - The host then offers you a choice: stick with your original door or switch to the other unopened door
 >
 > Question: Should you stick with your original choice or switch doors?
-
-
 
 
 
