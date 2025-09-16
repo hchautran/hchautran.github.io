@@ -278,6 +278,7 @@ Components of Bayes' Theorem
 > - The host then offers you a choice: stick with your original door or switch to the other unopened door
 >
 > Question: Should you stick with your original choice or switch doors?
+>
 > I highly recommend that you try to work out a decision for this question on your own. I’ll be sharing my explanation in a future blog post about [MLE and MAP](MLE).
 
 
