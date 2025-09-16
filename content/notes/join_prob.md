@@ -283,8 +283,6 @@ Components of Bayes' Theorem
 
 
 
-
-
 ## Key Takeaways
  
  ### Fundamental Concepts
