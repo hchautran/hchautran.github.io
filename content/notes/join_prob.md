@@ -270,8 +270,8 @@ Components of Bayes' Theorem
 
 > [!example] The Monty Hall Problem 
 > The Monty Hall problem is one of the most famous probability puzzles that often challenges our intuition. Named after the host of the game show "Let's Make a Deal," this problem demonstrates how Bayesian reasoning can help us understand counterintuitive probability results.
-> The Problem Setup
-> You are a contestant on a game show with three doors. Behind one door is a valuable prize (like a car), and behind the other two doors are less desirable prizes (like goats). The game proceeds as follows:
+>
+> **Problem Setup**: You are a contestant on a game show with three doors. Behind one door is a valuable prize (like a car), and behind the other two doors are less desirable prizes (like goats). The game proceeds as follows:
 >
 > - You choose one of the three doors (but don't open it yet)
 > - The host, who knows what's behind all doors, opens one of the remaining doors that contains a goat
