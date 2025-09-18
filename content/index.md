@@ -71,7 +71,6 @@ title: About Me
 ## 📰 News
 
 * **2025**: 📄 Our work [How Many Tokens Do 3D  Point Cloud Transformer Architectures Really Need?](https://openreview.net/forum?id=uGO1tgU3Mc)  was accepted at NeurIPS 2025 .
-* **2024**: 📄 Our paper [PiToMe](https://arxiv.org/abs/2405.16148) was accepted to NeurIPS 2024.
 * **2025**: 🎓 Joined [UIUC](https://siebelschool.illinois.edu/) as a graduate student.
 * **2025**: 📄 Our work "A statement-level code vulnerability detection for Python": [DetectVul](https://doi.org/10.1016/j.future.2024.107504) was accepted at the Future Generation Computer Systems Journal (IF 6.2).
 * **2024**: 📄 Our paper [PiToMe](https://arxiv.org/abs/2405.16148) was accepted to NeurIPS 2024.
