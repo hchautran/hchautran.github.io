@@ -70,6 +70,8 @@ title: About Me
 
 ## 📰 News
 
+* **2025**: 📄 Our work [How Many Tokens Do 3D  Point Cloud Transformer Architectures Really Need?](https://openreview.net/forum?id=uGO1tgU3Mc)  was accepted at NeurIPS 2025 .
+* **2024**: 📄 Our paper [PiToMe](https://arxiv.org/abs/2405.16148) was accepted to NeurIPS 2024.
 * **2025**: 🎓 Joined [UIUC](https://siebelschool.illinois.edu/) as a graduate student.
 * **2025**: 📄 Our work "A statement-level code vulnerability detection for Python": [DetectVul](https://doi.org/10.1016/j.future.2024.107504) was accepted at the Future Generation Computer Systems Journal (IF 6.2).
 * **2024**: 📄 Our paper [PiToMe](https://arxiv.org/abs/2405.16148) was accepted to NeurIPS 2024.
@@ -78,7 +80,7 @@ title: About Me
 
 ## 📚 Publications
 
-* 2025:  <span style="background-color: #fff3e0; color: #ef6c00; padding: 2px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold;">Under Review</span> <span style="background-color: #fff3e0; color: #ef6c00; padding: 2px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold;">ICML Workshop</span> [How Many Tokens Do 3D  Point Cloud Transformer Architectures Really Need?](https://openreview.net/forum?id=uGO1tgU3Mc). Tuan Anh Tran, Duy Minh Ho Nguyen, <u>**Hoai-Chau Tran***</u>, Michael Barz, Khoa D Doan, Roger Wattenhofer, Vien Anh Ngo, Mathias Niepert, Daniel Sonntag, & Paul Swoboda (2025).
+* 2025:   <span style="background-color: #e8f5e8; color: #2e7d32; padding: 2px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold;">NeurIPS</span> <span style="background-color: #e8f5e8; color: #2e7d32; padding: 2px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold;">ICLM Workshop</span>[How Many Tokens Do 3D  Point Cloud Transformer Architectures Really Need?](https://openreview.net/forum?id=uGO1tgU3Mc). Tuan Anh Tran, Duy Minh Ho Nguyen, <u>**Hoai-Chau Tran***</u>, Michael Barz, Khoa D Doan, Roger Wattenhofer, Vien Anh Ngo, Mathias Niepert, Daniel Sonntag, & Paul Swoboda (2025).
 
 <div style="border-top: 0.25px solid grey; margin: 10px auto; width: 95%;"></div>
 
