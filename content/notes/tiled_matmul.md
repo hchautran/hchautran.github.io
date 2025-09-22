@@ -73,64 +73,6 @@ __global__ void tiledMatMul(float* A, float* B, float* C, int M, int N, int K) {
 }
 ```
 
-### Memory Access Pattern
-
-> [!example] Memory Access Optimization
-> 
-> **Before tiling** (naive):
-> - Each thread loads A[i][k] and B[k][j] for every k
-> - Total loads: M×N×K elements from A + M×N×K elements from B
-> 
-> **After tiling** (TILE_SIZE = 16):
-> - Each tile is loaded once and reused for 16×16 = 256 computations
-> - Total loads: (M×K + K×N) / 16 elements
-> - **16x reduction** in memory traffic!
-
-
-> [!example]- Memory Access Analysis
-> 
-> Assume that the following matrix size specifications are passed to your tiled matrix multiplication kernel in MP3:
-> numARows=55
-> numAColumns=48
-> numBRows=48
-> numBColumns=43
-> numCRows=55
-> numCColumns=43
-> Remember that the matrices contain floats.
-> 
-> Also assume that you are using 
->  $16\times 16$ tiles.
-> 
->> [!example]- How many Bytes are read from global memory by the kernel?
->> Answer: 64704
->>
->> [!example]- How many Bytes are written to global memory by the kernel?
->> Answer:  9460
->>
-
-
-> [!example]- Tiled Matrix Multiplication Computation Use
-> 
-> Assume that the following matrix size specifications are passed to your tiled matrix multiplication kernel in MP3:
-> numARows=142
-> numAColumns=110
-> numBRows=110
-> numBColumns=146
-> numCRows=142
-> numCColumns=146
-> Remember that the matrices contain floats.
-> 
-> Also assume that you are using 
-> $32\times 32$ tiles.
-> 
-> Recall that floating-point arithmetic operations include mathematical operations such as addition and multiplication.
-> 
->> [!example]-  Consider a matrix multiplication implementation where only threads responsible for an element in the output matrix C are required to perform floating-point operations. How many floating-point operations are executed in this implementation with respect to the parameters above?
->> solution: 4561040 
->>
->> [!example]-  Now consider an implementation where all threads launched perform floating-point operations. How many floating-point operations are executed now?
->> solution: 6553600
-
 ### Thread Block Configuration
 
 ```c++
@@ -185,23 +127,6 @@ if ((tile * TILE_SIZE + ty) < K && col < N) {
 }
 ```
 
-### Visual Representation
-
-```
-Matrix A (1000×800) with 16×16 tiles:
-┌─────────────────────────────────────────┐
-│ 62×16 = 992 rows                        │
-├─────────────────────────────────────────┤
-│ 8 rows (992-999) ← Partial bottom tile  │
-└─────────────────────────────────────────┘
-
-Matrix B (800×1200) with 16×16 tiles:
-┌─────────────────────────────────────────────────────────┐
-│ 74×16 = 1184 columns                                    │
-├─────────────────────────────────────────────────────────┤
-│ 16 columns (1184-1199) ← Partial rightmost tile        │
-└─────────────────────────────────────────────────────────┘
-```
 
 ### Why Zero Padding Works
 
@@ -271,22 +196,8 @@ __global__ void tiledMatMulSafe(float* A, float* B, float* C, int M, int N, int 
 }
 ```
 
-## Performance Analysis
 
-### Arithmetic Intensity Improvement
-
-> [!example] Arithmetic Intensity Calculation
-> 
-> **Tiled approach** (TILE_SIZE = 16):
-> - Memory loads: 2 × (M×K + K×N) / 16 bytes
-> - FLOPs: 2 × M × N × K
-> - Arithmetic intensity: 16 FLOP/B (vs 0.25 FLOP/B for naive)
-> 
-> **On A100 GPU** (1555 GB/s bandwidth):
-> - Memory-bound limit: 1555 × 16 = 24,880 GFLOPS
-> - This approaches the compute peak (~19,500 GFLOPS)!
-
-### Memory Hierarchy Utilization
+## Memory Hierarchy Utilization
 
 > [!tip] Memory Usage Breakdown
 > - **Global memory**: Initial tile loads (coalesced access)
@@ -294,11 +205,6 @@ __global__ void tiledMatMulSafe(float* A, float* B, float* C, int M, int N, int 
 > - **Registers**: Accumulation variable `sum` (fastest access)
 > - **Constant memory**: Could store TILE_SIZE if needed
 
-
-
-### 3. Warp-Level Optimizations
-
-Exploit warp-level primitives for better memory coalescing and computation.
 
 ## Comparison with Naive Implementation
 
@@ -310,12 +216,52 @@ Exploit warp-level primitives for better memory coalescing and computation.
 | **Performance** | Memory-bound | Near compute-bound |
 | **Code Complexity** | Simple | Moderate |
 
-> [!example] Performance Results
+
+
+> [!example]- Memory Access Analysis
 > 
-> **1024×1024 matrix multiplication on A100**:
-> - **Naive**: ~400 GFLOPS (memory-bound)
-> - **Tiled (16×16)**: ~15,000 GFLOPS (near compute-bound)
-> - **Speedup**: ~37x improvement!
+> Assume that the following matrix size specifications are passed to your tiled matrix multiplication kernel in MP3:
+> numARows=55
+> numAColumns=48
+> numBRows=48
+> numBColumns=43
+> numCRows=55
+> numCColumns=43
+> Remember that the matrices contain floats.
+> 
+> Also assume that you are using 
+>  $16\times 16$ tiles.
+> 
+>> [!example]- How many Bytes are read from global memory by the kernel?
+>> Answer: 64704
+>>
+>> [!example]- How many Bytes are written to global memory by the kernel?
+>> Answer:  9460
+>>
+
+
+> [!example]- Tiled Matrix Multiplication Computation Use
+> 
+> Assume that the following matrix size specifications are passed to your tiled matrix multiplication kernel in MP3:
+> numARows=142
+> numAColumns=110
+> numBRows=110
+> numBColumns=146
+> numCRows=142
+> numCColumns=146
+> Remember that the matrices contain floats.
+> 
+> Also assume that you are using 
+> $32\times 32$ tiles.
+> 
+> Recall that floating-point arithmetic operations include mathematical operations such as addition and multiplication.
+> 
+>> [!example]-  Consider a matrix multiplication implementation where only threads responsible for an element in the output matrix C are required to perform floating-point operations. How many floating-point operations are executed in this implementation with respect to the parameters above?
+>> solution: 4561040 
+>>
+>> [!example]-  Now consider an implementation where all threads launched perform floating-point operations. How many floating-point operations are executed now?
+>> solution: 6553600
+
 
 ## Best Practices
 
