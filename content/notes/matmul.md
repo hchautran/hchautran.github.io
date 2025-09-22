@@ -210,8 +210,8 @@ This simple implementation has several limitations:
 
 Future optimizations could include:
 
-- Tiled matrix multiplication using shared memory
-- Memory coalescing optimization
+- [Tiled matrix multiplication](tiled_matmul) using shared memory
+- [Memory coalescing](mem_coalescing) optimization
 - Using tensor cores on modern GPUs
 - Comparing with cuBLAS performance
 
