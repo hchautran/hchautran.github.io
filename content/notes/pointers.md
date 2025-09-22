@@ -6,7 +6,7 @@ tags:
   - notes
 ---
 
-Pointers are one of C's most powerful and misunderstood features. This guide walks through the essentials: what pointers are, how to use them safely, and common pitfalls. If you already know about `void*`, see also: [Generic Pointers](Generic%20Pointers).
+Pointers are one of C's most powerful and misunderstood features. This guide walks through the essentials: what pointers are, how to use them safely, and common pitfalls.
 
 ## What is a pointer?
 
@@ -188,7 +188,6 @@ Guidelines:
 ## See also
 
 - [Initialization in C](Initialization%20in%20C)
-- [Generic Pointers](Generic%20Pointers)
 
 ## Summary
 
