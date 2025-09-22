@@ -1,5 +1,5 @@
 ---
-title: Matrix multiplication (Version 1)
+title: Matrix multiplication (Version 1) - Naive Matmul
 draft: false
 tags:
   - CUDA
