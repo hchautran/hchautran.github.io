@@ -6,7 +6,6 @@ tags:
   - notes
 ---
 
-# Tiled Matrix Multiplication: Optimizing for Memory Hierarchy
 
 Building on our [naive matrix multiplication implementation](matmul), we'll now explore **tiled matrix multiplication** - a crucial optimization technique that dramatically improves performance by leveraging the GPU's memory hierarchy. This approach addresses the memory bandwidth limitations we discussed in our [CUDA memory model](cuda_mem) post.
 
