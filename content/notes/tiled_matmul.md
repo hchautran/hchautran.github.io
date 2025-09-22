@@ -20,12 +20,9 @@ Our previous [naive implementation](matmul) has a fundamental limitation: each e
 - Each element of B is loaded **m times** (once for each row of A)
 - This results in very low arithmetic intensity: **0.25 FLOP/B**
 
-> [!example] Memory Access Analysis
-> For a 1024×1024 matrix multiplication:
-> - **Naive approach**: ~8.4M memory loads, 2.1B FLOPs → 0.25 FLOP/B
-> - **Tiled approach**: ~0.5M memory loads, 2.1B FLOPs → 4+ FLOP/B
-> 
-> This 16x improvement in arithmetic intensity can make the difference between memory-bound and compute-bound performance!
+
+
+
 
 ## The Tiling Strategy
 
@@ -88,6 +85,51 @@ __global__ void tiledMatMul(float* A, float* B, float* C, int M, int N, int K) {
 > - Each tile is loaded once and reused for 16×16 = 256 computations
 > - Total loads: (M×K + K×N) / 16 elements
 > - **16x reduction** in memory traffic!
+
+
+> [!example]- Memory Access Analysis
+> 
+> Assume that the following matrix size specifications are passed to your tiled matrix multiplication kernel in MP3:
+> numARows=55
+> numAColumns=48
+> numBRows=48
+> numBColumns=43
+> numCRows=55
+> numCColumns=43
+> Remember that the matrices contain floats.
+> 
+> Also assume that you are using 
+>  $16\times 16$ tiles.
+> 
+>> [!example]- How many Bytes are read from global memory by the kernel?
+>> Answer: 64704
+>>
+>> [!example]- How many Bytes are written to global memory by the kernel?
+>> Answer:  9460
+>>
+
+
+> [!example]- Tiled Matrix Multiplication Computation Use
+> 
+> Assume that the following matrix size specifications are passed to your tiled matrix multiplication kernel in MP3:
+> numARows=142
+> numAColumns=110
+> numBRows=110
+> numBColumns=146
+> numCRows=142
+> numCColumns=146
+> Remember that the matrices contain floats.
+> 
+> Also assume that you are using 
+> $32\times 32$ tiles.
+> 
+> Recall that floating-point arithmetic operations include mathematical operations such as addition and multiplication.
+> 
+>> [!example]-  Consider a matrix multiplication implementation where only threads responsible for an element in the output matrix C are required to perform floating-point operations. How many floating-point operations are executed in this implementation with respect to the parameters above?
+>> solution: 4561040 
+>>
+>> [!example]-  Now consider an implementation where all threads launched perform floating-point operations. How many floating-point operations are executed now?
+>> solution: 6553600
 
 ### Thread Block Configuration
 
