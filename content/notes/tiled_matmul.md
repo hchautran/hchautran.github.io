@@ -207,14 +207,19 @@ __global__ void tiledMatMulSafe(float* A, float* B, float* C, int M, int N, int 
 
 
 ## Comparison with Naive Implementation
+Let assume that, we use kernel with tile size $T \times T$ and $M,N,K$ can be divided by $T$
 
 | Aspect | Naive | Tiled |
 |--------|-------|-------|
-| **Arithmetic Intensity** | 0.25 FLOP/B | 16+ FLOP/B |
-| **Memory Traffic** | 2×M×N×K | 2×(M×K + K×N)/16 |
-| **Shared Memory** | Not used | TILE_SIZE² × 2 |
+| **Shared Memory** | Not used | $T\times T$ |
 | **Performance** | Memory-bound | Near compute-bound |
 | **Code Complexity** | Simple | Moderate |
+| **Arithmetic Intensity** | 0.25 FLOP/B | 16+ FLOP/B |
+| **Memory Traffic** | $2\times M\times N\times K$ | $(M\times K)\times (N/T)  + (K \times N)\times(M/T) $ |
+
+
+In general compare to naive implementation the memory traffic is reduced by a factor of $T$ and [branch divergence](cuda_scheduling) affects only blocks on boundaries, and should be small for large matrices.
+
 
 
 
@@ -234,10 +239,10 @@ __global__ void tiledMatMulSafe(float* A, float* B, float* C, int M, int N, int 
 > 
 >> [!example]- How many Bytes are read from global memory by the kernel?
 >> Answer: 64704
->>
+>
 >> [!example]- How many Bytes are written to global memory by the kernel?
 >> Answer:  9460
->>
+>
 
 
 > [!example]- Tiled Matrix Multiplication Computation Use
@@ -258,19 +263,51 @@ __global__ void tiledMatMulSafe(float* A, float* B, float* C, int M, int N, int 
 > 
 >> [!example]-  Consider a matrix multiplication implementation where only threads responsible for an element in the output matrix C are required to perform floating-point operations. How many floating-point operations are executed in this implementation with respect to the parameters above?
 >> solution: 4561040 
->>
+>
 >> [!example]-  Now consider an implementation where all threads launched perform floating-point operations. How many floating-point operations are executed now?
 >> solution: 6553600
+>
 
 
-## Best Practices
 
-> [!tip] Implementation Guidelines
-> 1. **Choose appropriate tile size**: Balance shared memory usage vs occupancy
-> 2. **Ensure memory coalescing**: Threads should access consecutive memory locations
-> 3. **Minimize bank conflicts**: Avoid multiple threads accessing same shared memory bank
-> 4. **Use appropriate synchronization**: `__syncthreads()` at the right points
-> 5. **Handle boundary conditions**: Check array bounds for partial tiles
+
+
+## Hardware Constraints to Consider
+
+- **Registers per SM**: 64K(32-bit registers)
+- **Shared Memory per SM**: 48KB-164KB
+- **Threads per SM**: 1024-2048 concurrent threads
+
+
+<figure>
+  <img src="./GPU_mem.png" alt="cuda mem" />
+  <figcaption>Register usage per thread, and shared memory usage per thread block constrain occupancy</figcaption>
+</figure>
+
+| Tile Size | Shared Memory | Use Case |
+|-----------|---------------|----------|
+| **32×32** | 8KB | Conservative, works on most GPUs |
+| **64×64** | 32KB | High-end GPUs, good performance |
+| **128×128** | 128KB | Modern GPUs with large shared memory |
+
+Selection Strategy
+1. **Start conservative** with 32×32
+2. **Profile different sizes** on target hardware
+3. **Check occupancy** (aim for >50%)
+4. **Monitor for register spilling**
+5. **Measure actual performance**
+
+>[!tip] Quick Decision Tree
+>
+> - If (GPU is modern Volta/Ampere) -> Try 64×64 or 128×128
+> - Else if (GPU is Pascal or older) ->     Use 32×32
+> - Always  Validate with profiling
+> 
+I will try to cover ways to calculate tile size for maximum occupancy in a future blog post.
+
+## Key Takeaway
+
+**Empirical testing beats theoretical calculation** - compiler optimizations and memory patterns significantly impact actual resource usage.
 
 ## When to Use Tiling
 
@@ -280,24 +317,20 @@ __global__ void tiledMatMulSafe(float* A, float* B, float* C, int M, int N, int 
 > - You have sufficient shared memory per block
 > - The algorithm has regular access patterns
 
-## Next Steps
+## Best Practices
 
-This tiled implementation forms the foundation for even more advanced optimizations:
-
-- **Tensor Core utilization** for mixed-precision operations
-- **Multi-GPU scaling** for very large matrices
-- **Automatic tuning** of tile sizes and thread configurations
-- **Integration with cuBLAS** for production use
+> [!tip] Implementation Guidelines
+> 1. **Choose appropriate tile size**: Balance shared memory usage vs occupancy
+> 4. **Use appropriate synchronization**: `__syncthreads()` at the right points
+> 5. **Handle boundary conditions**: Check array bounds for partial tiles
 
 ## Summary
 
 Tiled matrix multiplication demonstrates the power of understanding GPU memory hierarchy. By strategically using shared memory to reuse data, we can:
 
-- **Increase arithmetic intensity** from 0.25 to 16+ FLOP/B
-- **Reduce memory traffic** by 16x
+- **Increase arithmetic intensity** and **Reduce memory traffic** by a factor of $TILE_SIZE$ 
 - **Achieve near-peak performance** on modern GPUs
 - **Transform memory-bound kernels** into compute-bound ones
-
 The key insight is that **data reuse** is often more valuable than raw computational power. This principle applies to many other GPU algorithms beyond matrix multiplication.
 
 ---
