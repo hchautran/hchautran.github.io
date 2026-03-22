@@ -111,6 +111,7 @@ And yes, this is exactly the encoder of the VAE! Which can be trained to concent
 
 ## 2. ELBO (Evidence Lower Bound)
 
+
 Now that we have a controllable encoder model to generate $\mathbf{z}\sim q_\phi(\mathbf{z}|\mathbf{x})$. We can redefine the MLE optimization goal using $q_\phi(\mathbf{z} \mid \mathbf{x})$. 
 
 $$
