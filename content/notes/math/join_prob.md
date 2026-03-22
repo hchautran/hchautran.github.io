@@ -2,7 +2,7 @@
 title: Joint Probability Distributions 
 draft: false
 tags:
-  - Probabilities and Statistic 
+  - math 
   - notes
 ---
 

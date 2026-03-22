@@ -2,7 +2,7 @@
 title: Covariance and Correlation
 draft: true
 tags:
-  - Probabilities and Statistic 
+  - math 
   - notes
 ---
 

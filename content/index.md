@@ -2,131 +2,366 @@
 title: About Me
 ---
 
----
-
-<div style="display: flex; justify-content:center ;align-items: center; gap: 20px; margin: 20px 0; flex-wrap: wrap;">
-  <div style="flex: 1; min-width: 300px; order: 2;">
-    <p> Hi 👋 ! I am Hoai-Chau Tran, a first-year PhD student in Computer Science at the University of Illinois Urbana-Champaign (UIUC). I am advised by professor <a href="https://scholar.google.com/citations?user=z7GCqT4AAAAJ&hl=en&oi=ao" target="_blank"> Heng Ji</a> (UIUC) and professor <a href="https://scholar.google.com/citations?user=Zz2hMgcAAAAJ&hl=en&oi=ao" target="_blank">Khoa D Doan</a> (VinUniversity). Before that, I received my Bachelor degree from VNU - Ho Chi Minh City University of Science in 2018.
-    </p>
-    <p>
-    My (current) research focuses on the intersection of machine learning and engineering, with particular emphasis on efficient foundation models (SAM, LLMs, ,etc), EdgeAI and AutoML.</p>
+<div class="profile-hero">
+  <div class="profile-avatar">
+    <img src="./avatar.png" alt="Profile Picture">
   </div>
-  <div style="flex-shrink: 0; text-align: center; max-width: 250px; width: 100%; order: 1; margin-bottom: 20px;">
-    <img src="./profile.PNG" alt="Profile Picture" style="width: 180px; height: 180px; border-radius: 50%; object-fit: cover; max-width: 100%;">
+  <div class="profile-bio">
+    <h2 class="profile-name">Hoai-Chau Tran</h2>
+    <p class="profile-title">PhD Student · Computer Science · UIUC</p>
+    <p>
+      Hi! I am a first-year PhD student advised by
+      <a href="https://www.fanlai.me" target="_blank">Fan Lai</a> (UIUC) and
+      <a href="https://scholar.google.com/citations?user=Zz2hMgcAAAAJ&hl=en&oi=ao" target="_blank">Khoa D Doan</a> (VinUniversity).
+      I received my Bachelor's degree from VNU - Ho Chi Minh City University of Science in 2018.
+    </p>
+    <p>My research lies at the intersection of machine learning and systems, with a focus on:</p>
+    <div class="research-tags">
+      <span class="tag">Efficient Foundation Models</span>
+      <span class="tag">Edge AI</span>
+      <span class="tag">Generative Models</span>
+    </div>
+    <div class="social-links">
+      <a href="mailto:chauht2@illinois.edu">📧 Email</a>
+      <a href="https://www.linkedin.com/in/hoai-chau-tran/" target="_blank"><img src="./linkedin.png" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;">LinkedIn</a>
+      <a href="https://github.com/hchautran" target="_blank"><img src="./github.png" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;">GitHub</a>
+      <a href="https://scholar.google.com/citations?user=FZH2vcEAAAAJ&hl=en" target="_blank"><img src="./scholar.png" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;">Google Scholar</a>
+    </div>
   </div>
 </div>
-
-
-<style>
-@media (max-width: 768px) {
-  div[style*="display: flex"] {
-    flex-direction: column !important;
-    align-items: center !important;
-    text-align: center !important;
-  }
-
-  div[style*="flex: 1"] {
-    order: 2 !important;
-    min-width: unset !important;
-    width: 100% !important;
-  }
-
-  p[style*="text-align: justify"] {
-    text-align: center !important;
-  }
-
-  div[style*="flex-shrink: 0"] {
-    order: 1 !important;
-    max-width: 200px !important;
-    width: 100% !important;
-    margin: 0 auto 20px auto !important;
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-  }
-
-  img[alt="Profile Picture"] {
-    width: 150px !important;
-    height: 150px !important;
-    display: block !important;
-    margin: 0 auto !important;
-  }
-}
-
-@media (max-width: 480px) {
-  img[alt="Profile Picture"] {
-    width: 120px !important;
-    height: 120px !important;
-  }
-
-  div[style*="margin: 20px 0"] {
-    margin: 10px 0 !important;
-  }
-}
-</style>
-
 
 ---
 
 ## 📰 News
 
-* **2025**: 📄 Our work [How Many Tokens Do 3D  Point Cloud Transformer Architectures Really Need?](https://openreview.net/forum?id=uGO1tgU3Mc)  was accepted at NeurIPS 2025 .
-* **2025**: 🎓 Joined [UIUC](https://siebelschool.illinois.edu/) as a graduate student.
-* **2025**: 📄 Our work "A statement-level code vulnerability detection for Python": [DetectVul](https://doi.org/10.1016/j.future.2024.107504) was accepted at the Future Generation Computer Systems Journal (IF 6.2).
-* **2024**: 📄 Our paper [PiToMe](https://arxiv.org/abs/2405.16148) was accepted to NeurIPS 2024.
+<div class="news-list">
+  <div class="news-item" data-type="internship">
+    <div class="news-left">
+      <span class="news-year">2026</span>
+      <span class="news-tag">Internship</span>
+    </div>
+    <span class="news-content"> <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" alt="Apple" style="width:12px;height:15px;vertical-align:-17px;margin-right:2px;" class="apple-logo"> I am joining  <a href="https://machinelearning.apple.com/work-with-us">Apple</a>  as a Research Intern for Summer 2026!</span>
+  </div>
+  <div class="news-item" data-type="paper">
+    <div class="news-left">
+      <span class="news-year">2025</span>
+      <span class="news-tag">NeurIPS</span>
+    </div>
+    <span class="news-content">Our work <a href="https://openreview.net/forum?id=uGO1tgU3Mc">How Many Tokens Do 3D Point Cloud Transformer Architectures Really Need?</a> was accepted at <strong>NeurIPS 2025</strong>.</span>
+  </div>
+  <div class="news-item" data-type="milestone">
+    <div class="news-left">
+      <span class="news-year">2025</span>
+      <span class="news-tag">PhD</span>
+    </div>
+    <span class="news-content">Joined <a href="https://siebelschool.illinois.edu/">UIUC</a> as a PhD student.</span>
+  </div>
+  <div class="news-item" data-type="paper">
+    <div class="news-left">
+      <span class="news-year">2025</span>
+      <span class="news-tag">Journal</span>
+    </div>
+    <span class="news-content"><a href="https://doi.org/10.1016/j.future.2024.107504">DetectVul</a> accepted at <strong>Future Generation Computer Systems</strong> (IF 6.2).</span>
+  </div>
+  <div class="news-item" data-type="paper">
+    <div class="news-left">
+      <span class="news-year">2024</span>
+      <span class="news-tag">NeurIPS</span>
+    </div>
+    <span class="news-content"><a href="https://arxiv.org/abs/2405.16148">PiToMe</a> accepted at <strong>NeurIPS 2024</strong>.</span>
+  </div>
+</div>
 
 ---
 
 ## 📚 Publications
 
-* 2025:   <span style="background-color: #e8f5e8; color: #2e7d32; padding: 2px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold;">NeurIPS</span> <span style="background-color: #e8f5e8; color: #2e7d32; padding: 2px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold;">ICLM Workshop</span>[How Many Tokens Do 3D  Point Cloud Transformer Architectures Really Need?](https://openreview.net/forum?id=uGO1tgU3Mc). Tuan Anh Tran, Duy Minh Ho Nguyen, <u>**Hoai-Chau Tran***</u>, Michael Barz, Khoa D Doan, Roger Wattenhofer, Vien Anh Ngo, Mathias Niepert, Daniel Sonntag, & Paul Swoboda (2025).
+<div class="pub-card">
+  <div class="pub-venues">
+    <span class="venue-badge neurips">NeurIPS</span>
+    <span class="venue-badge workshop">ICLM Workshop</span>
+  </div>
+  <p class="pub-title"><a href="https://openreview.net/forum?id=uGO1tgU3Mc">How Many Tokens Do 3D Point Cloud Transformer Architectures Really Need?</a></p>
+  <p class="pub-authors">Tuan Anh Tran, Duy Minh Ho Nguyen, <u><strong>Hoai-Chau Tran*</strong></u>, Michael Barz, Khoa D Doan, Roger Wattenhofer, Vien Anh Ngo, Mathias Niepert, Daniel Sonntag, & Paul Swoboda (2025).</p>
+</div>
 
-<div style="border-top: 0.25px solid grey; margin: 10px auto; width: 95%;"></div>
+<div class="pub-card">
+  <div class="pub-venues">
+    <span class="venue-badge journal">Journal Article</span>
+  </div>
+  <p class="pub-title"><a href="https://doi.org/10.1016/j.future.2024.107504">DetectVul: A statement-level code vulnerability detection for Python.</a></p>
+  <p class="pub-authors"><u><strong>Hoai-Chau Tran*</strong></u>, Anh-Duy Tran, & Kim-Hung Le (2025). Future Generation Computer Systems, 163, 107504.</p>
+</div>
 
-* 2025: <span style="background-color: #e8f5e8; color: #2e7d32; padding: 2px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold;">Journal Article</span> [DetectVul: A statement-level code vulnerability detection for Python.](https://doi.org/10.1016/j.future.2024.107504). <u>**Hoai-Chau Tran***</u>, Anh-Duy Tran, & Kim-Hung Le (2025). Future Generation Computer Systems, 163, 107504.
-
-<div style="border-top: 0.25px solid grey; margin: 10px auto; width: 95%;"></div>
-
-* 2024: <span style="background-color: #e8f5e8; color: #2e7d32; padding: 2px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold;">NeurIPS</span> <span style="background-color: #e8f5e8; color: #2e7d32; padding: 2px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold;">ICLR Workshop</span> [Accelerating Transformers with Spectrum-Preserving Token Merging](https://arxiv.org/abs/2405.16148). <u>**Hoai-Chau Tran***</u>, Duy Minh Ho Nguyen, Manh-Duy Nguyen, TrungTin Nguyen, Ngan Hoang Le, Pengtao Xie, Daniel Sonntag, James Zou, Binh T. Nguyen, & Mathias Niepert (2024).
+<div class="pub-card">
+  <div class="pub-venues">
+    <span class="venue-badge neurips">NeurIPS</span>
+    <span class="venue-badge workshop">ICLR Workshop</span>
+  </div>
+  <p class="pub-title"><a href="https://arxiv.org/abs/2405.16148">Accelerating Transformers with Spectrum-Preserving Token Merging</a></p>
+  <p class="pub-authors"><u><strong>Hoai-Chau Tran*</strong></u>, Duy Minh Ho Nguyen, Manh-Duy Nguyen, TrungTin Nguyen, Ngan Hoang Le, Pengtao Xie, Daniel Sonntag, James Zou, Binh T. Nguyen, & Mathias Niepert (2024).</p>
+</div>
 
 ---
 
 ## 🛠️ Service
 
-<!-- * **2025**: [International Conference on Machine Learning (ICML)](https://icml.cc) - Area Chair -->
-* **2025**: [NeurIPS](https://neurips.cc) - Reviewer.
-<!-- * **2023**: [International Conference on Learning Representations (ICLR)](https://iclr.cc) - Reviewer -->
-<!-- * **2023**: [Association for the Advancement of Artificial Intelligence (AAAI)](https://aaai.org) - Senior Program Committee Member -->
-
-<!-- ### 🏛️ Workshop Organization -->
-<!-- * **2024**: [Workshop on Machine Learning for Healthcare](https://ml4health.github.io) - Co-organizer -->
-<!-- * **2023**: [AI Safety Workshop at NeurIPS](https://aissafety.org) - Program Committee Member -->
-
-<!-- ### 🏆 Awards & Recognition -->
-<!-- * **2024**: Outstanding Reviewer Award - [Conference Name](https://conference-website.com) -->
-<!-- * **2023**: Distinguished Service Award - [Organization Name](https://organization-website.com) -->
+* **2026**: [ICML](https://icml.cc) — Reviewer
+* **2025**: [NeurIPS](https://neurips.cc) — Volunteer, Reviewer
 
 ---
 
 ## 📝 Notes
 
-You'll also find my #notes here, which are continuously evolving as I learn and discover new ideas. 
-
----
-
-
-## 📧 Contact
-
-<div style="text-align: center; margin: 30px 0;">
-  <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
-    <a href="mailto:chauht2@illinois.edu" style="text-decoration: none; padding: 8px 16px; border: 1px solid #ddd; border-radius: 4px; color: #333; display: flex; align-items: center; gap: 6px;">📧 Email</a>
-    <a href="https://www.linkedin.com/in/hoai-chau-tran/" target="_blank" style="text-decoration: none; padding: 8px 16px; border: 1px solid #ddd; border-radius: 4px; color: #333; display: flex; align-items: center; gap: 6px;"><img src="./linkedin.png" alt="LinkedIn" style="width: 16px; height: 16px;"> LinkedIn</a>
-    <a href="https://github.com/hchautran" target="_blank" style="text-decoration: none; padding: 8px 16px; border: 1px solid #ddd; border-radius: 4px; color: #333; display: flex; align-items: center; gap: 6px;"><img src="./github.png" alt="GitHub" style="width: 16px; height: 16px;"> GitHub</a>
-    <a href="https://scholar.google.com/citations?user=FZH2vcEAAAAJ&hl=en" target="_blank" style="text-decoration: none; padding: 8px 16px; border: 1px solid #ddd; border-radius: 4px; color: #333; display: flex; align-items: center; gap: 6px;"><img src="./scholar.png" alt="Google Scholar" style="width: 16px; height: 16px;"> Google Scholar</a>
-  </div>
-</div>
-
+You'll also find my [notes](notes/) here — continuously evolving as I learn and explore new ideas across math, ML, and systems.
 
 ---
 
 <script type="text/javascript" id="clustrmaps" src="//clustrmaps.com/map_v2.js?d=VV_9AxgUp6rEn_vluenH0AQsjlWKPLdDalJIaJg96ms&cl=ffffff&w=a"></script>
+
+<style>
+/* ── Profile Hero ── */
+.profile-hero {
+  display: flex;
+  align-items: flex-start;
+  gap: 32px;
+  margin: 24px 0 32px;
+  flex-wrap: wrap;
+}
+
+.profile-avatar img {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--lightgray);
+}
+
+.profile-bio {
+  flex: 1;
+  min-width: 260px;
+}
+
+.profile-name {
+  margin: 0 0 4px;
+  font-size: 1.6em;
+}
+
+.profile-title {
+  color: var(--gray);
+  margin: 0 0 12px;
+  font-size: 0.95em;
+}
+
+/* ── Research Tags ── */
+.research-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0 16px;
+}
+
+.tag {
+  background: var(--highlight);
+  color: var(--secondary);
+  border: 1px solid var(--lightgray);
+  border-radius: 20px;
+  padding: 3px 12px;
+  font-size: 0.82em;
+  font-weight: 600;
+}
+
+/* ── Social Links ── */
+.social-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.social-links a {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  text-decoration: none;
+  padding: 6px 14px;
+  border: 1px solid var(--lightgray);
+  border-radius: 6px;
+  font-size: 0.88em;
+  color: var(--darkgray);
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.social-links a:hover {
+  border-color: var(--secondary);
+  color: var(--secondary);
+}
+
+/* ── News Timeline ── */
+.news-list {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 16px 0 16px 10px;
+  padding-left: 24px;
+}
+
+.news-list::before {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 10px;
+  bottom: 10px;
+  width: 2px;
+  background: var(--lightgray);
+}
+
+.news-item {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.news-item:hover {
+  background: var(--highlight);
+}
+
+.news-item::before {
+  content: '';
+  position: absolute;
+  left: -20px;
+  top: 14px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--light);
+  background: var(--secondary);
+  z-index: 1;
+}
+
+.news-item[data-type="internship"]::before { background: #1565c0; }
+.news-item[data-type="paper"]::before      { background: #2e7d32; }
+.news-item[data-type="milestone"]::before  { background: #6a1b9a; }
+
+.news-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 58px;
+  flex-shrink: 0;
+}
+
+.news-year {
+  font-weight: 700;
+  color: var(--secondary);
+  font-size: 0.85em;
+}
+
+.news-tag {
+  font-size: 0.68em;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 10px;
+  white-space: nowrap;
+  background: var(--lightgray);
+  color: var(--darkgray);
+}
+
+.news-item[data-type="internship"] .news-tag { background: #dbeafe; color: #1565c0; }
+.news-item[data-type="paper"]      .news-tag { background: #dcfce7; color: #2e7d32; }
+.news-item[data-type="milestone"]  .news-tag { background: #f3e5f5; color: #6a1b9a; }
+
+.news-content {
+  font-size: 0.93em;
+  line-height: 1.6;
+  padding-top: 1px;
+}
+
+.apple-logo {
+  filter: var(--apple-logo-filter, none);
+}
+
+/* ── Publication Cards ── */
+.pub-card {
+  border: 1px solid var(--lightgray);
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin: 12px 0;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.pub-card:hover {
+  border-color: var(--secondary);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.pub-venues {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.venue-badge {
+  padding: 2px 10px;
+  border-radius: 4px;
+  font-size: 0.78em;
+  font-weight: 700;
+}
+
+.venue-badge.neurips {
+  background: #e8f5e8;
+  color: #2e7d32;
+}
+
+.venue-badge.workshop {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+.venue-badge.journal {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.pub-title {
+  margin: 0 0 6px;
+  font-size: 0.97em;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.pub-authors {
+  margin: 0;
+  font-size: 0.85em;
+  /* color: var(--gray); */
+  line-height: 1.5;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .profile-hero {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .research-tags,
+  .social-links {
+    justify-content: center;
+  }
+
+  .profile-name {
+    font-size: 1.3em;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .apple-logo { filter: invert(1); }
+}
+</style>
