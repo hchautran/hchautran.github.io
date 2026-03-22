@@ -27,7 +27,7 @@ The Variational Autoencoder (VAE), introduced by [Kingma & Welling (2013)](https
 
 
 ## 1. Constructions of VAE
-Suppose we have a dataset of samples drawn i.i.d. from an unknown [joint distribution](join_prob.md) $p_{data}(\mathbf{x})$. Since the true form of $p_{data}$ is unknown, we cannot sample from it directly. The goal of a generative model is to learn a tractable approximation $p_\theta(\mathbf{x})$ from this finite dataset by minimizing a divergence $\mathcal{D}_f$ between the two distributions. In the case of VAEs, $\mathcal{D}_f$ is typically the KL divergence $\mathcal{D}_{KL}$. For more details on MLE see [Maximum Likelihood Estimation](MLE.md):
+Suppose we have a dataset of samples drawn i.i.d. from an unknown [joint distribution](join_prob.md) $p_{data}(\mathbf{x})$. Since the true form of $p_{data}$ is unknown, we cannot sample from it directly. The goal of a generative model is to learn a tractable approximation $p_\theta(\mathbf{x})$ from this finite dataset by minimizing a divergence $\mathcal{D}_f$ between the two distributions. In the case of VAEs, $\mathcal{D}_f$ is the KL divergence $\mathcal{D}_{KL}$:
 
 $$
 \mathcal{D}_{KL}(p_{data}(\mathbf{x}) \| p_{\theta}(\mathbf{x}))
@@ -45,10 +45,10 @@ $$
 > As we can see, the KL divergence measures the expected log-likelihood difference between $p_{data}$ and $p_\theta$. Therefore, minimizing $\mathcal{D}_{KL}(p_{data} \| p_\theta)$ pushes $p_\theta$ to assign high likelihood to real data $\mathbf{x}$ that was sampled from $p_{data}$.
 > 
 
- Once the optimal parameters $\theta$ are found, $p_\theta$  can be used to serve as a proxy for $p_{data}$, enabling two key capabilities:
+ Once the optimal parameters $\theta$ are found, $p_\theta(\mathbf{x})$  can be used to serve as a proxy for $p_{data}(\mathbf{x})$, enabling two key capabilities:
 
-- **Generation**: Draw new, realistic samples from $p_{data}$ via sampling methods such as [Monte Carlo Sampling](https://en.wikipedia.org/wiki/Monte_Carlo_method) via $p_\theta$.
-- **Evaluation**: Assess how likely a given sample $\mathbf{x}'$ is under the learned distribution $p_\theta(.)$ — for instance, judging whether an image $\mathbf{x}'$ looks realistic by computing the likelihood $p_\theta(\mathbf{x}')$.
+- **Generation**: Draw new, realistic samples from $p_{data}(\mathbf{x})$ via sampling methods such as [Monte Carlo Sampling](https://en.wikipedia.org/wiki/Monte_Carlo_method) via $p_\theta(\mathbf{x})$.
+- **Evaluation**: Assess how likely a given sample $\mathbf{x}'$ is under the learned distribution $p_\theta(\mathbf{x})$ — for instance, judging whether an image $\mathbf{x}'$ looks realistic by computing the likelihood $p_\theta(\mathbf{x}')$.
 
 Now having the target to optimize. We can rewrite the KL divergence as follow: 
 
@@ -81,10 +81,7 @@ $$
 \boxed{p_\theta(\mathbf{x}) = \int p_\theta(\mathbf{x} \mid \mathbf{z}) p(\mathbf{z}) \, d\mathbf{z}}
 $$
 
-Unfortunately, directly optimizing this objective via MLE is intractable: it requires integrating over the entire high-dimensional latent space, and since $p_\theta(\mathbf{x} \mid \mathbf{z})$ is a deep, expressive neural network with no closed-form solution, evaluating this integral exactly is computationally infeasible. 
-
-
-To make this optimization tractable, we need a way to focus only on latent states $\mathbf{z}$ that are likely to have generated the current input $\mathbf{x}$, rather than integrating over the entire latent space.
+Unfortunately, directly optimizing this objective via MLE is intractable: it requires integrating over the entire high-dimensional latent space, and since $p_\theta(\mathbf{x} \mid \mathbf{z})$ is a deep, expressive neural network with no closed-form solution, evaluating this integral exactly is computationally infeasible.  To make this optimization tractable, we need a way to focus only on latent states $\mathbf{z}$ that are likely to have generated the current input $\mathbf{x}$, rather than integrating over the entire latent space.
 
 
 ### 1.2 Encoder (Inference Model)
@@ -110,7 +107,7 @@ And yes, this is exactly the encoder of the VAE! Which can be trained to concent
 >   -->
 
 > [!summary] TL;DR — Constructions of VAE
-> The VAE consists of a **decoder** $p_\theta(\mathbf{x}\mid\mathbf{z})$ that generates data from latents (Eq. 5), and an **encoder** $q_\phi(\mathbf{z}\mid\mathbf{x})$ that approximates the intractable posterior (Eq. 7).
+> The VAE consists of a **decoder** $p_\theta(\mathbf{x}\mid\mathbf{z})$ that generates data from latents, and an **encoder** $q_\phi(\mathbf{z}\mid\mathbf{x})$ that approximates the intractable posterior.
 
 ## 2. ELBO (Evidence Lower Bound)
 
@@ -124,10 +121,7 @@ p_\theta(\mathbf{x}) &= \int p_\theta(\mathbf{z}, \mathbf{x}) d\mathbf{z} \notag
 &= \log \mathbb{E}_{\mathbf{z} \sim q_\phi(\mathbf{z} \mid \mathbf{x})} \left[ \frac{p_\theta(\mathbf{z}, \mathbf{x})}{q_\phi(\mathbf{z} \mid \mathbf{x})} \right] \notag
 \end{align}
 $$
-The learning objective is now tractable.
-
-
-Now according to [Jensen's inequality](https://en.wikipedia.org/wiki/Jensen%27s_inequality). We have the the evidence lower bound $\mathcal{L}_{ELBO}$ where:
+The learning objective is now tractable. Now according to [Jensen's inequality](https://en.wikipedia.org/wiki/Jensen%27s_inequality). We have the the evidence lower bound $\mathcal{L}_{ELBO}$ where:
 $$
 \begin{align}
 \log \mathbb{E}_{\mathbf{z} \sim q_\phi(\mathbf{z} \mid \mathbf{x})} \left[ \frac{p_\theta(\mathbf{z}, \mathbf{x})}{q_\phi(\mathbf{z} \mid \mathbf{x})} \right] \geq \mathbb{E}_{\mathbf{z} \sim q_\phi(\mathbf{z} \mid \mathbf{x})} \left[ \log \frac{p_\theta(\mathbf{z}, \mathbf{x})}{q_\phi(\mathbf{z} \mid \mathbf{x})} \right] = \mathcal{L}_{ELBO}
@@ -159,7 +153,7 @@ $$
 > only requires sampling $\mathbf{z}$ from the encoder $q_\phi(\mathbf{z} \mid \mathbf{x})$, which concentrates mass on the latent regions most relevant to $\mathbf{x}$. 
 >
 > **2. A closed-form KL term**:
->  $q_\phi(\mathbf{z} \mid \mathbf{x})$ is usually modeled as a simple distribution (usually a gaussian and the KL divergence between two Gaussians has a closed-form solution — no integration is needed at all). And it can also be easily trainable via the [reparameterization trick](https://en.wikipedia.org/wiki/Reparameterization_trick)
+>  $q_\phi(\mathbf{z} \mid \mathbf{x})$ is usually modeled as a simple distribution, usually a gaussian and the KL divergence between two Gaussians has a closed-form solution — no integration is needed at all. And it can also be easily trainable via the [reparameterization trick](https://en.wikipedia.org/wiki/Reparameterization_trick)
 
 
 Together, the two terms create a natural tension: maximizing $\mathcal{L}_{ELBO}$ encourages the decoder to recover the original input $\mathbf{x}$ as accurately as possible from latent samples $\mathbf{z} \sim q_\phi(\mathbf{z} \mid \mathbf{x})$ (reconstruction term), while the regularization term pulls the encoder's posterior $q_\phi(\mathbf{z} \mid \mathbf{x})$ back toward the prior $p(\mathbf{z})$. The VAE learns by striking a balance between these two competing objectives.
@@ -169,22 +163,22 @@ Together, the two terms create a natural tension: maximizing $\mathcal{L}_{ELBO}
 > [!note] ELBO as a Divergence Bound
 >
 > So what is the relationship between ELBO and the true MLE goal $p_\theta(\mathbf{x})$?
-> Recall that maximum likelihood training amounts to minimizing the KL divergence between $p_\theta{x}$ and the data distribution  $p_\theta(x)$ 
+> Recall that maximum likelihood training amounts to minimizing the KL divergence between $p_\theta(\mathbf{x})$ and the data distribution  $p_{data}(x)$ 
 > $$
 > \mathcal{D}_{KL}(p_{data}(\mathbf{x}))\|p_{\theta}(\mathbf{x}))
 > $$
->  Since this term is intractable in general, the variational framework of VAE introduces a joint comparison $\mathbf{z}$. Specifically, consider two joint distributions$ 
+>  Since this term is intractable in general, the variational framework of VAE introduces a joint comparison $\mathbf{z}$. Specifically, consider two joint distributions 
 >  - Generative Join -- Decoder: $p_\theta(\mathbf{z}, \mathbf{x})$ 
 >  - Inference Join -- Encoder:  $q_\phi(\mathbf{z}, \mathbf{x})$ 
 >
-> The total error bound is:
+> The total error bound is to match these join together is:
 > $$
 > \begin{align}
 > \mathcal{D}_{KL}(q_\phi{\mathbf{x}, \mathbf{z}} \| p_\theta(\mathbf{x}, \mathbf{z})) &= \iint q_\phi(\mathbf{x}, \mathbf{z}) \log \frac{q_\phi(\mathbf{x}, \mathbf{z})}{p_\theta(\mathbf{x}, \mathbf{z})}  d\mathbf{x}  d\mathbf{z}  \notag \\
 > &= \iint p_{data}(\mathbf{x}) q_{\phi}(\mathbf{z}\mid \mathbf{x}) \log(\frac{p_{data}(\mathbf{x})q_\phi(\mathbf{x}\mid \mathbf{z})}{p_\theta(\mathbf{x}) p_\theta(\mathbf{z}\mid \mathbf{x})}) d\mathbf{z}  d\mathbf{x}  \notag \\
 > &=  \int p_{data}(\mathbf{x}) \log(\frac{p_{data}(\mathbf{x})}{p_\theta(\mathbf{x})}) d\mathbf{x}  \notag \\
 > &+ \iint p_{data}(\mathbf{x}) q_{\phi}(\mathbf{z}\mid \mathbf{x}) \log(\frac{q_\phi(\mathbf{x}\mid \mathbf{z})}{ p_\theta(\mathbf{z}\mid \mathbf{x})}) d\mathbf{z}  d\mathbf{x}  \notag  \\ 
-> &= \underbrace{\mathcal{D}_{KL}(p_{data}(x))\|p_{\theta}(x))}_{\text{True Modeling Error}}  \notag \\
+> &= \underbrace{\mathcal{D}_{KL}(p_{data}(\mathbf{x}))\|p_{\theta}(\mathbf{x}))}_{\text{True Modeling Error}}  \notag \\
 > &+ \underbrace{\mathbb{E}_{x\sim p_{data}(x)}\left[\mathcal{D}_{KL}(q_\phi(\mathbf{z} \mid \mathbf{x}) \| p_\theta(\mathbf{z} \mid \mathbf{x}))  \right]}_{\text{Inference Error}} \notag\\ 
 > \end{align} 
 > $$
@@ -205,7 +199,7 @@ Together, the two terms create a natural tension: maximizing $\mathcal{L}_{ELBO}
 >
 
 > [!summary] TL;DR — ELBO
-> By Jensen's inequality, $\log p_\theta(\mathbf{x}) \geq \mathcal{L}_\text{ELBO}$ (Eq. 8). The ELBO decomposes into a **reconstruction term** (maximize decoder fidelity) minus a **KL term** (keep encoder close to prior), both of which are tractable to optimize (Eq. 9).
+> By Jensen's inequality, $\log p_\theta(\mathbf{x}) \geq \mathcal{L}_\text{ELBO}$ (Eq. 5). The ELBO decomposes into a **reconstruction term** (maximize decoder fidelity) minus a **KL term** (keep encoder close to prior), both of which are tractable to optimize .
 
 ## 3. Gaussian VAEs
 
