@@ -14,7 +14,7 @@ Building on our [naive matrix multiplication implementation](matmul), we'll now 
 
 ## The Problem with Naive Matrix Multiplication
 
-Our previous [naive implementation](matmul) has a fundamental limitation: each element of matrices A and B is loaded from global memory multiple times. For a matrix multiplication C = A × B:
+Our previous [naive implementation](matmul) has a fundamental limitation: each element of matrices A and B is loaded from global memory multiple times. For a matrix multiplication  C = A × B:
 
 - Each element of A is loaded **n times** (once for each column of B)
 - Each element of B is loaded **m times** (once for each row of A)
