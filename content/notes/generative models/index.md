@@ -1,5 +1,5 @@
 ---
-title: Generatives Models 
+title: Generative Models 
 draft: false
 tags:
   - CUDA
