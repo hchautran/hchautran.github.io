@@ -1,6 +1,6 @@
 ---
 title: Matrix multiplication (Version 1) - Naive Matmul
-draft: false
+draft: true 
 tags:
   - CUDA
   - notes

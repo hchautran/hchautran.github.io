@@ -1,6 +1,6 @@
 ---
 title: "Initialization and assignment in C++"
-draft: false
+draft: true
 tags:
   - C
   - notes

@@ -1,6 +1,6 @@
 ---
 title: Pointers in C 
-draft: false
+draft: true 
 tags:
   - C
   - notes

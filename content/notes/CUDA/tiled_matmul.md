@@ -1,6 +1,6 @@
 ---
 title: Matrix multiplication (Version 2) - Tiled Matmul
-draft: false
+draft: true
 tags:
   - CUDA
   - notes
