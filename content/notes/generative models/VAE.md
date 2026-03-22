@@ -392,7 +392,8 @@ That said, the Gaussian VAE is far from perfect. The three drawbacks discussed a
 ---
 ## References
 
-[1]-- Kingma, D. P., & Welling, M. (2013). *Auto-encoding variational Bayes*. arXiv. <https://arxiv.org/abs/1312.6114>
+[1]-- Kingma, D. P., & Welling, M. (2013). *Auto-encoding variational Bayes*. 
+
 [2]--The Principles of Diffusion Models. (n.d.). <https://the-principles-of-diffusion-models.github.io/>
 
 [3]--Wikipedia contributors. (n.d.). *Jensen's inequality*. Wikipedia. <https://en.wikipedia.org/wiki/Jensen%27s_inequality>
