@@ -4,5 +4,4 @@ draft: false
 ---
 
 
-
 Notes on generative models.
