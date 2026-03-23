@@ -4,7 +4,7 @@ title: About Me
 
 <div class="profile-hero">
   <div class="profile-avatar">
-    <img src="./avatar.png" alt="Profile Picture">
+    <img src="./avatar.png" alt="Profile Picture" width="160" height="160">
   </div>
   <div class="profile-bio">
     <h2 class="profile-name">Hoai-Chau Tran</h2>
