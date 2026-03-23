@@ -90,7 +90,6 @@ These are simply the **sample mean** and **sample variance** — the MLE recover
 ## Example: Coin Flipping (Bernoulli MLE)
 
 Suppose we flip a coin $N$ times and observe outcomes $x^{(i)} \in \{0, 1\}$, where $1$ = heads and $0$ = tails. We model each flip as $x^{(i)} \overset{\text{i.i.d.}}{\sim} \text{Bernoulli}(p)$, with the single unknown parameter $\theta = p \in [0,1]$.The probability of a single outcome is:
-
 $$
 p_\theta(x) = p^x (1-p)^{1-x} \tag{12}
 $$
