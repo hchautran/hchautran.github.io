@@ -16,6 +16,7 @@ const Navbar: QuartzComponent = ({ fileData }: QuartzComponentProps) => {
   )
 }
 
+
 Navbar.css = `
 body {
   padding-top: 48px;
