@@ -106,8 +106,8 @@ And yes, this is exactly the encoder of the VAE! Which can be trained to concent
 >
 >   -->
 
-> [!summary] TL;DR — Constructions of VAE
-> The VAE consists of a **decoder** $p_\theta(\mathbf{x}\mid\mathbf{z})$ that generates data from latents, and an **encoder** $q_\phi(\mathbf{z}\mid\mathbf{x})$ that approximates the intractable posterior.
+<!-- > [!summary] TL;DR — Constructions of VAE
+> The VAE consists of a **decoder** $p_\theta(\mathbf{x}\mid\mathbf{z})$ that generates data from latents, and an **encoder** $q_\phi(\mathbf{z}\mid\mathbf{x})$ that approximates the intractable posterior. -->
 
 ## 2. ELBO (Evidence Lower Bound)
 
@@ -138,9 +138,9 @@ $$
 \end{align}
 $$
 
-- **Reconstruction term** — $\mathbb{E}_{\mathbf{z} \sim q_\phi(\mathbf{z} \mid \mathbf{x})} \left[ \log p_\theta(\mathbf{x} \mid \mathbf{z}) \right]$: This is the reconstruction objective from the standard AE (cf. Eq. 1), but now evaluated only over $\mathbf{z}$ sampled from the encoder (Eq. 7), making it tractable.
+- **Reconstruction term** — $\mathbb{E}_{\mathbf{z} \sim q_\phi(\mathbf{z} \mid \mathbf{x})} \left[ \log p_\theta(\mathbf{x} \mid \mathbf{z}) \right]$: This is the reconstruction objective from the standard AE, but now evaluated only over $\mathbf{z}$ sampled from the encoder, making it tractable.
 
-- **Regularization term** — $\mathcal{D}_{KL}(q_\phi(\mathbf{z} \mid \mathbf{x}) \| p(\mathbf{z}))$: This penalizes the encoder's posterior $q_\phi(\mathbf{z} \mid \mathbf{x})$ for deviating from the prior $p(\mathbf{z}) = \mathcal{N}(\mathbf{0}, \mathbf{I})$, enforcing the latent space structure needed for generation (cf. Eq. 5).
+- **Regularization term** — $\mathcal{D}_{KL}(q_\phi(\mathbf{z} \mid \mathbf{x}) \| p(\mathbf{z}))$: This penalizes the encoder's posterior $q_\phi(\mathbf{z} \mid \mathbf{x})$ for deviating from the prior $p(\mathbf{z}) = \mathcal{N}(\mathbf{0}, \mathbf{I})$, enforcing the latent space structure needed for generation.
 
 
 
@@ -164,9 +164,9 @@ Together, the two terms create a natural tension: maximizing $\mathcal{L}_{ELBO}
 > [!note] ELBO as a Divergence Bound
 >
 > So what is the relationship between ELBO and the true MLE goal $p_\theta(\mathbf{x})$?
-> Recall that maximum likelihood training amounts to minimizing the KL divergence between $p_\theta(\mathbf{x})$ and the data distribution  $p_{data}(x)$ 
+> Recall that maximum likelihood training amounts to minimizing the KL divergence between $p_{data}(\mathbf{x})$ and the learned distribution $p_\theta(\mathbf{x})$:
 > $$
-> \mathcal{D}_{KL}(p_{data}(\mathbf{x}))\|p_{\theta}(\mathbf{x}))
+> \mathcal{D}_{KL}(p_{data}(\mathbf{x}) \| p_{\theta}(\mathbf{x}))
 > $$
 >  Since this term is intractable in general, the variational framework of VAE introduces a joint comparison $\mathbf{z}$. Specifically, consider two joint distributions 
 >  - Generative Join -- Decoder: $p_\theta(\mathbf{z}, \mathbf{x})$ 
@@ -175,17 +175,17 @@ Together, the two terms create a natural tension: maximizing $\mathcal{L}_{ELBO}
 > The total error bound is to match these join together is:
 > $$
 > \begin{align}
-> \mathcal{D}_{KL}(q_\phi{\mathbf{x}, \mathbf{z}} \| p_\theta(\mathbf{x}, \mathbf{z})) &= \iint q_\phi(\mathbf{x}, \mathbf{z}) \log \frac{q_\phi(\mathbf{x}, \mathbf{z})}{p_\theta(\mathbf{x}, \mathbf{z})}  d\mathbf{x}  d\mathbf{z}  \notag \\
-> &= \iint p_{data}(\mathbf{x}) q_{\phi}(\mathbf{z}\mid \mathbf{x}) \log(\frac{p_{data}(\mathbf{x})q_\phi(\mathbf{x}\mid \mathbf{z})}{p_\theta(\mathbf{x}) p_\theta(\mathbf{z}\mid \mathbf{x})}) d\mathbf{z}  d\mathbf{x}  \notag \\
+> \mathcal{D}_{KL}(q_\phi(\mathbf{x}, \mathbf{z}) \| p_\theta(\mathbf{x}, \mathbf{z})) &= \iint q_\phi(\mathbf{x}, \mathbf{z}) \log \frac{q_\phi(\mathbf{x}, \mathbf{z})}{p_\theta(\mathbf{x}, \mathbf{z})}  d\mathbf{x}  d\mathbf{z}  \notag \\
+> &= \iint p_{data}(\mathbf{x}) q_{\phi}(\mathbf{z}\mid \mathbf{x}) \log(\frac{p_{data}(\mathbf{x})q_\phi(\mathbf{z}\mid \mathbf{x})}{p_\theta(\mathbf{x}) p_\theta(\mathbf{z}\mid \mathbf{x})}) d\mathbf{z}  d\mathbf{x}  \notag \\
 > &=  \int p_{data}(\mathbf{x}) \log(\frac{p_{data}(\mathbf{x})}{p_\theta(\mathbf{x})}) d\mathbf{x}  \notag \\
-> &+ \iint p_{data}(\mathbf{x}) q_{\phi}(\mathbf{z}\mid \mathbf{x}) \log(\frac{q_\phi(\mathbf{x}\mid \mathbf{z})}{ p_\theta(\mathbf{z}\mid \mathbf{x})}) d\mathbf{z}  d\mathbf{x}  \notag  \\ 
-> &= \underbrace{\mathcal{D}_{KL}(p_{data}(\mathbf{x}))\|p_{\theta}(\mathbf{x}))}_{\text{True Modeling Error}}  \notag \\
+> &+ \iint p_{data}(\mathbf{x}) q_{\phi}(\mathbf{z}\mid \mathbf{x}) \log(\frac{q_\phi(\mathbf{z}\mid \mathbf{x})}{ p_\theta(\mathbf{z}\mid \mathbf{x})}) d\mathbf{z}  d\mathbf{x}  \notag  \\
+> &= \underbrace{\mathcal{D}_{KL}(p_{data}(\mathbf{x}) \| p_{\theta}(\mathbf{x}))}_{\text{True Modeling Error}}  \notag \\
 > &+ \underbrace{\mathbb{E}_{x\sim p_{data}(x)}\left[\mathcal{D}_{KL}(q_\phi(\mathbf{z} \mid \mathbf{x}) \| p_\theta(\mathbf{z} \mid \mathbf{x}))  \right]}_{\text{Inference Error}} \notag\\ 
 > \end{align} 
 > $$
 > Thus we have 
 >$$
->\mathcal{D}_{KL}(q_\phi(\mathbf{x}, \mathbf{z}) \| p_\theta(\mathbf{\mathbf{x}}, \mathbf{z})) \geq   \mathcal{D}_{KL}(p_{data}(\mathbf{x}))\|p_{\theta}(\mathbf{x}))
+>\mathcal{D}_{KL}(q_\phi(\mathbf{x}, \mathbf{z}) \| p_\theta(\mathbf{x}, \mathbf{z})) \geq \mathcal{D}_{KL}(p_{data}(\mathbf{x}) \| p_{\theta}(\mathbf{x}))
 >$$
 > Where equality happens when inference error is zeros, which also means the encoder $q_\phi(\mathbf{z} \mid \mathbf{x})$ perfectly model the unknow posterior distribution $p_\theta(\mathbf{z} \mid \mathbf{x})$.  
 >
@@ -199,8 +199,8 @@ Together, the two terms create a natural tension: maximizing $\mathcal{L}_{ELBO}
 > We can see that the gap between the true log-likelihood $\log p_\theta(\mathbf{x})$ and the ELBO is precisely the inference error of the current sample $\mathbf{x}$. Maximizing the ELBO therefore directly reduces this gap. Specifically, optimizing the encoder $q_\phi(\mathbf{z}|\mathbf{x})$ tightens the bound by bringing the approximate posterior closer to the true one $p_\theta(\mathbf{z}|\mathbf{x})$, while optimizing the decoder $p_\theta(\mathbf{x}|\mathbf{z})$ pushes the $p_\theta(\mathbf{x})$ itself upward — lifting the entire lower bound and improving the overall log-likelihood.
 >
 
-> [!summary] TL;DR — ELBO
-> By Jensen's inequality, $\log p_\theta(\mathbf{x}) \geq \mathcal{L}_\text{ELBO}$ (Eq. 5). The ELBO decomposes into a **reconstruction term** (maximize decoder fidelity) minus a **KL term** (keep encoder close to prior), both of which are tractable to optimize .
+<!-- > [!summary] TL;DR — ELBO
+> By Jensen's inequality, $\log p_\theta(\mathbf{x}) \geq \mathcal{L}_\text{ELBO}$. The ELBO decomposes into a **reconstruction term** (maximize decoder fidelity) minus a **KL term** (keep encoder close to prior), both of which are tractable to optimize. -->
 
 ## 3. Gaussian VAEs
 
@@ -293,7 +293,7 @@ This is equivalent to minimizing the expected MSE between the input $\mathbf{x}$
 
 
 ### 3.3 Overall Training Procedure
-With both the encoder and decoder defined, the full training procedure follows directly from maximizing the ELBO (Eq. 9). Each training step processes a minibatch of inputs:
+With both the encoder and decoder defined, the full training procedure follows directly from maximizing the ELBO. Each training step processes a minibatch of inputs:
 
 $$
 \begin{array}{l}
