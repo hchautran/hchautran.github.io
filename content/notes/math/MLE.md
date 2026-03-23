@@ -90,6 +90,7 @@ These are simply the **sample mean** and **sample variance** — the MLE recover
 ## Example: Coin Flipping (Bernoulli MLE)
 
 Suppose we flip a coin $N$ times and observe outcomes $x^{(i)} \in \{0, 1\}$, where $1$ = heads and $0$ = tails. We model each flip as $x^{(i)} \overset{\text{i.i.d.}}{\sim} \text{Bernoulli}(p)$, with the single unknown parameter $\theta = p \in [0,1]$.The probability of a single outcome is:
+
 $$
 p_\theta(x) = p^x (1-p)^{1-x} \tag{12}
 $$
@@ -161,6 +162,115 @@ $$
 $$
 
 This is the well-known **ordinary least squares (OLS)** solution. The key insight is that **minimizing MSE in linear regression is exactly MLE under a Gaussian noise assumption**.
+
+Drag the sliders below to see how the slope and intercept affect the NLL — the OLS solution is where it is minimized.
+
+<div id="lr-plot" style="width:100%;height:340px;"></div>
+<div class="mle-controls">
+  <label>slope w₁: <input type="range" id="lr-w1" min="-2" max="6" step="0.05" value="2">
+    <span id="lr-w1-val">2.00</span>
+  </label>
+  <label>intercept w₀: <input type="range" id="lr-w0" min="-5" max="5" step="0.05" value="1">
+    <span id="lr-w0-val">1.00</span>
+  </label>
+  <button id="lr-reset-btn">Reset to OLS</button>
+</div>
+
+<script data-plot-script>
+(function () {
+  function init() {
+    if (!document.getElementById('lr-plot') || !window.Plotly) return;
+    setup();
+  }
+
+  function setup() {
+    // Reproducible data: y = 2x + 1 + noise
+    const trueW1 = 2.0, trueW0 = 1.0, sigma = 1.2, N = 40;
+    let seed = 7;
+    function rand() { seed = (Math.imul(seed, 1664525) + 1013904223) | 0; return (seed >>> 0) / 4294967296; }
+    function randn() {
+      let u, v;
+      do { u = rand(); } while (u === 0);
+      do { v = rand(); } while (v === 0);
+      return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+    }
+
+    const xs = Array.from({ length: N }, () => rand() * 6 - 1);
+    const ys = xs.map(x => trueW1 * x + trueW0 + sigma * randn());
+
+    // OLS solution
+    const xMean = xs.reduce((a, b) => a + b, 0) / N;
+    const yMean = ys.reduce((a, b) => a + b, 0) / N;
+    const olsW1 = xs.reduce((s, x, i) => s + (x - xMean) * (ys[i] - yMean), 0) /
+                  xs.reduce((s, x) => s + (x - xMean) ** 2, 0);
+    const olsW0 = yMean - olsW1 * xMean;
+
+    function nll(w0, w1) {
+      const sig2 = sigma * sigma;
+      return ys.reduce((s, y, i) => s + (y - (w1 * xs[i] + w0)) ** 2, 0) / (2 * sig2 * N)
+             + 0.5 * Math.log(2 * Math.PI * sig2);
+    }
+
+    const lineX = [Math.min(...xs) - 0.3, Math.max(...xs) + 0.3];
+
+    function drawPlot(w0, w1) {
+      const ll = -nll(w0, w1);
+      const olsLL = -nll(olsW0, olsW1);
+      Plotly.react('lr-plot', [
+        {
+          x: xs, y: ys, mode: 'markers', type: 'scatter', name: 'Data',
+          marker: { color: 'rgba(99,149,218,0.7)', size: 7 },
+        },
+        {
+          x: lineX, y: lineX.map(x => w1 * x + w0),
+          mode: 'lines', type: 'scatter', name: `w₁=${w1.toFixed(2)}, w₀=${w0.toFixed(2)}`,
+          line: { color: '#e63946', width: 2.5 },
+        },
+        {
+          x: lineX, y: lineX.map(x => olsW1 * x + olsW0),
+          mode: 'lines', type: 'scatter', name: 'OLS (MLE)',
+          line: { color: '#2a9d8f', width: 2, dash: 'dot' },
+        },
+      ], {
+        title: { text: `NLL: ${nll(w0, w1).toFixed(3)}  (OLS minimum: ${nll(olsW0, olsW1).toFixed(3)})`, font: { size: 13 } },
+        xaxis: { title: 'x' }, yaxis: { title: 'y' },
+        legend: { orientation: 'h', y: -0.25 },
+        margin: { t: 45, b: 40, l: 55, r: 20 },
+        height: 340,
+      }, { responsive: true });
+    }
+
+    const w1Slider = document.getElementById('lr-w1');
+    const w0Slider = document.getElementById('lr-w0');
+    const w1Val    = document.getElementById('lr-w1-val');
+    const w0Val    = document.getElementById('lr-w0-val');
+    const resetBtn = document.getElementById('lr-reset-btn');
+
+    w1Slider.value = olsW1.toFixed(2);
+    w0Slider.value = olsW0.toFixed(2);
+    w1Val.textContent = (+olsW1).toFixed(2);
+    w0Val.textContent = (+olsW0).toFixed(2);
+    drawPlot(olsW0, olsW1);
+
+    function update() {
+      const w1 = +w1Slider.value, w0 = +w0Slider.value;
+      w1Val.textContent = w1.toFixed(2);
+      w0Val.textContent = w0.toFixed(2);
+      drawPlot(w0, w1);
+    }
+
+    w1Slider.addEventListener('input', update);
+    w0Slider.addEventListener('input', update);
+    resetBtn.addEventListener('click', () => {
+      w1Slider.value = olsW1.toFixed(2);
+      w0Slider.value = olsW0.toFixed(2);
+      update();
+    });
+  }
+
+  init();
+})();
+</script>
 
 ## Connection to KL Divergence
 

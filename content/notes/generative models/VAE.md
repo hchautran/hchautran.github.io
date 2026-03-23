@@ -264,7 +264,7 @@ $$
  q_\phi(\mathbf{z} \mid \mathbf{x}) \longrightarrow \mathcal{N}(\mathbf{0}, \mathbf{I}) = p(\mathbf{z})
 $$
 
-This is why the reconstruction term is essential: it pulls $\mu_j$ away from zero and $\sigma_j^2$ toward smaller values to make $\mathbf{z}$ informative about $\mathbf{x}$. 
+This is why the reconstruction term is essential: it pulls $\mu_j$ away from zero and $\sigma_j^2$ toward smaller values to make $\mathbf{z}$ informative about $\mathbf{x}$.
 
 
 ### 3.2 The Decoder part

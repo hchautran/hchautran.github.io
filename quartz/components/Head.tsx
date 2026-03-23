@@ -41,6 +41,13 @@ export default (() => {
         <link rel="stylesheet" type="text/css" href="https://tikzjax.com/v1/fonts.css" />
         <script src="https://tikzjax.com/v1/tikzjax.js"></script>
         <style>{`.tikz-center svg { display: block; margin: 0 auto; }`}</style>
+        <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" spa-preserve={true}></script>
+        <script
+          spa-preserve={true}
+          dangerouslySetInnerHTML={{
+            __html: `document.addEventListener('nav',function(){document.querySelectorAll('script[data-plot-script]').forEach(function(el){try{(new Function(el.textContent))()}catch(e){console.error('Plot init error:',e)}})});`,
+          }}
+        ></script>
         {css.map((href) => (
           <link key={href} href={href} rel="stylesheet" type="text/css" spa-preserve />
         ))}

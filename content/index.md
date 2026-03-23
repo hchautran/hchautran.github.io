@@ -32,6 +32,8 @@ title: About Me
     </div>
 </div>
 
+
+
 ---
 
 ## 📰 News
@@ -341,6 +343,35 @@ You'll also find my [notes](notes/) here — continuously evolving as I learn an
   font-size: 0.85em;
   /* color: var(--gray); */
   line-height: 1.5;
+}
+
+/* ── New Blog Banner ── */
+.new-blog-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: var(--highlight);
+  border: 1px solid var(--lightgray);
+  border-left: 4px solid var(--secondary);
+  border-radius: 6px;
+  margin: 0 0 4px;
+}
+
+.new-blog-badge {
+  font-size: 0.72em;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: var(--secondary);
+  color: var(--light);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.new-blog-text {
+  font-size: 0.92em;
+  color: var(--darkgray);
 }
 
 /* ── Responsive ── */
