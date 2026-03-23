@@ -214,7 +214,7 @@ You'll also find my [notes](notes/) here — continuously evolving as I learn an
 .news-list::before {
   content: '';
   position: absolute;
-  left: 4px;
+  left: 6px;
   top: 10px;
   bottom: 10px;
   width: 2px;
@@ -238,7 +238,7 @@ You'll also find my [notes](notes/) here — continuously evolving as I learn an
 .news-item::before {
   content: '';
   position: absolute;
-  left: -20px;
+  left: -24px;
   top: 14px;
   width: 10px;
   height: 10px;
