@@ -21,13 +21,15 @@ title: About Me
       <span class="tag">Edge AI</span>
       <span class="tag">Generative Models</span>
     </div>
+
+  </div>
     <div class="social-links">
       <a href="mailto:chauht2@illinois.edu">📧 Email</a>
-      <a href="https://www.linkedin.com/in/hoai-chau-tran/" target="_blank"><img src="./linkedin.png" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;">LinkedIn</a>
-      <a href="https://github.com/hchautran" target="_blank"><img src="./github.png" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;">GitHub</a>
-      <a href="https://scholar.google.com/citations?user=FZH2vcEAAAAJ&hl=en" target="_blank"><img src="./scholar.png" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;">Google Scholar</a>
+      <a href="https://www.linkedin.com/in/hoai-chau-tran/" target="_blank"><img src="./linkedin.png" style="width:14px;height:14px;vertical-align:middle;">LinkedIn</a>
+      <a href="https://github.com/hchautran" target="_blank"><img src="./github.png" style="width:14px;height:14px;vertical-align:middle;">GitHub</a>
+      <a href="https://scholar.google.com/citations?user=FZH2vcEAAAAJ&hl=en" target="_blank"><img src="./scholar.png" style="width:14px;height:14px;vertical-align:middle;">Scholar</a>
+      <a href="./CV_Chau_Tran.pdf" target="_blank">📄 My Resume</a>
     </div>
-  </div>
 </div>
 
 ---
@@ -152,7 +154,6 @@ You'll also find my [notes](notes/) here — continuously evolving as I learn an
   margin: 0 0 12px;
   font-size: 0.95em;
 }
-
 /* ── Research Tags ── */
 .research-tags {
   display: flex;
@@ -175,15 +176,19 @@ You'll also find my [notes](notes/) here — continuously evolving as I learn an
 .social-links {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
 }
 
 .social-links a {
   display: flex;
   align-items: center;
-  gap: 5px;
+  justify-content: center;
+  gap: 4px;
   text-decoration: none;
-  padding: 6px 14px;
+  padding: 5px 14px;
+  background: transparent;
   border: 1px solid var(--lightgray);
   border-radius: 6px;
   font-size: 0.88em;
@@ -281,8 +286,6 @@ You'll also find my [notes](notes/) here — continuously evolving as I learn an
   line-height: 1.6;
   padding-top: 1px;
 }
-
-
 /* ── Publication Cards ── */
 .pub-card {
   border: 1px solid var(--lightgray);
@@ -350,6 +353,7 @@ You'll also find my [notes](notes/) here — continuously evolving as I learn an
 
   .research-tags,
   .social-links {
+    flex-direction: row;
     justify-content: center;
   }
 
