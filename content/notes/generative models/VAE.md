@@ -7,9 +7,10 @@ tags:
 ---
 
 
+
 In a lot of generative models courses, the starting point of training a neural network to generate new realistic data is the Variational Autoencoder (VAE). This model has its origins in the AutoEncoder (AE), which serves a different purpose: to reconstruct data:
 
-Formally, AE consists of two parts: an encoder $f_\phi$ that compresses the input $\mathbf{x}$ into a compact latent representation $\mathbf{z} = f_\phi(\mathbf{x})$, and a decoder $g_\theta$ that reconstructs the input from that representation $\hat{x} = g_\theta(\mathbf{z})$. The network is trained end-to-end by minimizing a reconstruction loss, typically mean squared error:
+Formally, AE consists of two parts: an encoder $f_\phi$ that compresses the input $\mathbf{x}$ into a compact latent representation $\mathbf{z} = f_\phi(\mathbf{x})$, and a decoder $g_\theta$ that reconstructs the input from that representation $\hat{\mathbf{x}} = g_\theta(\mathbf{z})$. The network is trained end-to-end by minimizing a reconstruction loss, typically mean squared error:
 
 $$
 \mathcal{L} = \| \mathbf{x} - g_\theta(f_\phi(\mathbf{x})) \|^2
@@ -17,32 +18,29 @@ $$
 
 The bottleneck forces the encoder to learn a compressed, meaningful representation of the data. Once trained, the latent space can be used for tasks like dimensionality reduction or feature extraction. However, autoencoders have a critical limitation to serve as a generative model: the latent space has no guaranteed structure. Points in latent space are not organized in any principled way, so randomly sampling an arbitrary $\mathbf{z}$ and decoding it often yields garbage. There is no way to smoothly interpolate between examples or generate novel, realistic samples.
 
-
-
 The Variational Autoencoder (VAE), introduced by [Kingma & Welling (2013)](https://arxiv.org/abs/1312.6114), addresses this by imposing a probabilistic structure on the latent space. Instead of mapping $\mathbf{x}$ to a fixed point $\mathbf{z}$, the encoder $q_\phi(\mathbf{z}\mid \mathbf{x})$ outputs the parameters of a distribution (usually a Gaussian). A latent vector $\mathbf{z}$ is then sampled from this distribution rather than deterministically computed. The decoder $p_\theta(\mathbf{x} \mid \mathbf{z})$ learns to reconstruct $\mathbf{x}$ from these sampled latents. A prior $p(\mathbf{z})$ is placed over the latent space, and the encoder is regularized to stay close to this prior via KL divergence. This shift — from a deterministic bottleneck to a learned posterior — gives the latent space two important properties:
 
 - **Continuity** -- Nearby points in latent space decode to similar outputs. Because the encoder maps each input $\mathbf{x}$ to a distribution over $\mathbf{z}$ rather than a single point, inputs that are similar naturally produce overlapping distributions — and thus neighboring regions in latent space correspond to similar decoded outputs.
 
-- **Completeness** -- Any point sampled from the prior produces a meaningful output. By regularizing the encoder's posterior $q_\phi(\mathbf{z} \mid \mathbf{x})$ to stay close to the prior $\mathcal{N}(0, \mathbf{I})$, the model ensures that the high-probability regions of the latent space are densely covered with meaningful structure, so random samples from the prior reliably decode into coherent outputs.
+- **Completeness** -- Any point sampled from the prior produces a meaningful output. By regularizing the encoder's posterior $q_\phi(\mathbf{z} \mid \mathbf{x})$ to stay close to the prior $\mathcal{N}(\mathbf{0}, \mathbf{I})$, the model ensures that the high-probability regions of the latent space are densely covered with meaningful structure, so random samples from the prior reliably decode into coherent outputs.
 
-
+---
 ## 1. Constructions of VAE
 Suppose we have a dataset of samples drawn i.i.d. from an unknown [distribution](join_prob.md) $p_{data}(\mathbf{x})$. Since the true form of $p_{data}$ is unknown, we cannot sample from it directly. The goal of a generative model is to learn a tractable approximation $p_\theta(\mathbf{x})$ from this finite dataset by minimizing a divergence $\mathcal{D}_f$ between the two distributions. In the case of VAEs, $\mathcal{D}_f$ is the KL divergence $\mathcal{D}_{KL}$:
 
 $$
 \mathcal{D}_{KL}(p_{data}(\mathbf{x}) \| p_{\theta}(\mathbf{x}))
 $$
- 
 
 > [!note]- KL divergence intuition
 >$$
 >\begin{align}
->\mathcal{D}_{KL}(p_{data} \| p_\theta) &= \int p_{data}(\mathbf{x}) \log \frac{p_{data}(\mathbf{x})}{p_{\theta}(\mathbf{x})} \, d\mathbf{x} \\
->&= \mathbb{E}_{\mathbf{x} \sim p_{data}}\left[\log \frac{p_{data}(\mathbf{x})}{p_{\theta}(\mathbf{x})}\right] \\
->&= \mathbb{E}_{\mathbf{x} \sim p_{data}}\left[\log p_{data }(\mathbf{x}) - \log p_{\theta}(\mathbf{x})\right ] \\
+>\mathcal{D}_{KL}(p_{data}(\mathbf{x}) \| p_\theta(\mathbf{x})) &= \int p_{data}(\mathbf{x}) \log \frac{p_{data}(\mathbf{x})}{p_{\theta}(\mathbf{x})} \, d\mathbf{x} \\
+>&= \mathbb{E}_{\mathbf{x} \sim p_{data}(\mathbf{x})}\left[\log \frac{p_{data}(\mathbf{x})}{p_{\theta}(\mathbf{x})}\right] \\
+>&= \mathbb{E}_{\mathbf{x} \sim p_{data}(\mathbf{x})}\left[\log p_{data}(\mathbf{x}) - \log p_{\theta}(\mathbf{x})\right] \\
 >\end{align}
 >$$
-> As we can see, the KL divergence measures the expected log-likelihood difference between $p_{data}$ and $p_\theta$. Therefore, minimizing $\mathcal{D}_{KL}(p_{data} \| p_\theta)$ pushes $p_\theta$ to assign high likelihood to real data $\mathbf{x}$ that was sampled from $p_{data}$.
+> As we can see, the KL divergence measures the expected log-likelihood difference between $p_{data}(\mathbf{x})$ and $p_\theta(\mathbf{x})$. Therefore, minimizing $\mathcal{D}_{KL}(p_{data}(\mathbf{x}) \| p_\theta(\mathbf{x}))$ pushes $p_\theta(\mathbf{x})$ to assign high likelihood to real data $\mathbf{x}$ sampled from $p_{data}(\mathbf{x})$.
 > 
 
  Once the optimal parameters $\theta$ are found, $p_\theta(\mathbf{x})$  can be used to serve as a proxy for $p_{data}(\mathbf{x})$, enabling two key capabilities:
@@ -50,23 +48,23 @@ $$
 - **Generation**: Draw new, realistic samples from $p_{data}(\mathbf{x})$ via sampling methods such as [Monte Carlo Sampling](https://en.wikipedia.org/wiki/Monte_Carlo_method) via $p_\theta(\mathbf{x})$.
 - **Evaluation**: Assess how likely a given sample $\mathbf{x}'$ is under the learned distribution $p_\theta(\mathbf{x})$ — for instance, judging whether an image $\mathbf{x}'$ looks realistic by computing the likelihood $p_\theta(\mathbf{x}')$.
 
-Now having the target to optimize. We can rewrite the KL divergence as follow: 
+Now having the target to optimize. We can rewrite the KL divergence as follow:
 
 $$
 \begin{align}
-\mathcal{D}_{KL}(p_{data} \| p_\theta) &= \mathbb{E}_{\mathbf{x} \sim p_{data}}\left[\log p_{data}(\mathbf{x}) - \log p_{\theta}(\mathbf{x})\right] \notag \\
-&= -\mathbb{E}_{\mathbf{x} \sim p_{data}}\left[\log p_{\theta}(\mathbf{x})\right] + \mathbb{E}_{\mathbf{x} \sim p_{data}}\left[\log p_{data}(\mathbf{x})\right] \notag \\
-&= -\mathbb{E}_{\mathbf{x} \sim p_{data}}\left[\log p_{\theta}(\mathbf{x})\right] + \mathcal{C} \notag
+\mathcal{D}_{KL}(p_{data}(\mathbf{x}) \| p_\theta(\mathbf{x})) &= \mathbb{E}_{\mathbf{x} \sim p_{data}(\mathbf{x})}\left[\log p_{data}(\mathbf{x}) - \log p_{\theta}(\mathbf{x})\right] \notag \\
+&= -\mathbb{E}_{\mathbf{x} \sim p_{data}(\mathbf{x})}\left[\log p_{\theta}(\mathbf{x})\right] + \mathbb{E}_{\mathbf{x} \sim p_{data}(\mathbf{x})}\left[\log p_{data}(\mathbf{x})\right] \notag \\
+&= -\mathbb{E}_{\mathbf{x} \sim p_{data}(\mathbf{x})}\left[\log p_{\theta}(\mathbf{x})\right] + \mathcal{C} \notag
 \end{align}
 $$
 
-The constant $\mathbb{E}_{\mathbf{x} \sim p_{data}}[\log p_{data}(\mathbf{x})]$ is simply the entropy of $p_{data}$ and is independent of $\theta$. This is very convenient as $p_{data}$ is unknown and minimizing $\mathcal{D}_{KL}$ is equivalent to maximizing the expected log-likelihood of the data $\mathbf{x}$ under $p_\theta(\mathbf{x})$:
+The constant $\mathbb{E}_{\mathbf{x} \sim p_{data}(\mathbf{x})}[\log p_{data}(\mathbf{x})]$ is simply the entropy of $p_{data}(\mathbf{x})$ and is independent of $\theta$. This is very convenient as $p_{data}(\mathbf{x})$ is unknown and minimizing $\mathcal{D}_{KL}$ is equivalent to maximizing the expected log-likelihood of the data $\mathbf{x}$ under $p_\theta(\mathbf{x})$:
 
 $$
-\boxed{\underset{\theta}{\arg\max} \; \mathbb{E}_{\mathbf{x} \sim p_{data}}[\log p_\theta(\mathbf{x})]}
+\boxed{\underset{\theta}{\arg\max} \; \mathbb{E}_{\mathbf{x} \sim p_{data}(\mathbf{x})}[\log p_\theta(\mathbf{x})]}
 $$
 
-Which is precisely the [maximum likelihood estimation (MLE)](MLE.md) objective. In practice we replace this population expectation $\mathbb{E}_{\mathbf{x} \sim p_{data}}$ by its [Monte Carlo](https://en.wikipedia.org/wiki/Monte_Carlo_method) estimate, yielding the empirical MLE objective now becomes:
+Which is precisely the [maximum likelihood estimation (MLE)](MLE.md) objective. In practice we replace this population expectation $\mathbb{E}_{\mathbf{x} \sim p_{data}(\mathbf{x})}$ by its [Monte Carlo](https://en.wikipedia.org/wiki/Monte_Carlo_method) estimate, yielding the empirical MLE objective now becomes:
 
 $$
 \hat{\mathcal{L}}_{\text{MLE}}(\theta) := -\frac{1}{N} \sum_{i=1}^{N} \log p_\theta(\mathbf{x}^{(i)})
@@ -109,10 +107,11 @@ And yes, this is exactly the encoder of the VAE! Which can be trained to concent
 <!-- > [!summary] TL;DR — Constructions of VAE
 > The VAE consists of a **decoder** $p_\theta(\mathbf{x}\mid\mathbf{z})$ that generates data from latents, and an **encoder** $q_\phi(\mathbf{z}\mid\mathbf{x})$ that approximates the intractable posterior. -->
 
+---
 ## 2. ELBO (Evidence Lower Bound)
 
 
-Now that we have a controllable encoder model to generate $\mathbf{z}\sim q_\phi(\mathbf{z}|\mathbf{x})$. We can redefine the MLE optimization goal using $q_\phi(\mathbf{z} \mid \mathbf{x})$. 
+Now that we have a controllable encoder model to generate $\mathbf{z}\sim q_\phi(\mathbf{z}\mid\mathbf{x})$. We can redefine the MLE optimization goal using $q_\phi(\mathbf{z} \mid \mathbf{x})$.
 
 $$
 \begin{align}
@@ -134,7 +133,7 @@ $$
   \mathcal{L}_{ELBO}  &= \mathbb{E}_{\mathbf{z} \sim q_\phi(\mathbf{z} \mid \mathbf{x})} \left[ \log \frac{p_\theta(\mathbf{z}, \mathbf{x})}{ q_\phi(\mathbf{z} \mid \mathbf{x})} \right] \notag \\
   &= \mathbb{E}_{\mathbf{z} \sim q_\phi(\mathbf{z} \mid \mathbf{x})} \left[ \log \frac{p_\theta(\mathbf{x}\mid \mathbf{z})p(\mathbf{z})}{ q_\phi(\mathbf{z} \mid \mathbf{x})} \right] \notag \\
   &= \mathbb{E}_{\mathbf{z} \sim q_\phi(\mathbf{z} \mid \mathbf{x})} \left[ \log p_\theta(\mathbf{x} \mid \mathbf{z}) \right] - \mathbb{E}_{\mathbf{z} \sim q_\phi(\mathbf{z} \mid \mathbf{x})} \left[ \log \frac{q_\phi(\mathbf{z} \mid \mathbf{x})}{p(\mathbf{z})} \right] \notag \\
-  &= \boxed{\underbrace{\mathbb{E}_{\mathbf{z} \sim q_\phi(\mathbf{z} \mid \mathbf{x})} \left[ \log p_\theta(\mathbf{x} \mid \mathbf{z}) \right]}_{\text{reconstruction error}} - \underbrace{\mathcal{D}_{KL}(q_{\phi}(\mathbf{z}|\mathbf{x}) \| p(\mathbf{z}))}_{\text{regularizing term}}}
+  &= \boxed{\underbrace{\mathbb{E}_{\mathbf{z} \sim q_\phi(\mathbf{z} \mid \mathbf{x})} \left[ \log p_\theta(\mathbf{x} \mid \mathbf{z}) \right]}_{\text{reconstruction error}} - \underbrace{\mathcal{D}_{KL}(q_{\phi}(\mathbf{z}\mid\mathbf{x}) \| p(\mathbf{z}))}_{\text{regularizing term}}}
 \end{align}
 $$
 
@@ -179,7 +178,7 @@ Together, the two terms create a natural tension: maximizing $\mathcal{L}_{ELBO}
 > &=  \int p_{data}(\mathbf{x}) \log(\frac{p_{data}(\mathbf{x})}{p_\theta(\mathbf{x})}) d\mathbf{x}  \notag \\
 > &+ \iint p_{data}(\mathbf{x}) q_{\phi}(\mathbf{z}\mid \mathbf{x}) \log(\frac{q_\phi(\mathbf{z}\mid \mathbf{x})}{ p_\theta(\mathbf{z}\mid \mathbf{x})}) d\mathbf{z}  d\mathbf{x}  \notag  \\
 > &= \underbrace{\mathcal{D}_{KL}(p_{data}(\mathbf{x}) \| p_{\theta}(\mathbf{x}))}_{\text{True Modeling Error}}  \notag \\
-> &+ \underbrace{\mathbb{E}_{x\sim p_{data}(x)}\left[\mathcal{D}_{KL}(q_\phi(\mathbf{z} \mid \mathbf{x}) \| p_\theta(\mathbf{z} \mid \mathbf{x}))  \right]}_{\text{Inference Error}} \notag\\ 
+> &+ \underbrace{\mathbb{E}_{\mathbf{x}\sim p_{data}(\mathbf{x})}\left[\mathcal{D}_{KL}(q_\phi(\mathbf{z} \mid \mathbf{x}) \| p_\theta(\mathbf{z} \mid \mathbf{x}))  \right]}_{\text{Inference Error}} \notag\\
 > \end{align} 
 > $$
 > Thus we have 
@@ -195,12 +194,13 @@ Together, the two terms create a natural tension: maximizing $\mathcal{L}_{ELBO}
 > \rightarrow \log p_\theta(\mathbf{x}) - \mathcal{L}_{ELBO} =  \mathcal{D}_{KL}(q_\phi(\mathbf{z} \mid \mathbf{x}) \| p_\theta(\mathbf{z} \mid \mathbf{x}))  \notag 
 >\end{align}
 > $$
-> We can see that the gap between the true log-likelihood $\log p_\theta(\mathbf{x})$ and the ELBO is precisely the inference error of the current sample $\mathbf{x}$. Maximizing the ELBO therefore directly reduces this gap. Specifically, optimizing the encoder $q_\phi(\mathbf{z}|\mathbf{x})$ tightens the bound by bringing the approximate posterior closer to the true one $p_\theta(\mathbf{z}|\mathbf{x})$, while optimizing the decoder $p_\theta(\mathbf{x}|\mathbf{z})$ pushes the $p_\theta(\mathbf{x})$ itself upward — lifting the entire lower bound and improving the overall log-likelihood.
+> We can see that the gap between the true log-likelihood $\log p_\theta(\mathbf{x})$ and the ELBO is precisely the inference error of the current sample $\mathbf{x}$. Maximizing the ELBO therefore directly reduces this gap. Specifically, optimizing the encoder $q_\phi(\mathbf{z}\mid\mathbf{x})$ tightens the bound by bringing the approximate posterior closer to the true one $p_\theta(\mathbf{z}\mid\mathbf{x})$, while optimizing the decoder $p_\theta(\mathbf{x}\mid\mathbf{z})$ pushes the $p_\theta(\mathbf{x})$ itself upward — lifting the entire lower bound and improving the overall log-likelihood.
 >
 
 <!-- > [!summary] TL;DR — ELBO
 > By Jensen's inequality, $\log p_\theta(\mathbf{x}) \geq \mathcal{L}_\text{ELBO}$. The ELBO decomposes into a **reconstruction term** (maximize decoder fidelity) minus a **KL term** (keep encoder close to prior), both of which are tractable to optimize. -->
 
+---
 ## 3. Gaussian VAEs
 
 The most common instantiation of the VAE framework is the **Gaussian VAE**, where the encoder, decoder and prior are modeled as Gaussians.
@@ -220,7 +220,7 @@ Since the prior $p(\mathbf{z}) = \mathcal{N}(\mathbf{0}, \mathbf{I})$ is also Ga
 
 $$
 \begin{align}
-\mathcal{L}_{KL} = \mathcal{D}_{KL}( \mathcal{N}(\boldsymbol{\mu}_\phi, \text{diag}(\boldsymbol{\sigma}_\phi^2) \| \mathcal{N}(0, \mathbf{I})) \\  
+\mathcal{L}_{KL} = \mathcal{D}_{KL}( \mathcal{N}(\boldsymbol{\mu}_\phi, \text{diag}(\boldsymbol{\sigma}_\phi^2)) \| \mathcal{N}(\mathbf{0}, \mathbf{I})) \\  
 \boxed{ \mathcal{L}_{KL} =  -\frac{1}{2} \sum_{j=1}^{d} \left(1 + \log\sigma_j^2 - \mu_j^2 - \sigma_j^2\right)}
 \end{align}
 $$
@@ -323,6 +323,7 @@ $$
 $$
 
 
+---
 ## 4. Drawbacks of Gaussian VAEs
 
 Despite its elegance, the Gaussian VAE has several well-known limitations:
@@ -368,7 +369,7 @@ Even if each individual posterior $q_\phi(\mathbf{z} \mid \mathbf{x})$ is close 
 These limitations motivate more expressive extensions, such as **Hierarchical VAEs**, which stack multiple layers of latent variables to capture richer structure.
 
 
-
+---
 ## 5. Conclusion
 
 The Variational Autoencoder is a foundational generative model that elegantly combines probabilistic inference with deep learning. By replacing the deterministic bottleneck of a standard autoencoder with a learned posterior distribution, VAEs endow the latent space with a structured, continuous geometry that supports both generation and interpolation. The ELBO provides a tractable training objective that simultaneously encourages faithful reconstruction and regularizes the latent space toward a simple prior — a tension that lies at the heart of all latent-variable generative models.
@@ -396,3 +397,7 @@ That said, the Gaussian VAE is far from perfect. The three drawbacks discussed a
 
 [5]--Wikipedia contributors. (n.d.). *Reparameterization trick*. Wikipedia. <https://en.wikipedia.org/wiki/Reparameterization_trick>
 
+
+
+> [!note]- Notations
+> See the [notation reference](notation.md) for a summary of symbols used across all notes.
