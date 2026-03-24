@@ -34,7 +34,6 @@ description: Personal site of Hoai-Chau Tran, CS PhD student @ UIUC.
 </div>
 
 
-
 ---
 
 ## 📰 News
