@@ -16,6 +16,7 @@ $$
 \mathcal{L} = \| \mathbf{x} - g_\theta(f_\phi(\mathbf{x})) \|^2
 $$
 
+
 The bottleneck forces the encoder to learn a compressed, meaningful representation of the data. Once trained, the latent space can be used for tasks like dimensionality reduction or feature extraction. However, autoencoders have a critical limitation to serve as a generative model: the latent space has no guaranteed structure. Points in latent space are not organized in any principled way, so randomly sampling an arbitrary $\mathbf{z}$ and decoding it often yields garbage. There is no way to smoothly interpolate between examples or generate novel, realistic samples.
 
 The Variational Autoencoder (VAE), introduced by [Kingma & Welling (2013)](https://arxiv.org/abs/1312.6114), addresses this by imposing a probabilistic structure on the latent space. Instead of mapping $\mathbf{x}$ to a fixed point $\mathbf{z}$, the encoder $q_\phi(\mathbf{z}\mid \mathbf{x})$ outputs the parameters of a distribution (usually a Gaussian). A latent vector $\mathbf{z}$ is then sampled from this distribution rather than deterministically computed. The decoder $p_\theta(\mathbf{x} \mid \mathbf{z})$ learns to reconstruct $\mathbf{x}$ from these sampled latents. A prior $p(\mathbf{z})$ is placed over the latent space, and the encoder is regularized to stay close to this prior via KL divergence. This shift — from a deterministic bottleneck to a learned posterior — gives the latent space two important properties:
