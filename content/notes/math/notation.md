@@ -1,5 +1,6 @@
 ---
-title: Notations
+title: Notation Reference
+description: Notation conventions used across all math and ML notes — covering random variables, probability distributions, parametric models, expectations, and divergences.
 draft: false
 tags:
   - math

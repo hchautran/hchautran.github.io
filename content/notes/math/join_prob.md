@@ -1,5 +1,6 @@
 ---
 title: Joint Probability Distributions
+description: An introduction to joint, marginal, and conditional probability distributions, covering the chain rule, independence, and Bayes' theorem with worked examples.
 draft: false
 tags:
   - math

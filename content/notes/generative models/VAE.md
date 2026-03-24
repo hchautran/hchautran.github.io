@@ -1,5 +1,6 @@
 ---
 title: Variational AutoEncoder
+description: A ground-up derivation of the VAE, covering the ELBO, encoder/decoder construction.
 draft: false
 tags:
   - generative models

@@ -1,5 +1,6 @@
 ---
-title: About Me
+title: About Me 
+description: Personal site of Hoai-Chau Tran, CS PhD student @ UIUC.
 ---
 
 <div class="profile-hero">
@@ -122,6 +123,20 @@ You'll also find my [notes](notes/) here — continuously evolving as I learn an
 ---
 
 <script type="text/javascript" id="clustrmaps" src="//clustrmaps.com/map_v2.js?d=VV_9AxgUp6rEn_vluenH0AQsjlWKPLdDalJIaJg96ms&cl=ffffff&w=a"></script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Hoai-Chau Tran",
+  "url": "https://hchautran.github.io",
+  "affiliation": {"@type": "Organization", "name": "University of Illinois Urbana-Champaign"},
+  "sameAs": [
+    "https://github.com/hchautran",
+    "https://scholar.google.com/citations?user=FZH2vcEAAAAJ"
+  ]
+}
+</script>
 
 <style>
 /* ── Profile Hero ── */
@@ -247,7 +262,6 @@ You'll also find my [notes](notes/) here — continuously evolving as I learn an
   border-radius: 50%;
   border: 2px solid var(--light);
   background: var(--secondary);
-  z-index: 1;
 }
 
 .news-item[data-type="internship"]::before { background: #1565c0; }

@@ -1,5 +1,6 @@
 ---
 title: Maximum Likelihood Estimation
+description: A derivation of MLE from first principles.
 draft: false
 tags:
   - math
