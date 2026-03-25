@@ -11,7 +11,7 @@ description: Personal site of Hoai-Chau Tran, CS PhD student @ UIUC.
     <h2 class="profile-name">Hoai-Chau Tran</h2>
     <p class="profile-title">PhD Student · Computer Science · UIUC</p>
     <p>
-      Hi! 👋 I am a first-year PhD student advised by
+      Hi! 👋 I am a first-year CS PhD student advised by
       <a href="https://www.fanlai.me" target="_blank">Fan Lai</a> (UIUC) and
       <a href="https://scholar.google.com/citations?user=Zz2hMgcAAAAJ&hl=en&oi=ao" target="_blank">Khoa D Doan</a> (VinUniversity).
       I received my Bachelor's degree from VNU - Ho Chi Minh City University of Science in 2018.
