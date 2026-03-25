@@ -217,6 +217,56 @@ export function renderPage(
     <html lang={lang}>
       <Head {...componentData} />
       <body data-slug={slug}>
+        <div id="loading-skeleton">
+          {/* Left sidebar skeleton */}
+          <div class="sk-sidebar sk-left">
+            <div class="sk-bar" style="width:70%;height:1.1rem;" />
+            <div class="sk-bar" style="width:55%;height:0.85rem;margin-top:0.5rem;" />
+            <div class="sk-bar" style="width:80%;height:0.85rem;" />
+            <div class="sk-bar" style="width:60%;height:0.85rem;" />
+            <div class="sk-bar" style="width:75%;height:0.85rem;" />
+            <div class="sk-bar" style="width:50%;height:0.85rem;" />
+            <div class="sk-bar" style="width:68%;height:0.85rem;" />
+            <div class="sk-bar" style="width:72%;height:0.85rem;" />
+            <div class="sk-bar" style="width:58%;height:0.85rem;" />
+            <div class="sk-bar" style="width:65%;height:0.85rem;" />
+            <div class="sk-bar" style="width:48%;height:0.85rem;" />
+          </div>
+          {/* Center skeleton */}
+          <div class="sk-center">
+            {/* Navbar */}
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+              <div class="sk-bar" style="width:130px;height:2rem;border-radius:6px;" />
+              <div class="sk-bar" style="width:210px;height:2rem;border-radius:20px;" />
+            </div>
+            {/* Title */}
+            <div class="sk-bar" style="width:58%;height:2.4rem;border-radius:6px;" />
+            {/* Meta line */}
+            <div class="sk-bar" style="width:30%;height:0.7rem;margin-top:0.25rem;margin-bottom:1.5rem;" />
+            {/* Content lines */}
+            <div class="sk-bar" style="width:100%;height:0.85rem;" />
+            <div class="sk-bar" style="width:96%;height:0.85rem;" />
+            <div class="sk-bar" style="width:92%;height:0.85rem;" />
+            <div class="sk-bar" style="width:98%;height:0.85rem;" />
+            <div class="sk-bar" style="width:72%;height:0.85rem;margin-bottom:0.75rem;" />
+            <div class="sk-bar" style="width:100%;height:0.85rem;" />
+            <div class="sk-bar" style="width:88%;height:0.85rem;" />
+            <div class="sk-bar" style="width:95%;height:0.85rem;" />
+            <div class="sk-bar" style="width:65%;height:0.85rem;margin-bottom:0.75rem;" />
+            <div class="sk-bar" style="width:100%;height:0.85rem;" />
+            <div class="sk-bar" style="width:78%;height:0.85rem;" />
+            <div class="sk-bar" style="width:91%;height:0.85rem;" />
+          </div>
+          {/* Right sidebar skeleton */}
+          <div class="sk-sidebar sk-right">
+            <div class="sk-bar" style="width:100%;height:180px;border-radius:8px;" />
+            <div class="sk-bar" style="width:70%;height:0.85rem;margin-top:0.5rem;" />
+            <div class="sk-bar" style="width:55%;height:0.85rem;" />
+            <div class="sk-bar" style="width:65%;height:0.85rem;" />
+            <div class="sk-bar" style="width:50%;height:0.85rem;" />
+            <div class="sk-bar" style="width:60%;height:0.85rem;" />
+          </div>
+        </div>
         <div id="quartz-root" class="page">
           <Body {...componentData}>
             {LeftComponent}

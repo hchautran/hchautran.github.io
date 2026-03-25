@@ -22,6 +22,88 @@ export default (() => {
       <head>
         <title>{title}</title>
         <meta charSet="utf-8" />
+        <style dangerouslySetInnerHTML={{__html: `
+          #loading-skeleton {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: #faf8f8;
+            display: flex;
+            flex-direction: row;
+            gap: 2rem;
+            padding: 5rem 2rem 2rem;
+            overflow: hidden;
+            transition: opacity 0.25s ease;
+          }
+          html[saved-theme="dark"] #loading-skeleton {
+            background: #1c1c1e;
+          }
+          #loading-skeleton.sk-hidden {
+            opacity: 0;
+            pointer-events: none;
+          }
+          .sk-bar {
+            border-radius: 5px;
+            background: linear-gradient(90deg, #e8e8e8 25%, #f4f4f4 50%, #e8e8e8 75%);
+            background-size: 200% 100%;
+            animation: sk-shimmer 1.4s infinite linear;
+          }
+          html[saved-theme="dark"] .sk-bar {
+            background: linear-gradient(90deg, #2c2c2e 25%, #3a3a3c 50%, #2c2c2e 75%);
+            background-size: 200% 100%;
+          }
+          @keyframes sk-shimmer {
+            0%   { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+          }
+          .sk-sidebar {
+            width: 380px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.65rem;
+            padding-top: 0.5rem;
+          }
+          .sk-center {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.65rem;
+          }
+          @media (max-width: 1510px) { .sk-sidebar.sk-right { display: none; } }
+          @media (max-width: 1000px) { .sk-sidebar { display: none; } }
+        `}} />
+        <script dangerouslySetInnerHTML={{__html: `
+          (function () {
+            function hideSkeleton() {
+              var sk = document.getElementById('loading-skeleton');
+              if (!sk) return;
+              sk.classList.add('sk-hidden');
+              setTimeout(function () { sk.style.display = 'none'; }, 280);
+            }
+            function showSkeleton() {
+              var sk = document.getElementById('loading-skeleton');
+              if (!sk) return;
+              sk.style.display = 'flex';
+              requestAnimationFrame(function () { sk.classList.remove('sk-hidden'); });
+            }
+            window.addEventListener('load', hideSkeleton);
+            document.addEventListener('nav', hideSkeleton);
+            document.addEventListener('click', function (e) {
+              var a = e.target && e.target.closest && e.target.closest('a');
+              if (!a || a.getAttribute('target') === '_blank') return;
+              if (a.dataset && 'routerIgnore' in a.dataset) return;
+              try {
+                var url = new URL(a.href);
+                if (url.origin === location.origin && url.pathname !== location.pathname) {
+                  showSkeleton();
+                }
+              } catch (_) {}
+            });
+          })();
+        `}} />
+
         {cfg.theme.cdnCaching && cfg.theme.fontOrigin === "googleFonts" && (
           <>
             <link rel="preconnect" href="https://fonts.googleapis.com" />
