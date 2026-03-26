@@ -208,7 +208,7 @@ $$
 The marginal distribution tells us about individual variables when we ignore the others.
 
 > [!example]- Example
-> Say we have a bakery that tracks the joint distribution of bread ($B$) and coffee ($C$) sales $p(b, c)$. The marginal $p(b) = \sum_c p(b, c)$ answers "how often do people buy bread — regardless of whether they also buy coffee?", focusing just on bread sales alone.
+> Say we have a bakery that tracks the joint distribution of bread ($B$) and coffee ($C$) sales $p(b, c)$. The marginal $p(b) = \sum_c p(b, c)$ answers "how often do people buy bread - regardless of whether they also buy coffee?", focusing just on bread sales alone.
 
 ### Bayes' Theorem
 
@@ -218,7 +218,7 @@ $$
 p(y \mid x) = \frac{p(x \mid y) \cdot p(y)}{p(x)}
 $$
 
-Bayes' rule is a fundamental principle for **updating beliefs** based on new evidence. It tells us how to revise our initial beliefs when we observe new data. This is extremely important when we want to **experiment and observe new data in an unknown world** — it provides a principled framework for learning from experience and adapting our understanding as we gather more information. I will try to cover this aspect in future blog posts on [Maximum Likelihood Estimation](MLE) and [Maximum A Posteriori](MAP).
+Bayes' rule is a fundamental principle for **updating beliefs** based on new evidence. It tells us how to revise our initial beliefs when we observe new data. This is extremely important when we want to **experiment and observe new data in an unknown world** - it provides a principled framework for learning from experience and adapting our understanding as we gather more information. I will try to cover this aspect in future blog posts on [Maximum Likelihood Estimation](MLE) and [Maximum A Posteriori](MAP).
 
 Components of Bayes' Theorem:
 

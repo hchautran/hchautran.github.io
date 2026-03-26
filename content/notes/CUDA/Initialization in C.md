@@ -364,11 +364,11 @@ Understanding initialization in C++ is crucial for writing safe, efficient, and 
 5. **Be aware of the differences** between initialization and assignment
 6. **Use `auto`** with proper initialization for type deduction
 
-Remember that good initialization practices are not just about correctness—they're about writing code that clearly expresses your intent and is easy for others (and future you) to understand and maintain. You can refer to the following section for examples of good practices when initialize variables in C.
+Remember that good initialization practices are not just about correctness-they're about writing code that clearly expresses your intent and is easy for others (and future you) to understand and maintain. You can refer to the following section for examples of good practices when initialize variables in C.
 
 
 
 ---
 ## Reference
 
-Alex. (2025, March 6). 1.4 — Variable assignment and initialization. https://www.learncpp.com/cpp-tutorial/variable-assignment-and-initialization/
+Alex. (2025, March 6). 1.4 - Variable assignment and initialization. https://www.learncpp.com/cpp-tutorial/variable-assignment-and-initialization/

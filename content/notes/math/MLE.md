@@ -15,7 +15,7 @@ Maximum Likelihood Estimation (MLE) is one of the most fundamental methods for f
 ---
 ## Setup
 
-Suppose we observe a dataset $\mathcal{X} = \{\mathbf{x}^{(1)}, \dots, \mathbf{x}^{(N)}\}$ drawn i.i.d (independent and identically distributed sampling). from an unknown distribution $p_{data}(\mathbf{x})$. We posit a parametric family of [joint distributions](join_prob.md) $p_\theta(\mathbf{x})$ (note that $\mathbf{x}\in \mathbb{R}^d$ is vector of multiple features) and want to find the $\theta$ that best explains the data — assigning high probability to frequently occurring data and low probability to rare observations.
+Suppose we observe a dataset $\mathcal{X} = \{\mathbf{x}^{(1)}, \dots, \mathbf{x}^{(N)}\}$ drawn i.i.d (independent and identically distributed sampling). from an unknown distribution $p_{data}(\mathbf{x})$. We posit a parametric family of [joint distributions](join_prob.md) $p_\theta(\mathbf{x})$ (note that $\mathbf{x}\in \mathbb{R}^d$ is vector of multiple features) and want to find the $\theta$ that best explains the data - assigning high probability to frequently occurring data and low probability to rare observations.
 
 Since the data was i.i.d. sampled, the joint likelihood factorizes into a product. We can write the **likelihood** of the dataset under the model as:
 
@@ -32,7 +32,7 @@ $$
 ---
 ## Log-Likelihood
 
-Products are numerically unstable and hard to differentiate. Taking the logarithm — a monotone transformation — converts the product into a sum without changing the argmax:
+Products are numerically unstable and hard to differentiate. Taking the logarithm - a monotone transformation - converts the product into a sum without changing the argmax:
 
 $$
 \hat{\theta}_{\text{MLE}} = \underset{\theta}{\arg\max} \sum_{i=1}^{N} \log p_\theta(\mathbf{x}^{(i)}) \tag{3}
@@ -83,7 +83,7 @@ $$
 \end{align}
 $$
 
-The MLE estimate is simply the **empirical fraction of heads** — exactly what intuition suggests.
+The MLE estimate is simply the **empirical fraction of heads** - exactly what intuition suggests.
 
 
 ### Example 2: Gaussian MLE
@@ -124,7 +124,7 @@ $$
 \end{align}
 $$
 
-These are simply the **sample mean** and **sample variance** — the MLE recovers the intuitive estimators from first principles.
+These are simply the **sample mean** and **sample variance** - the MLE recovers the intuitive estimators from first principles.
 
 ### Example 3: Linear Regression (Gaussian noise MLE)
 
@@ -189,7 +189,7 @@ Since the second term does not depend on $\theta$, minimizing $\mathcal{D}_{KL}$
 
 ## Summary
 
-This note has covered MLE and its application to simple parametric distribution families, illustrated through three classical examples: Gaussian estimation, Bernoulli coin flipping, and Gaussian linear regression. Note that in practice, $p_\theta(\mathbf{x})$ rarely admits a closed-form solution like in the examples above — it is often a deep, expressive neural network, in which case the MLE objective must be optimized iteratively via [gradient descent](https://en.wikipedia.org/wiki/Gradient_descent).
+This note has covered MLE and its application to simple parametric distribution families, illustrated through three classical examples: Gaussian estimation, Bernoulli coin flipping, and Gaussian linear regression. Note that in practice, $p_\theta(\mathbf{x})$ rarely admits a closed-form solution like in the examples above - it is often a deep, expressive neural network, in which case the MLE objective must be optimized iteratively via [gradient descent](https://en.wikipedia.org/wiki/Gradient_descent).
 
 
 ---

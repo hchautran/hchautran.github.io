@@ -1,6 +1,6 @@
 ---
 title: Notation Reference
-description: Notation conventions used across all math and ML notes — covering random variables, probability distributions, parametric models, expectations, and divergences.
+description: Notation conventions used across all math and ML notes - covering random variables, probability distributions, parametric models, expectations, and divergences.
 draft: false
 tags:
   - math
@@ -21,7 +21,7 @@ tags:
 
 | Symbol | Meaning |
 |--------|---------|
-| $p(x)$ | Probability mass function (PMF) or Probability density function (PDF) evaluated at $x$ — for discrete/continuous variables |
+| $p(x)$ | Probability mass function (PMF) or Probability density function (PDF) evaluated at $x$ - for discrete/continuous variables |
 | $p(X)$ | Probability distribution of random variable $X$ |
 | $p(y \mid x)$ | Conditional PMF/PDF of $Y=y$ given $X=x$ |
 | $p(Y \mid X)$ | Conditional distribution of $Y$ given $X$ |

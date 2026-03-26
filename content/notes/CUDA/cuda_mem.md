@@ -86,8 +86,8 @@ $$
 $$
 
 
-- Low ratio:  Kernel is **memory-bound**—performance limited by the rate at which data can be fetched from memory.
-- High ratio: Kernel is **compute-bound**—performance limited by computational hardware, not data movement.
+- Low ratio:  Kernel is **memory-bound**-performance limited by the rate at which data can be fetched from memory.
+- High ratio: Kernel is **compute-bound**-performance limited by computational hardware, not data movement.
 
 
 
@@ -128,7 +128,7 @@ Points close to the rooflines are efficient and points far below indicate wasted
 **CUDA programming performance** is tightly linked to memory system use:
 - Use faster on-chip memories (registers/shared/constant) wherever possible
 - Structure kernels for high compute-to-memory ratios
-- Use metrics—and models like the roofline—to diagnose and bottleneck performance
+- Use metrics-and models like the roofline-to diagnose and bottleneck performance
 - Optimize for both hardware and algorithmic efficiency for best results
 
 ---
