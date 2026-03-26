@@ -174,7 +174,6 @@ $$
 
 Together, the two terms create a natural tension: maximizing $\mathcal{L}_{ELBO}$ encourages the decoder to recover the original input $\mathbf{x}$ as accurately as possible from latent samples $\mathbf{z} \sim q_\phi(\mathbf{z} \mid \mathbf{x})$ (reconstruction term), while the regularization term pulls the encoder's posterior $q_\phi(\mathbf{z} \mid \mathbf{x})$ back toward the prior $p(\mathbf{z})$. The VAE learns by striking a balance between these two competing objectives.
 
-
 > [!note]- ELBO as a Divergence Bound
 >
 > So what is the relationship between ELBO and the true MLE goal $p_\theta(\mathbf{x})$?
