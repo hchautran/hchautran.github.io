@@ -22,17 +22,31 @@ The bottleneck forces the encoder to learn a compressed, meaningful representati
 
 The Variational Autoencoder (VAE), introduced by [Kingma & Welling (2013)](https://arxiv.org/abs/1312.6114), addresses this by imposing a probabilistic structure on the latent space. Instead of mapping $\mathbf{x}$ to a fixed point $\mathbf{z}$, the encoder $q_\phi(\mathbf{z}\mid \mathbf{x})$ outputs the parameters of a distribution (usually a Gaussian). A latent vector $\mathbf{z}$ is then sampled from this distribution rather than deterministically computed. The decoder $p_\theta(\mathbf{x} \mid \mathbf{z})$ learns to reconstruct $\mathbf{x}$ from these sampled latents. A prior $p(\mathbf{z})$ is placed over the latent space, and the encoder is regularized to stay close to this prior via KL divergence. This shift — from a deterministic bottleneck to a learned posterior — gives the latent space two important properties:
 
-- **Continuity** -- Nearby points in latent space decode to similar outputs. Because the encoder maps each input $\mathbf{x}$ to a distribution over $\mathbf{z}$ rather than a single point, inputs that are similar naturally produce overlapping distributions — and thus neighboring regions in latent space correspond to similar decoded outputs.
+- **Continuity**: Nearby points in latent space decode to similar outputs. Because the encoder maps each input $\mathbf{x}$ to a distribution over $\mathbf{z}$ rather than a single point, inputs that are similar naturally produce overlapping distributions — and thus neighboring regions in latent space correspond to similar decoded outputs.
 
-- **Completeness** -- Any point sampled from the prior produces a meaningful output. By regularizing the encoder's posterior $q_\phi(\mathbf{z} \mid \mathbf{x})$ to stay close to the prior $\mathcal{N}(\mathbf{0}, \mathbf{I})$, the model ensures that the high-probability regions of the latent space are densely covered with meaningful structure, so random samples from the prior reliably decode into coherent outputs.
+- **Completeness**: Any point sampled from the prior produces a meaningful output. By regularizing the encoder's posterior $q_\phi(\mathbf{z} \mid \mathbf{x})$ to stay close to the prior $\mathcal{N}(\mathbf{0}, \mathbf{I})$, the model ensures that the high-probability regions of the latent space are densely covered with meaningful structure, so random samples from the prior reliably decode into coherent outputs.
 
 ---
 ## 1. Constructions of VAE
 Suppose we have a dataset of samples drawn i.i.d. from an unknown [distribution](join_prob.md) $p_{data}(\mathbf{x})$. Since the true form of $p_{data}$ is unknown, we cannot sample from it directly. The goal of a generative model is to learn a tractable approximation $p_\theta(\mathbf{x})$ from this finite dataset by minimizing a divergence $\mathcal{D}_f$ between the two distributions. In the case of VAEs, $\mathcal{D}_f$ is the KL divergence $\mathcal{D}_{KL}$:
-
 $$
 \mathcal{D}_{KL}(p_{data}(\mathbf{x}) \| p_{\theta}(\mathbf{x}))
 $$
+<!-- 
+> [!note]- What does it mean by being tractable/intractable?
+> **Tractable** means a computation that is practically feasible — it has a closed-form solution or can be evaluated efficiently in finite time. **Intractable** means the opposite: evaluating it exactly is computationally impossible in practice.
+>
+> A distribution $p(\mathbf{x})$ is **tractable** if, given any sample $\mathbf{x}$, you can compute its probability density directly using an explicit formula. A Gaussian is the canonical example:
+> $$p(\mathbf{x}) = \frac{1}{\sqrt{2\pi\sigma^2}} \exp\!\left(-\frac{(\mathbf{x}-\mu)^2}{2\sigma^2}\right)$$
+> Plug in $\mathbf{x}$, get a number. Done.
+>
+> A distribution becomes **intractable** when computing $p(\mathbf{x})$ requires marginalizing over a latent variable $\mathbf{z}$:
+> $$p_\theta(\mathbf{x}) = \int p_\theta(\mathbf{x} \mid \mathbf{z})\, p(\mathbf{z})\, d\mathbf{z}$$
+> Here, $p_\theta(\mathbf{x} \mid \mathbf{z})$ is a deep neural network — a highly non-linear function with no closed form. To evaluate this integral exactly, you would need to evaluate the network at every possible $\mathbf{z}$ in a continuous, high-dimensional space and sum the results — which requires infinite computation. Even numerical approximations (e.g. Monte Carlo) become prohibitively expensive when the latent space is high-dimensional, because most sampled $\mathbf{z}$ values contribute nearly zero probability mass and are wasted.
+>
+> This is why VAEs introduce an encoder $q_\phi(\mathbf{z} \mid \mathbf{x})$ — to avoid integrating over all $\mathbf{z}$ and instead focus only on the regions that actually explain $\mathbf{x}$. -->
+
+
 
 > [!note]- KL divergence intuition
 >$$
@@ -45,12 +59,12 @@ $$
 > As we can see, the KL divergence measures the expected log-likelihood difference between $p_{data}(\mathbf{x})$ and $p_\theta(\mathbf{x})$. Therefore, minimizing $\mathcal{D}_{KL}(p_{data}(\mathbf{x}) \| p_\theta(\mathbf{x}))$ pushes $p_\theta(\mathbf{x})$ to assign high likelihood to real data $\mathbf{x}$ sampled from $p_{data}(\mathbf{x})$.
 > 
 
- Once the optimal parameters $\theta$ are found, $p_\theta(\mathbf{x})$  can be used to serve as a proxy for $p_{data}(\mathbf{x})$, enabling two key capabilities:
+Once the optimal parameters $\theta$ are found, $p_\theta(\mathbf{x})$  can be used to serve as a proxy for $p_{data}(\mathbf{x})$, enabling two key capabilities:
 
 - **Generation**: Draw new, realistic samples from $p_{data}(\mathbf{x})$ via sampling methods such as [Monte Carlo Sampling](https://en.wikipedia.org/wiki/Monte_Carlo_method) via $p_\theta(\mathbf{x})$.
 - **Evaluation**: Assess how likely a given sample $\mathbf{x}'$ is under the learned distribution $p_\theta(\mathbf{x})$ — for instance, judging whether an image $\mathbf{x}'$ looks realistic by computing the likelihood $p_\theta(\mathbf{x}')$.
 
-Now having the target to optimize. We can rewrite the KL divergence as follow:
+Now, We can rewrite the KL divergence as follow:
 
 $$
 \begin{align}
@@ -145,7 +159,7 @@ $$
 
 
 
-> [!note] Why is the learning objective tractable now?
+> [!note]- Why is the learning objective tractable now?
 >
 > The original MLE objective $\log p_\theta(\mathbf{x}) = \log \int p_\theta(\mathbf{x} \mid \mathbf{z})\, p(\mathbf{z})\, d\mathbf{z}$ is intractable because it requires integrating $p_\theta(\mathbf{x} \mid \mathbf{z})$ — a neural network — over the entire latent space. The ELBO resolves this in two key ways:
 >
@@ -161,16 +175,16 @@ $$
 Together, the two terms create a natural tension: maximizing $\mathcal{L}_{ELBO}$ encourages the decoder to recover the original input $\mathbf{x}$ as accurately as possible from latent samples $\mathbf{z} \sim q_\phi(\mathbf{z} \mid \mathbf{x})$ (reconstruction term), while the regularization term pulls the encoder's posterior $q_\phi(\mathbf{z} \mid \mathbf{x})$ back toward the prior $p(\mathbf{z})$. The VAE learns by striking a balance between these two competing objectives.
 
 
-> [!note] ELBO as a Divergence Bound
+> [!note]- ELBO as a Divergence Bound
 >
 > So what is the relationship between ELBO and the true MLE goal $p_\theta(\mathbf{x})$?
 > Recall that maximum likelihood training amounts to minimizing the KL divergence between $p_{data}(\mathbf{x})$ and the learned distribution $p_\theta(\mathbf{x})$:
 > $$
 > \mathcal{D}_{KL}(p_{data}(\mathbf{x}) \| p_{\theta}(\mathbf{x}))
 > $$
->  Since this term is intractable in general, the variational framework of VAE introduces a joint comparison $\mathbf{z}$. Specifically, consider two joint distributions 
->  - Generative Join -- Decoder: $p_\theta(\mathbf{z}, \mathbf{x})$ 
->  - Inference Join -- Encoder:  $q_\phi(\mathbf{z}, \mathbf{x})$ 
+>  Since this term is intractable in general, the variational framework of VAE introduces a joint comparison $\mathbf{z}$. Specifically, consider two join distributions 
+>  - Generative Join (Decoder): $p_\theta(\mathbf{z}, \mathbf{x})$ 
+>  - Inference Join (Encoder):  $q_\phi(\mathbf{z}, \mathbf{x})$ 
 >
 > The total error bound is to match these join together is:
 > $$
@@ -333,7 +347,7 @@ Despite its elegance, the Gaussian VAE has several well-known limitations:
 ### 4.1 Blurry reconstructions
 Modeling $p_\theta(\mathbf{x} \mid \mathbf{z})$ as a Gaussian with a fixed variance corresponds to minimizing MSE, which tends to average over multiple plausible reconstructions. 
 
-> [!note] Proof
+> [!note]- Proof of blurry reconstructions in VAEs
 > Recall the per-sample reconstruction loss:
 > $$
 > \mathcal{L}_{recon}=\mathbb{E}_{\mathbf{z}\sim q_\phi(\mathbf{z}\mid\mathbf{x})}\left[\|\mathbf{x}-\boldsymbol\mu_\theta(\mathbf{z})\|^2\right]
@@ -403,3 +417,8 @@ That said, the Gaussian VAE is far from perfect. The three drawbacks discussed a
 
 > [!note]- Notations
 > See the [notation reference](notation.md) for a summary of symbols used across all notes.
+
+---
+
+> [!note]- AI Acknowledgement
+> And yes, I had AI helped with wording and structure (Claude by Anthropic) (•‿•)
