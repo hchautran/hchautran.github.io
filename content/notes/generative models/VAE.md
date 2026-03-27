@@ -27,6 +27,7 @@ The Variational Autoencoder (VAE), introduced by [Kingma & Welling (2013)](https
 - **Completeness**: Any point sampled from the prior produces a meaningful output. By regularizing the encoder's posterior $q_\phi(\mathbf{z} \mid \mathbf{x})$ to stay close to the prior $\mathcal{N}(\mathbf{0}, \mathbf{I})$, the model ensures that the high-probability regions of the latent space are densely covered with meaningful structure, so random samples from the prior reliably decode into coherent outputs.
 
 ---
+![VAE](vae.svg) *Figure 1: Variational AutoEncoder*
 ## 1. Constructions of VAE
 Suppose we have a dataset of samples drawn i.i.d. from an unknown [distribution](join_prob.md) $p_{data}(\mathbf{x})$. Since the true form of $p_{data}$ is unknown, we cannot sample from it directly. The goal of a generative model is to learn a tractable approximation $p_\theta(\mathbf{x})$ from this finite dataset by minimizing a divergence $\mathcal{D}_f$ between the two distributions. In the case of VAEs, $\mathcal{D}_f$ is the KL divergence $\mathcal{D}_{KL}$:
 $$
@@ -228,6 +229,7 @@ $$
 &\Rightarrow q_\phi(\mathbf{z} \mid \mathbf{x}) = \mathcal{N}(\mathbf{z};\, \boldsymbol{\mu}_\phi(\mathbf{x}),\, \text{diag}(\boldsymbol{\sigma}^2_\phi(\mathbf{x})))
 \end{align}
 $$
+
 
 This is the reparameterization trick: by expressing $\mathbf{z}$ as a deterministic function of $\phi$ and a fixed noise variable $\boldsymbol{\varepsilon}$, the stochasticity is separated from the parameters, making the sampling step differentiable and allowing gradients to flow back through $\mathbf{z}$ to the encoder.
 
