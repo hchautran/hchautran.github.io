@@ -11,6 +11,8 @@ tags:
 
 In a lot of generative models courses, the starting point of training a neural network to generate new realistic data is the Variational Autoencoder (VAE). This model has its origins in the AutoEncoder (AE), which serves a different purpose: to reconstruct data:
 
+![AE](AE.svg) *The standard autoencoder compresses input $\mathbf{x}$ into a fixed latent code $\mathbf{z}$ via the encoder, then reconstructs $\mathbf{x}'$ via the decoder.  $\mathbf{z}$ is a single point with no probabilistic structure.*
+
 Formally, AE consists of two parts: an encoder $f_\phi$ that compresses the input $\mathbf{x}$ into a compact latent representation $\mathbf{z} = f_\phi(\mathbf{x})$, and a decoder $g_\theta$ that reconstructs the input from that representation $\hat{\mathbf{x}} = g_\theta(\mathbf{z})$. The network is trained end-to-end by minimizing a reconstruction loss, typically mean squared error:
 
 $$
@@ -27,7 +29,8 @@ The Variational Autoencoder (VAE), introduced by [Kingma & Welling (2013)](https
 - **Completeness**: Any point sampled from the prior produces a meaningful output. By regularizing the encoder's posterior $q_\phi(\mathbf{z} \mid \mathbf{x})$ to stay close to the prior $\mathcal{N}(\mathbf{0}, \mathbf{I})$, the model ensures that the high-probability regions of the latent space are densely covered with meaningful structure, so random samples from the prior reliably decode into coherent outputs.
 
 ---
-![VAE](vae.svg) *Figure 1: Variational AutoEncoder*
+![VAE](vae.svg) *Figure 2: The VAE encoder $q_\phi(\mathbf{z} \mid \mathbf{x})$ maps input $\mathbf{x}$ to a Gaussian distribution in latent space, regularized toward the prior $p(\mathbf{z}) = \mathcal{N}(\mathbf{0}, \mathbf{I})$. A vector $\mathbf{z}$ is then sampled from $q_\phi(\mathbf{z} \mid \mathbf{x})$ and decoded by $p_\theta(\mathbf{x} \mid \mathbf{z})$ to reconstruct $\mathbf{x}'$.*
+
 ## 1. Constructions of VAE
 Suppose we have a dataset of samples drawn i.i.d. from an unknown [distribution](join_prob.md) $p_{data}(\mathbf{x})$. Since the true form of $p_{data}$ is unknown, we cannot sample from it directly. The goal of a generative model is to learn a tractable approximation $p_\theta(\mathbf{x})$ from this finite dataset by minimizing a divergence $\mathcal{D}_f$ between the two distributions. In the case of VAEs, $\mathcal{D}_f$ is the KL divergence $\mathcal{D}_{KL}$:
 $$
@@ -221,7 +224,7 @@ Together, the two terms create a natural tension: maximizing $\mathcal{L}_{ELBO}
 
 The most common instantiation of the VAE framework is the **Gaussian VAE**, where the encoder, decoder and prior are modeled as Gaussians.
 
-![VAE_v2](gaussian_vae.svg) *Figure 2: Overview of the Gaussian VAE. Each input $\mathbf{x}$ is encoded into a class-conditional Gaussian $q_\phi(\mathbf{z} \mid \mathbf{x})$ (colored clusters). The aggregate posterior $q_\phi(\mathbf{z}) = \mathbb{E}_{\mathbf{x}\sim p_\text{data}(\mathbf{x})}[q_\phi(\mathbf{z} \mid \mathbf{x})]$ is matched to the isotropic prior $p(\mathbf{z})$ via the KL term in the ELBO. Samples from $q_\phi(\mathbf{z} \mid \mathbf{x})$ are decoded by $p_\theta(\mathbf{x} \mid \mathbf{z})$ to produce reconstructions $\mathbf{x}'$, whose marginal $p_\theta(\mathbf{x})$ approximates the data distribution.*
+![VAE_v2](gaussian_vae.svg) *Figure 3: Overview of the Gaussian VAE. Each input $\mathbf{x}$ is encoded into a class-conditional Gaussian $q_\phi(\mathbf{z} \mid \mathbf{x})$ (colored clusters). The aggregate posterior $q_\phi(\mathbf{z}) = \mathbb{E}_{\mathbf{x}\sim p_\text{data}(\mathbf{x})}[q_\phi(\mathbf{z} \mid \mathbf{x})]$ is matched to the isotropic prior $p(\mathbf{z})$ via the KL term in the ELBO. Samples from $q_\phi(\mathbf{z} \mid \mathbf{x})$ are decoded by $p_\theta(\mathbf{x} \mid \mathbf{z})$ to produce reconstructions $\mathbf{x}'$, whose marginal $p_\theta(\mathbf{x})$ approximates the data distribution.*
 
 ### 3.1 The encoder part
 For each input $\mathbf{x}$, the encoder produces a Gaussian distribution centered at $\boldsymbol{\mu}_\phi(\mathbf{x})$ with variance $\boldsymbol{\sigma}^2_\phi(\mathbf{x})$, so that similar inputs yield overlapping distributions in the latent space:
