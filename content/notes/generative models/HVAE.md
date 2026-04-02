@@ -6,7 +6,6 @@ tags:
   - generative models
   - notes
 ---
-
 ...Writing..
 
 <!-- The Variational Autoencoder is an elegant framework, but its Gaussian design comes with fundamental limitations: blurry reconstructions from the MSE objective, an approximate posterior restricted to a diagonal Gaussian, and an aggregate posterior that can drift away from the prior. All three problems share a common root — a single latent variable $\mathbf{z}$ is too weak a representation to capture the full complexity of real-world data.
