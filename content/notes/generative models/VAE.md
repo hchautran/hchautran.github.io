@@ -383,27 +383,25 @@ For image data, this produces blurry outputs rather than sharp, realistic sample
 The diagonal Gaussian assumption for $q_\phi(\mathbf{z} \mid \mathbf{x})$ restricts the variational family distribution to an axis-aligned ellipsoid (i.e., zero off-diagonal [covariance](covariance.md)). If the true posterior $p_\theta(\mathbf{z} \mid \mathbf{x})$ has complex, multimodal, or highly correlated structure, a single Gaussian cannot capture it - leading to a persistently loose ELBO bound regardless of the encoder capacity. 
 
 ### 4.3 Posterior Collapse
-Why does this happen? One key reason is that when the decoder becomes too expressive (a sufficiently deep neural network), at some point during optimizing for some input $\mathbf{x}\sim p_{data}(\mathbf{x})$:
+Why does this happen? One key reason is that when the decoder becomes too expressive (a sufficiently deep neural network), at some point during training, for some $\mathbf{x} \sim p_{data}(\mathbf{x})$, the decoder finds it easier to simply approximate the data distribution directly:
 
 $$
 p_\theta(\mathbf{x} \mid \mathbf{z}) \approx p_{data}(\mathbf{x})
 $$
 
-
-This means that  the decoder has learned to approximate the data distribution directly without relying on $\mathbf{z}$. This sounds like a win — but it creates a pathological optimization problem. Recall the ELBO:
+This sounds like a win for reconstruction quality, but it also breaks the encoder. In other words, the decoder has learned to ignore $\mathbf{z}$, the VAE's output now barely changes no matter what latent code it receives. Recall the ELBO:
 
 $$
 \mathcal{L}_{ELBO} = \underbrace{\mathbb{E}_{\mathbf{z}\sim q_\phi(\mathbf{z} \mid \mathbf{x})}[\log p_\theta(\mathbf{x} \mid \mathbf{z})]}_{\text{reconstruction}} - \underbrace{\mathcal{D}_{KL}(q_\phi(\mathbf{z} \mid \mathbf{x}) \| p(\mathbf{z}))}_{\text{regularization}}
 
 $$
 
-When the decoder is powerful enough to reconstruct $\mathbf{x}$ without using $\mathbf{z}$, by exploiting its own internal structure, the reconstruction term becomes approximately constant with respect to $\mathbf{z}$. The gradient signal that would normally force the encoder to encode information into $\mathbf{z}$ disappears. The optimizer then finds the path of least resistance: collapse the KL term to zero by driving $q_\phi(\mathbf{z} \mid \mathbf{x}) \to p(\mathbf{z})$, so the ELBO degenerates to:
+When the decoder is powerful enough to reconstruct $\mathbf{x}$ without using $\mathbf{z}$, by exploiting its own internal structure, the reconstruction term becomes approximately constant with respect to $\mathbf{z}$. The gradient signal that would normally force the encoder to encode information into $\mathbf{z}$ disappears. The optimizer then finds the path of least resistance: collapse the KL term to zero by driving $q_\phi(\mathbf{z} \mid \mathbf{x}) \to p(\mathbf{z})$. At this point, $\mathbf{z}$ and $\mathbf{x}$ become statistically independent, the latent code carries no information about the input, and the decoder can no longer be used to control the output. The VAE reduces to a decoder-only model. so the ELBO degenerates to:
 
 $$
 \mathcal{L}_{ELBO} \approx\log p_\theta(\mathbf{x})
 $$
 
-At this point, $\mathbf{z}$ and $\mathbf{x}$ become statistically independent, the latent code carries no information about the input, and the decoder can no longer be used to control the output. The VAE reduces to a decoder-only model. 
 
 > [!note]- Proof for the independence of $\mathbf{x}$ and $\mathbf{z}$ after postierior corruption
 > We can rewrite the regularization term, averaged over all $\mathbf{x} \sim p_{data}(\mathbf{x})$, as:
@@ -438,7 +436,7 @@ That said, the Gaussian VAE is far from perfect. The four drawbacks discussed ab
 
 **What comes next?** Two important lines of work build directly on these observations to solve standard VAE's limitations:
 
-- [Hierarchical VAEs (HVAEs)](HVAE.md) address the expressiveness problem by stacking multiple layers of stochastic latent variables. Rather than compressing $\mathbf{x}$ into a single $\mathbf{z}$, HVAEs learn a hierarchy $\mathbf{z}_1, \mathbf{z}_2, \dots, \mathbf{z}_L$ where each layer captures structure at a different level of abstraction. This allows the model to represent far richer posteriors, and the ELBO generalizes naturally to the hierarchical setting.
+- [Hierarchical VAEs (HVAEs)](DDPM.md) address the expressiveness problem by stacking multiple layers of stochastic latent variables. Rather than compressing $\mathbf{x}$ into a single $\mathbf{z}$, HVAEs learn a hierarchy $\mathbf{z}_1, \mathbf{z}_2, \dots, \mathbf{z}_L$ where each layer captures structure at a different level of abstraction. This allows the model to represent far richer posteriors, and the ELBO generalizes naturally to the hierarchical setting.
 
 - [Denoising Diffusion Probabilistic Models (DDPMs)](DDPM.md) take a different philosophical path. Instead of learning a compact latent code, diffusion models define a fixed forward process that gradually corrupts data with Gaussian noise over $T$ steps, then learn to reverse this process step by step. Remarkably, this can be seen as a special case of a hierarchical latent-variable model where the encoder is fixed (the forward noising process) and only the decoder (the denoising network) is learned. This design sidesteps the blurry-reconstruction and posterior-collapse problems entirely - the fixed encoder cannot collapse, and the step-by-step denoising objective enforces sharp, high-frequency detail at each scale. 
 

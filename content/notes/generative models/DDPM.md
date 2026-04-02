@@ -1,6 +1,6 @@
 ---
-title: Hierachical Variational AutoEncoders (HVAEs)
-description: A ground-up derivation of the VAE, covering the ELBO, encoder/decoder construction.
+title: Denoising Diffusion Probabilistic Models (DDPMs)
+description: A ground-up derivation of the DDPM.
 draft: false
 tags:
   - generative models
