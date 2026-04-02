@@ -346,7 +346,7 @@ $$
 Despite its elegance, the Gaussian VAE has several well-known limitations:
 
 ### 4.1 Blurry reconstructions
-Modeling $p_\theta(\mathbf{x} \mid \mathbf{z})$ as a Gaussian with a fixed variance corresponds to minimizing MSE, which tends to average over multiple plausible reconstructions. 
+Modeling $p_\theta(\mathbf{x} \mid \mathbf{z})$ as a Gaussian with a fixed variance corresponds to minimizing MSE, which tends to average over multiple plausible reconstructions using the sampled code $\mathbf{z}$. 
 
 > [!note]- Proof of blurry reconstructions in VAEs
 > Recall the per-sample reconstruction loss:
@@ -373,17 +373,59 @@ Modeling $p_\theta(\mathbf{x} \mid \mathbf{z})$ as a Gaussian with a fixed varia
 > $$
 > The optimal decoder output is the **conditional mean** of $\mathbf{x}$ given $\mathbf{z}$ under the encoder's inverse distribution $q_\phi(\mathbf{x}\mid \mathbf{z})$. When multiple distinct images $\mathbf{x}$ map to similar latent codes $\mathbf{z}$, the MSE loss forces the decoder to output their average - producing blurry reconstructions.
 
-For image data, this produces blurry outputs rather than sharp, realistic samples.
+For image data, this produces blurry outputs rather than sharp, realistic samples. 
 
-
+**So what could be done to improve this?** - One natural idea is to make the encoder or decoder more expressive by adding more layers to capture richer, more complex latent structure. However, increasing depth alone does not solve the [Limited posterior expressiveness](VAE#42-limited-posterior-expressiveness) problem of the encoder. Moreover, when the decoder grows too powerful, it can reconstruct $\mathbf{x}$ without relying on $\mathbf{z}$ at all, triggering [posterior collapse](VAE#43-posterior-collapse).
 
 ### 4.2 Limited posterior expressiveness
-The diagonal Gaussian assumption for $q_\phi(\mathbf{z} \mid \mathbf{x})$ restricts the approximate posterior to an axis-aligned ellipsoid (i.e., zero off-diagonal [covariance](covariance.md)). If the true posterior $p_\theta(\mathbf{z} \mid \mathbf{x})$ has complex, multimodal, or highly correlated structure, a single Gaussian cannot capture it - leading to a persistently loose ELBO bound regardless of encoder capacity.
+The diagonal Gaussian assumption for $q_\phi(\mathbf{z} \mid \mathbf{x})$ restricts the variational family distribution to an axis-aligned ellipsoid (i.e., zero off-diagonal [covariance](covariance.md)). If the true posterior $p_\theta(\mathbf{z} \mid \mathbf{x})$ has complex, multimodal, or highly correlated structure, a single Gaussian cannot capture it - leading to a persistently loose ELBO bound regardless of the encoder capacity. 
 
-### 4.3 Mismatch between aggregate posterior and prior
-Even if each individual posterior $q_\phi(\mathbf{z} \mid \mathbf{x})$ is close to the prior, the **aggregate posterior** $q_\phi(\mathbf{z}) = \mathbb{E}_{\mathbf{x} \sim p_{data}}[q_\phi(\mathbf{z} \mid \mathbf{x})]$ may not match $p(\mathbf{z}) = \mathcal{N}(\mathbf{0}, \mathbf{I})$. This mismatch creates "holes" in the latent space - regions with high prior probability but low posterior density - causing poor sample quality at generation time.
+### 4.3 Posterior Collapse
+Why does this happen? One key reason is that when the decoder becomes too expressive (a sufficiently deep neural network), at some point during optimizing for some input $\mathbf{x}\sim p_{data}(\mathbf{x})$:
 
-These limitations motivate more expressive extensions, such as **Hierarchical VAEs**, which stack multiple layers of latent variables to capture richer structure.
+$$
+p_\theta(\mathbf{x} \mid \mathbf{z}) \approx p_{data}(\mathbf{x})
+$$
+
+
+This means that  the decoder has learned to approximate the data distribution directly without relying on $\mathbf{z}$. This sounds like a win — but it creates a pathological optimization problem. Recall the ELBO:
+
+$$
+\mathcal{L}_{ELBO} = \underbrace{\mathbb{E}_{\mathbf{z}\sim q_\phi(\mathbf{z} \mid \mathbf{x})}[\log p_\theta(\mathbf{x} \mid \mathbf{z})]}_{\text{reconstruction}} - \underbrace{\mathcal{D}_{KL}(q_\phi(\mathbf{z} \mid \mathbf{x}) \| p(\mathbf{z}))}_{\text{regularization}}
+
+$$
+
+When the decoder is powerful enough to reconstruct $\mathbf{x}$ without using $\mathbf{z}$, by exploiting its own internal structure, the reconstruction term becomes approximately constant with respect to $\mathbf{z}$. The gradient signal that would normally force the encoder to encode information into $\mathbf{z}$ disappears. The optimizer then finds the path of least resistance: collapse the KL term to zero by driving $q_\phi(\mathbf{z} \mid \mathbf{x}) \to p(\mathbf{z})$, so the ELBO degenerates to:
+
+$$
+\mathcal{L}_{ELBO} \approx \mathbb{E}[\log p_\theta(\mathbf{x})]
+$$
+
+At this point, $\mathbf{z}$ and $\mathbf{x}$ become statistically independent, the latent code carries no information about the input, and the decoder can no longer be used to control the output. The VAE reduces to a decoder-only model. 
+
+> [!note]- Proof for the independence of $\mathbf{x}$ and $\mathbf{z}$ after postierior corruption
+> We can rewrite the regularization term, averaged over all $\mathbf{x} \sim p_{data}(\mathbf{x})$, as:
+>
+>
+>$$
+>\begin{align}
+>\mathbb{E}_{\mathbf{x} \sim p{data}(\mathbf{x})}\left[D_{KL}(q_\phi(\mathbf{z} \mid \mathbf{x}) \mid p(\mathbf{z}))\right] &= \iint p_{data}(\mathbf{x}) q_\phi(\mathbf{z} \mid \mathbf{x}) \log \frac{q_\phi(\mathbf{z} \mid \mathbf{x})}{p(\mathbf{z})}   d\mathbf{z}  d\mathbf{x} \notag \\
+>&= \iint q_\phi(\mathbf{z} , \mathbf{x}) \log (\frac{q_\phi(\mathbf{x} \mid \mathbf{z})q_\phi(\mathbf{z})}{p(\mathbf{z}) p_{data}(\mathbf{x})})  d\mathbf{z}  d\mathbf{x} \notag \\
+>
+>&= \iint q_\phi(\mathbf{z} , \mathbf{x}) \log(\frac{p_\phi(\mathbf{x} \mid \mathbf{z})}{p_{data}(\mathbf{x})}) d\mathbf{z}  d\mathbf{x} + \iint q_\phi(\mathbf{z} , \mathbf{x}) \log (\frac{q_\phi(\mathbf{z})}{p(\mathbf{z})})  d\mathbf{z}  d\mathbf{x} \notag \\
+>&= \iint q_\phi(\mathbf{z} , \mathbf{x}) \log (\frac{q_\phi(\mathbf{x} , \mathbf{z})}{p_{data}(\mathbf{x})q_\phi(\mathbf{z})} ) d\mathbf{z}  d\mathbf{x} + \int q_\phi(\mathbf{z}) \log (\frac{q_\phi(\mathbf{z})}{p(\mathbf{z})} ) d\mathbf{z} \notag \\
+>&= \boxed{\underbrace{\mathcal{I}(\mathbf{x}, \mathbf{z})}_{\text{mutual information}} + D_{KL}(q_\phi(\mathbf{z}) \| p(\mathbf{z}))}
+>\end{align}
+>$$
+>
+>This decomposition reveals what posterior collapse actually destroys. When the regularization term is driven to zero, both components must vanish simultaneously:
+>
+>- $\mathcal{I}(\mathbf{x}, \mathbf{z}) \rightarrow 0$ - The latent code $\mathbf{z}$ becomes statistically independent of $\mathbf{x}$ (recall [independent property](join_prob)), i.e. $q_\phi(\mathbf{x}, \mathbf{z}) = q_\phi(\mathbf{z}) p_{data}(\mathbf{x})$.  
+>- $D_{KL}(q_\phi(\mathbf{z}) \| p(\mathbf{z}))\rightarrow 0$ - The aggregate posterior $q_\phi(\mathbf{z})$ collapses to the isotropic Gaussian $p(\mathbf{z}) = \mathcal{N}(\mathbf{0}, \mathbf{I})$. The latent space loses all input class-specific structure, the per-class mixture components that distinguish different types of $\mathbf{x}$ are wiped out.
+
+
+### 4.4 Mismatch between aggregate posterior and prior
+Another weakness of standard VAEs is that even if each individual posterior $q_\phi(\mathbf{z} \mid \mathbf{x})$ is close to the prior, the aggregated posterior $q_\phi(\mathbf{z})$  may not match $p(\mathbf{z}) = \mathcal{N}(\mathbf{0}, \mathbf{I})$ at some regions. This mismatch creates "holes" in the latent space - regions with high prior probability but low posterior density - causing poor sample quality at generation time.
 
 
 ---
@@ -391,9 +433,9 @@ These limitations motivate more expressive extensions, such as **Hierarchical VA
 
 The Variational Autoencoder is a foundational generative model that elegantly combines probabilistic inference with deep learning. By replacing the deterministic bottleneck of a standard autoencoder with a learned posterior distribution, VAEs endow the latent space with a structured, continuous geometry that supports both generation and interpolation. The ELBO provides a tractable training objective that simultaneously encourages faithful reconstruction and regularizes the latent space toward a simple prior - a tension that lies at the heart of all latent-variable generative models.
 
-That said, the Gaussian VAE is far from perfect. The three drawbacks discussed above - blurry reconstructions from the MSE objective, limited posterior expressiveness from the diagonal Gaussian assumption, and aggregate posterior mismatch - are not merely implementation details; they are fundamental limitations that arise from the design choices made to keep the ELBO tractable.
+That said, the Gaussian VAE is far from perfect. The four drawbacks discussed above - blurry reconstructions from the MSE objective, posterior collapse, limited posterior expressiveness from the diagonal Gaussian assumption, and aggregate posterior mismatch - are not merely implementation details; they are fundamental limitations that arise from the design choices made to keep the ELBO tractable.
 
-**What comes next?** Two important lines of work build directly on these observations:
+**What comes next?** Two important lines of work build directly on these observations to solve standard VAE's limitations:
 
 - [Hierarchical VAEs (HVAEs)](HVAE.md) address the expressiveness problem by stacking multiple layers of stochastic latent variables. Rather than compressing $\mathbf{x}$ into a single $\mathbf{z}$, HVAEs learn a hierarchy $\mathbf{z}_1, \mathbf{z}_2, \dots, \mathbf{z}_L$ where each layer captures structure at a different level of abstraction. This allows the model to represent far richer posteriors, and the ELBO generalizes naturally to the hierarchical setting.
 
