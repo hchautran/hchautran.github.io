@@ -8,7 +8,9 @@ tags:
 ---
 ...Writing....
 
+
 ![VAE](HVAE.svg) *Figure 1: Hierachical Variational AutoEncoder*
+
 <!-- The Variational Autoencoder is an elegant framework, but its Gaussian design comes with fundamental limitations: blurry reconstructions from the MSE objective, an approximate posterior restricted to a diagonal Gaussian, and an aggregate posterior that can drift away from the prior. All three problems share a common root — a single latent variable $\mathbf{z}$ is too weak a representation to capture the full complexity of real-world data.
 
 The Hierarchical VAE (HVAE) addresses this by stacking multiple layers of stochastic latent variables:
