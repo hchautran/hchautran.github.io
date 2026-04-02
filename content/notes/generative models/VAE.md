@@ -221,6 +221,8 @@ Together, the two terms create a natural tension: maximizing $\mathcal{L}_{ELBO}
 
 The most common instantiation of the VAE framework is the **Gaussian VAE**, where the encoder, decoder and prior are modeled as Gaussians.
 
+![VAE_v2](gaussian_vae.svg) *Figure 2: Overview of the Gaussian VAE. Each input $\mathbf{x}$ is encoded into a class-conditional Gaussian $q_\phi(\mathbf{z} \mid \mathbf{x})$ (colored clusters). The aggregate posterior $q_\phi(\mathbf{z}) = \mathbb{E}_{\mathbf{x}\sim p_\text{data}(\mathbf{x})}[q_\phi(\mathbf{z} \mid \mathbf{x})]$ is matched to the isotropic prior $p(\mathbf{z})$ via the KL term in the ELBO. Samples from $q_\phi(\mathbf{z} \mid \mathbf{x})$ are decoded by $p_\theta(\mathbf{x} \mid \mathbf{z})$ to produce reconstructions $\mathbf{x}'$, whose marginal $p_\theta(\mathbf{x})$ approximates the data distribution.*
+
 ### 3.1 The encoder part
 For each input $\mathbf{x}$, the encoder produces a Gaussian distribution centered at $\boldsymbol{\mu}_\phi(\mathbf{x})$ with variance $\boldsymbol{\sigma}^2_\phi(\mathbf{x})$, so that similar inputs yield overlapping distributions in the latent space:
 $$
@@ -398,7 +400,7 @@ $$
 When the decoder is powerful enough to reconstruct $\mathbf{x}$ without using $\mathbf{z}$, by exploiting its own internal structure, the reconstruction term becomes approximately constant with respect to $\mathbf{z}$. The gradient signal that would normally force the encoder to encode information into $\mathbf{z}$ disappears. The optimizer then finds the path of least resistance: collapse the KL term to zero by driving $q_\phi(\mathbf{z} \mid \mathbf{x}) \to p(\mathbf{z})$, so the ELBO degenerates to:
 
 $$
-\mathcal{L}_{ELBO} \approx \mathbb{E}[\log p_\theta(\mathbf{x})]
+\mathcal{L}_{ELBO} \approx\log p_\theta(\mathbf{x})
 $$
 
 At this point, $\mathbf{z}$ and $\mathbf{x}$ become statistically independent, the latent code carries no information about the input, and the decoder can no longer be used to control the output. The VAE reduces to a decoder-only model. 
@@ -406,10 +408,9 @@ At this point, $\mathbf{z}$ and $\mathbf{x}$ become statistically independent, t
 > [!note]- Proof for the independence of $\mathbf{x}$ and $\mathbf{z}$ after postierior corruption
 > We can rewrite the regularization term, averaged over all $\mathbf{x} \sim p_{data}(\mathbf{x})$, as:
 >
->
 >$$
 >\begin{align}
->\mathbb{E}_{\mathbf{x} \sim p{data}(\mathbf{x})}\left[D_{KL}(q_\phi(\mathbf{z} \mid \mathbf{x}) \mid p(\mathbf{z}))\right] &= \iint p_{data}(\mathbf{x}) q_\phi(\mathbf{z} \mid \mathbf{x}) \log \frac{q_\phi(\mathbf{z} \mid \mathbf{x})}{p(\mathbf{z})}   d\mathbf{z}  d\mathbf{x} \notag \\
+>\mathbb{E}_{\mathbf{x} \sim p_{data}(\mathbf{x})}\left[D_{KL}(q_\phi(\mathbf{z} \mid \mathbf{x}) \mid p(\mathbf{z}))\right] &= \iint p_{data}(\mathbf{x}) q_\phi(\mathbf{z} \mid \mathbf{x}) \log \frac{q_\phi(\mathbf{z} \mid \mathbf{x})}{p(\mathbf{z})}   d\mathbf{z}  d\mathbf{x} \notag \\
 >&= \iint q_\phi(\mathbf{z} , \mathbf{x}) \log (\frac{q_\phi(\mathbf{x} \mid \mathbf{z})q_\phi(\mathbf{z})}{p(\mathbf{z}) p_{data}(\mathbf{x})})  d\mathbf{z}  d\mathbf{x} \notag \\
 >
 >&= \iint q_\phi(\mathbf{z} , \mathbf{x}) \log(\frac{p_\phi(\mathbf{x} \mid \mathbf{z})}{p_{data}(\mathbf{x})}) d\mathbf{z}  d\mathbf{x} + \iint q_\phi(\mathbf{z} , \mathbf{x}) \log (\frac{q_\phi(\mathbf{z})}{p(\mathbf{z})})  d\mathbf{z}  d\mathbf{x} \notag \\

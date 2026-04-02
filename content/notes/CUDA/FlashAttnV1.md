@@ -1,35 +1,21 @@
 ---
-title: Flash Attention work log 
-description: My work log of implementing Flash Attention using CuTe DSL.
+title: Flash Attention Work Log 
+description: My Work Log of implementing Flash Attention using CuTe DSL.
 draft: false
 tags:
   - CUDA 
-  - notes
+  - notes 
+  - work log 
 ---
 
+My Work Log implementing Flash Attention using [CuTe DSL](https://docs.nvidia.com/cutlass/latest/media/docs/pythonDSL/cute_dsl_general/dsl_introduction.html).
 
 ---
 ## 1. The Math
 
+
 ---
 ## 2. The Algorithms
-
----
-## 3. Matmul
-
---- 
-## 4. Matmul
-
----
-## 4. Online Softmax
-
-
---- 
-## 5. Flash Attention V1
-
-
----
-## 6. Flash Attention V2
 
 $$
 \begin{array}{l}
@@ -64,4 +50,36 @@ $$
 $$
 
 ---
+## 3. Matmul V1
+
+### 3.0 Initialize Input
+
+### 3.1 Make A, B Load Layout
+
+### 3.2 Make C Store Layout 
+
+### 3.3 Construct Copy Atom
+
+### 3.4 Construct MMA Atom
+
+### 3.5 Kernel Implementation
+
+### 3.6 Comparison To Torch's Matmul
+
+--- 
+## 4. Matmul V2
+
+---
+## 4. Online Softmax
+
+
+--- 
+## 5. Flash Attention V1
+
+
+---
+## 6. Flash Attention V2
+
+---
 ## 7. Flash Attention V3
+

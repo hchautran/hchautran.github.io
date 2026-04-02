@@ -109,6 +109,7 @@ description: Personal site of Hoai-Chau Tran, CS PhD student @ UIUC.
 
 ## 🛠️ Service
 
+* **2026**: [NeurIPS](https://icml.cc) - Reviewer
 * **2026**: [ICML](https://icml.cc) - Reviewer
 * **2025**: [NeurIPS](https://neurips.cc) - Volunteer, Reviewer
 
