@@ -128,7 +128,6 @@ And yes, this is exactly the encoder of the VAE! Which can be trained to concent
 >
 >
 >   -->
-
 <!-- > [!summary] TL;DR - Constructions of VAE
 > The VAE consists of a **decoder** $p_\theta(\mathbf{x}\mid\mathbf{z})$ that generates data from latents, and an **encoder** $q_\phi(\mathbf{z}\mid\mathbf{x})$ that approximates the intractable posterior. -->
 
