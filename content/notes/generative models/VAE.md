@@ -11,7 +11,7 @@ tags:
 
 In a lot of generative models courses, the starting point of training a neural network to generate new realistic data is the Variational Autoencoder (VAE). This model has its origins in the AutoEncoder (AE), which serves a different purpose: to reconstruct data:
 
-![AE](AE.svg) *The standard autoencoder compresses input $\mathbf{x}$ into a fixed latent code $\mathbf{z}$ via the encoder, then reconstructs $\mathbf{x}'$ via the decoder.  $\mathbf{z}$ is a single point with no probabilistic structure.*
+![AE](AE.svg) *Figure 2: The standard autoencoder compresses input $\mathbf{x}$ into a fixed latent code $\mathbf{z}$ via the encoder, then reconstructs $\mathbf{x}'$ via the decoder.  $\mathbf{z}$ is a single point with no probabilistic structure.*
 
 Formally, AE consists of two parts: an encoder $f_\phi$ that compresses the input $\mathbf{x}$ into a compact latent representation $\mathbf{z} = f_\phi(\mathbf{x})$, and a decoder $g_\theta$ that reconstructs the input from that representation $\hat{\mathbf{x}} = g_\theta(\mathbf{z})$. The network is trained end-to-end by minimizing a reconstruction loss, typically mean squared error:
 
@@ -32,10 +32,16 @@ The Variational Autoencoder (VAE), introduced by [Kingma & Welling (2013)](https
 ![VAE](vae.svg) *Figure 2: The VAE encoder $q_\phi(\mathbf{z} \mid \mathbf{x})$ maps input $\mathbf{x}$ to a Gaussian distribution in latent space, regularized toward the prior $p(\mathbf{z}) = \mathcal{N}(\mathbf{0}, \mathbf{I})$. A vector $\mathbf{z}$ is then sampled from $q_\phi(\mathbf{z} \mid \mathbf{x})$ and decoded by $p_\theta(\mathbf{x} \mid \mathbf{z})$ to reconstruct $\mathbf{x}'$.*
 
 ## 1. Constructions of VAE
-Suppose we have a dataset of samples drawn i.i.d. from an unknown [distribution](join_prob.md) $p_{data}(\mathbf{x})$. Since the true form of $p_{data}$ is unknown, we cannot sample from it directly. The goal of a generative model is to learn a tractable approximation $p_\theta(\mathbf{x})$ from this finite dataset by minimizing a divergence $\mathcal{D}_f$ between the two distributions. In the case of VAEs, $\mathcal{D}_f$ is the KL divergence $\mathcal{D}_{KL}$:
-$$
-\mathcal{D}_{KL}(p_{data}(\mathbf{x}) \| p_{\theta}(\mathbf{x}))
-$$
+Suppose we have a dataset of samples drawn i.i.d. from an unknown, complex [distribution](join_prob.md) $p_{data}(\mathbf{x})$.  Since the true form of $p_{data}$ is unknown, we cannot generate new sample by drawing from $p_{data}(\mathbf{x})$ directly. The goal of a generative model is to learn a tractable approximation $p_\theta(\mathbf{x})$ from this finite dataset by minimizing a divergence $\mathcal{D}_f$ between the two distributions. 
+
+![genai](genai.svg) *Figure 3: The goal of a generative model: find parameters $\theta$ that minimize the divergence $\mathcal{D}(p_{data}(\mathbf{x}),\, p_\theta(\mathbf{x}))$ between the true data distribution (blue) and the learned model distribution (yellow). As $\mathcal{D} \to 0$, the model distribution increasingly overlaps with the data distribution.*
+
+
+Once the optimal parameters $\theta$ are found, $p_\theta(\mathbf{x})$  can be used to serve as a proxy for $p_{data}(\mathbf{x})$, enabling two key capabilities:
+
+- **Generation**: Draw new, realistic samples from $p_{data}(\mathbf{x})$ via sampling methods such as [Monte Carlo Sampling](https://en.wikipedia.org/wiki/Monte_Carlo_method) via $p_\theta(\mathbf{x})$.
+- **Evaluation**: Assess how likely a given sample $\mathbf{x}'$ is under the learned distribution $p_\theta(\mathbf{x})$ - for instance, judging whether an image $\mathbf{x}'$ looks realistic by computing the likelihood $p_\theta(\mathbf{x}')$.
+
 <!-- 
 > [!note]- What does it mean by being tractable/intractable?
 > **Tractable** means a computation that is practically feasible - it has a closed-form solution or can be evaluated efficiently in finite time. **Intractable** means the opposite: evaluating it exactly is computationally impossible in practice.
@@ -50,7 +56,10 @@ $$
 >
 > This is why VAEs introduce an encoder $q_\phi(\mathbf{z} \mid \mathbf{x})$ - to avoid integrating over all $\mathbf{z}$ and instead focus only on the regions that actually explain $\mathbf{x}$. -->
 
-
+In the case of VAEs, $\mathcal{D}_f$ is the KL divergence $\mathcal{D}_{KL}$:
+$$
+\mathcal{D}_{KL}(p_{data}(\mathbf{x}) \| p_{\theta}(\mathbf{x}))
+$$
 
 > [!note]- KL divergence intuition
 >$$
@@ -63,10 +72,6 @@ $$
 > As we can see, the KL divergence measures the expected log-likelihood difference between $p_{data}(\mathbf{x})$ and $p_\theta(\mathbf{x})$. Therefore, minimizing $\mathcal{D}_{KL}(p_{data}(\mathbf{x}) \| p_\theta(\mathbf{x}))$ pushes $p_\theta(\mathbf{x})$ to assign high likelihood to real data $\mathbf{x}$ sampled from $p_{data}(\mathbf{x})$.
 > 
 
-Once the optimal parameters $\theta$ are found, $p_\theta(\mathbf{x})$  can be used to serve as a proxy for $p_{data}(\mathbf{x})$, enabling two key capabilities:
-
-- **Generation**: Draw new, realistic samples from $p_{data}(\mathbf{x})$ via sampling methods such as [Monte Carlo Sampling](https://en.wikipedia.org/wiki/Monte_Carlo_method) via $p_\theta(\mathbf{x})$.
-- **Evaluation**: Assess how likely a given sample $\mathbf{x}'$ is under the learned distribution $p_\theta(\mathbf{x})$ - for instance, judging whether an image $\mathbf{x}'$ looks realistic by computing the likelihood $p_\theta(\mathbf{x}')$.
 
 Now, We can rewrite the KL divergence as follow:
 
@@ -87,13 +92,13 @@ $$
 Which is precisely the [maximum likelihood estimation (MLE)](MLE.md) objective. In practice we replace this population expectation $\mathbb{E}_{\mathbf{x} \sim p_{data}(\mathbf{x})}$ by its [Monte Carlo](https://en.wikipedia.org/wiki/Monte_Carlo_method) estimate, yielding the empirical MLE objective now becomes:
 
 $$
-\hat{\mathcal{L}}_{\text{MLE}}(\theta) := -\frac{1}{N} \sum_{i=1}^{N} \log p_\theta(\mathbf{x}^{(i)})
+\hat{\mathcal{L}}_{\text{MLE}}(\theta) := -\frac{1}{N} \sum_{i=1}^{N} \log p_\theta(\mathbf{x}^{(i)}) \tag 1
 $$
 
 Where $N$ is the number of samples in the dataset. This objective is then optimized  via SGD  over minibatches.
 
 ### 1.1 Decoder (Generator)
-Returning to the autoencoder setting, the goal is to generate a new sample $\mathbf{x}$ from a latent variable $\mathbf{z}$ via a neural network decoder $p_\theta(\mathbf{x} \mid \mathbf{z})$. We can express the target distribution $p_\theta(\mathbf{x})$ as the [marginal distribution](join_prob.md):
+Returning to the autoencoder setting, the goal is to generate a new sample $\mathbf{x}$ from a latent variable $\mathbf{z}$ via a neural network decoder $p_\theta(\mathbf{x} \mid \mathbf{z})$. We can express the target distribution $p_\theta(\mathbf{x})$ in equation (1) as the [marginal distribution](join_prob.md):
 
 $$
 \boxed{p_\theta(\mathbf{x}) = \int p_\theta(\mathbf{x} \mid \mathbf{z}) p(\mathbf{z}) \, d\mathbf{z}}
@@ -144,7 +149,7 @@ $$
 The learning objective is now tractable. Now according to [Jensen's inequality](https://en.wikipedia.org/wiki/Jensen%27s_inequality). We have the the evidence lower bound $\mathcal{L}_{ELBO}$ where:
 $$
 \begin{align}
-\log \mathbb{E}_{\mathbf{z} \sim q_\phi(\mathbf{z} \mid \mathbf{x})} \left[ \frac{p_\theta(\mathbf{z}, \mathbf{x})}{q_\phi(\mathbf{z} \mid \mathbf{x})} \right] \geq \mathbb{E}_{\mathbf{z} \sim q_\phi(\mathbf{z} \mid \mathbf{x})} \left[ \log \frac{p_\theta(\mathbf{z}, \mathbf{x})}{q_\phi(\mathbf{z} \mid \mathbf{x})} \right] = \mathcal{L}_{ELBO}
+\log \mathbb{E}_{\mathbf{z} \sim q_\phi(\mathbf{z} \mid \mathbf{x})} \left[ \frac{p_\theta(\mathbf{z}, \mathbf{x})}{q_\phi(\mathbf{z} \mid \mathbf{x})} \right] \geq \mathbb{E}_{\mathbf{z} \sim q_\phi(\mathbf{z} \mid \mathbf{x})} \left[ \log \frac{p_\theta(\mathbf{z}, \mathbf{x})}{q_\phi(\mathbf{z} \mid \mathbf{x})} \right] = \mathcal{L}_{ELBO}  \tag 2
 \end{align}
 $$
 Deriving further, we can see that $\mathcal{L}_{ELBO}$ consists of 2 terms:
@@ -153,7 +158,7 @@ $$
   \mathcal{L}_{ELBO}  &= \mathbb{E}_{\mathbf{z} \sim q_\phi(\mathbf{z} \mid \mathbf{x})} \left[ \log \frac{p_\theta(\mathbf{z}, \mathbf{x})}{ q_\phi(\mathbf{z} \mid \mathbf{x})} \right] \notag \\
   &= \mathbb{E}_{\mathbf{z} \sim q_\phi(\mathbf{z} \mid \mathbf{x})} \left[ \log \frac{p_\theta(\mathbf{x}\mid \mathbf{z})p(\mathbf{z})}{ q_\phi(\mathbf{z} \mid \mathbf{x})} \right] \notag \\
   &= \mathbb{E}_{\mathbf{z} \sim q_\phi(\mathbf{z} \mid \mathbf{x})} \left[ \log p_\theta(\mathbf{x} \mid \mathbf{z}) \right] - \mathbb{E}_{\mathbf{z} \sim q_\phi(\mathbf{z} \mid \mathbf{x})} \left[ \log \frac{q_\phi(\mathbf{z} \mid \mathbf{x})}{p(\mathbf{z})} \right] \notag \\
-  &= \boxed{\underbrace{\mathbb{E}_{\mathbf{z} \sim q_\phi(\mathbf{z} \mid \mathbf{x})} \left[ \log p_\theta(\mathbf{x} \mid \mathbf{z}) \right]}_{\text{reconstruction error}} - \underbrace{\mathcal{D}_{KL}(q_{\phi}(\mathbf{z}\mid\mathbf{x}) \| p(\mathbf{z}))}_{\text{regularizing term}}}
+  &= \boxed{\underbrace{\mathbb{E}_{\mathbf{z} \sim q_\phi(\mathbf{z} \mid \mathbf{x})} \left[ \log p_\theta(\mathbf{x} \mid \mathbf{z}) \right]}_{\text{reconstruction error}} - \underbrace{\mathcal{D}_{KL}(q_{\phi}(\mathbf{z}\mid\mathbf{x}) \| p(\mathbf{z}))}_{\text{regularizing term}}} \tag 3
 \end{align}
 $$
 
@@ -224,7 +229,7 @@ Together, the two terms create a natural tension: maximizing $\mathcal{L}_{ELBO}
 
 The most common instantiation of the VAE framework is the **Gaussian VAE**, where the encoder, decoder and prior are modeled as Gaussians.
 
-![VAE_v2](gaussian_vae.svg) *Figure 3: Overview of the Gaussian VAE. Each input $\mathbf{x}$ is encoded into a class-conditional Gaussian $q_\phi(\mathbf{z} \mid \mathbf{x})$ (colored clusters). The aggregate posterior $q_\phi(\mathbf{z}) = \mathbb{E}_{\mathbf{x}\sim p_\text{data}(\mathbf{x})}[q_\phi(\mathbf{z} \mid \mathbf{x})]$ is matched to the isotropic prior $p(\mathbf{z})$ via the KL term in the ELBO. Samples from $q_\phi(\mathbf{z} \mid \mathbf{x})$ are decoded by $p_\theta(\mathbf{x} \mid \mathbf{z})$ to produce reconstructions $\mathbf{x}'$, whose marginal $p_\theta(\mathbf{x})$ approximates the data distribution.*
+![VAE_v2](gaussian_vae.svg) *Figure 4: Overview of the Gaussian VAE. Each input $\mathbf{x}$ is encoded into a class-conditional Gaussian $q_\phi(\mathbf{z} \mid \mathbf{x})$ (colored clusters). The aggregate posterior $q_\phi(\mathbf{z}) = \mathbb{E}_{\mathbf{x}\sim p_\text{data}(\mathbf{x})}[q_\phi(\mathbf{z} \mid \mathbf{x})]$ is matched to the isotropic prior $p(\mathbf{z})$ via the KL term in the ELBO. Samples from $q_\phi(\mathbf{z} \mid \mathbf{x})$ are decoded by $p_\theta(\mathbf{x} \mid \mathbf{z})$ to produce reconstructions $\mathbf{x}'$, whose marginal $p_\theta(\mathbf{x})$ approximates the data distribution.*
 
 ### 3.1 The encoder part
 For each input $\mathbf{x}$, the encoder produces a Gaussian distribution centered at $\boldsymbol{\mu}_\phi(\mathbf{x})$ with variance $\boldsymbol{\sigma}^2_\phi(\mathbf{x})$, so that similar inputs yield overlapping distributions in the latent space:

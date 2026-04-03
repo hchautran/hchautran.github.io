@@ -2,27 +2,31 @@
 
 // put your custom CSS here!
 
-// Wider layout on large screens (1050px content + 2x380px sidebars = 1810px minimum)
-@media all and (min-width: 1810px) {
+html {
+  font-size: 17px;
+}
+
+// Wider layout on large screens (850px content + 2x380px sidebars = 1610px minimum)
+@media all and (min-width: 1610px) {
   .page .center,
   .page footer {
-    width: 1050px;
+    width: 850px;
     margin-left: auto;
     margin-right: auto;
   }
 
   .page .page-header,
   .page .page-footer {
-    width: 1050px;
+    width: 850px;
     margin-left: auto;
     margin-right: auto;
   }
 
   .page #quartz-body .sidebar.left {
-    left: calc(calc(100vw - 1050px) / 2 - 380px);
+    left: calc(calc(100vw - 850px) / 2 - 380px);
   }
 
   .page #quartz-body .sidebar.right {
-    right: calc(calc(100vw - 1050px) / 2 - 380px);
+    right: calc(calc(100vw - 850px) / 2 - 380px);
   }
 }
