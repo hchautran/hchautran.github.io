@@ -15,7 +15,7 @@ Imagine an autonomous car approaching a busy intersection at night. Its roof-mou
 
 The pedestrian has not moved, only the viewpoint has changed. To connect what the sensor sees with where the vehicle believes it is, we need to carry the measurement through a chain of coordinate frames. One link comes from calibration, which tells us how the LiDAR is mounted on the car. Another comes from localization, which tells us where the car is in the world. If either link is inverted or composed in the wrong order, a pedestrian on the sidewalk can appear in the road.
 
-![An autonomous car using roof-mounted LiDAR to detect a pedestrian at a nighttime intersection, with coordinate frames attached to the sensor, vehicle, and world map](transforms.png)
+![An autonomous car using roof-mounted LiDAR to detect a pedestrian at a nighttime intersection, with coordinate frames attached to the sensor, vehicle, and world map](transforms.webp)
 _The same pedestrian detection must travel from the LiDAR frame, through the vehicle frame, and into the world frame before the motion planner can use it._
 
 This is why poses and transforms sit at the foundation of machine perception. In this note, we will build the geometry behind them from first principles: how a pose relates two frames, how a rigid transform rotates and translates coordinates, how several transforms compose, and why the choice of rotation representation matters in practice.
@@ -49,6 +49,9 @@ t_x & t_y & t_z & \alpha & \beta & \gamma
 $$
 
 where $(t_x,t_y,t_z)$ locate the body-frame origin and $(\alpha,\beta,\gamma)$ denote roll, pitch, and yaw under a chosen Euler-angle convention.
+
+![A simple sketch separating the three translational and three rotational degrees of freedom](pose-six-dof.svg)
+_Figure 1: Translation locates the body-frame origin; roll, pitch, and yaw describe its orientation relative to the fixed world frame._
 
 ### 1.1 A notation that prevents frame bugs
 
@@ -117,9 +120,9 @@ Figure 2 completes the construction by drawing the two world-basis component vec
 
 _Figure 2: A body-frame point becomes a world-frame point by rotating its local displacement into the world basis and adding the body origin's world-frame translation._
 
-> [!warning] Pose versus point motion
-> The same matrix can be described as moving a point or as changing the coordinate frame in which a fixed point is expressed. These active and passive interpretations lead to inverse transforms if mixed. Pick one convention, document it, and attach frame labels to every quantity.
-
+<!-- > [!warning] Pose versus point motion -->
+<!-- > The same matrix can be described as moving a point or as changing the coordinate frame in which a fixed point is expressed. These active and passive interpretations lead to inverse transforms if mixed. Pick one convention, document it, and attach frame labels to every quantity. -->
+<!--  -->
 ---
 
 ## 2. Rigid Transforms
@@ -366,8 +369,8 @@ The columns of $\mathbf R$ are the rotated coordinate axes expressed in the dest
 
 No single rotation representation is best for every job.
 
-![Comparison of rotation matrices, Euler angles, axis-angle, and unit quaternions](rotation-representations.svg)
-_Figure 4: Rotation representations trade storage, interpretability, singularities, and ease of composition._
+<!-- ![Comparison of rotation matrices, Euler angles, axis-angle, and unit quaternions](rotation-representations.svg) -->
+<!-- _Figure 4: Rotation representations trade storage, interpretability, singularities, and ease of composition._ -->
 
 ### 6.1 Euler angles
 

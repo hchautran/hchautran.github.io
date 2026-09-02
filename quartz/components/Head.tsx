@@ -39,7 +39,7 @@ export default (() => {
             "@id": `${canonicalUrl}#person`,
             name: "Hoai-Chau Tran",
             url: canonicalUrl,
-            image: `https://${cfg.baseUrl}/avatar.png`,
+            image: `https://${cfg.baseUrl}/avatar.webp`,
             jobTitle: "Computer Science PhD Student",
             affiliation: {
               "@type": "Organization",
@@ -147,7 +147,16 @@ export default (() => {
               sk.style.display = 'flex';
               requestAnimationFrame(function () { sk.classList.remove('sk-hidden'); });
             }
-            window.addEventListener('load', hideSkeleton);
+            // The HTML is server-rendered, so it is usable as soon as parsing
+            // finishes. Do not block first paint on images, web fonts, analytics,
+            // or other third-party resources.
+            if (document.readyState === 'loading') {
+              document.addEventListener('DOMContentLoaded', hideSkeleton, { once: true });
+            } else {
+              hideSkeleton();
+            }
+            // Safety valve for unusually slow or blocked third-party resources.
+            setTimeout(hideSkeleton, 1200);
             document.addEventListener('nav', hideSkeleton);
             document.addEventListener('click', function (e) {
               var a = e.target && e.target.closest && e.target.closest('a');

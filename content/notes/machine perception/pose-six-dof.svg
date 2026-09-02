@@ -1,71 +1,55 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="960" height="510" viewBox="0 0 960 510" role="img" aria-labelledby="title desc">
-  <title id="title">Position and orientation of a quadruped robot</title>
-  <desc id="desc">A fixed world frame is connected to a body frame on a quadruped robot by a translation vector, with roll, pitch, and yaw shown about the body axes.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="500" viewBox="0 0 1000 500" role="img" aria-labelledby="title desc">
+  <title id="title">A 3D pose has three translations and three rotations</title>
+  <desc id="desc">A simple Excalidraw-style figure separates position from roll, pitch, and yaw.</desc>
   <defs>
-    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#111827"/>
-      <stop offset="1" stop-color="#05080e"/>
-    </linearGradient>
-    <radialGradient id="halo">
-      <stop offset="0" stop-color="#f59e0b" stop-opacity=".14"/>
-      <stop offset="1" stop-color="#f59e0b" stop-opacity="0"/>
-    </radialGradient>
-    <marker id="axis-green" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#22c55e"/></marker>
-    <marker id="axis-blue" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#38bdf8"/></marker>
-    <marker id="axis-red" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#fb7185"/></marker>
-    <marker id="axis-amber" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#fbbf24"/></marker>
+    <marker id="ink-arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0 0L10 5L0 10" fill="none" stroke="#1e1e1e" stroke-width="1.5"/></marker>
+    <marker id="orange-arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0 0L10 5L0 10" fill="none" stroke="#f08c00" stroke-width="1.5"/></marker>
+    <marker id="red-arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0 0L10 5L0 10" fill="none" stroke="#e03131" stroke-width="1.5"/></marker>
+    <style>
+      @font-face{font-family:Excalifont;src:url("Excalifont-Latin.woff2")}@font-face{font-family:Excalifont;src:url("Excalifont-Greek.woff2")}
+      .sk{font-family:Excalifont,"Comic Sans MS",sans-serif;fill:#1e1e1e}.math{font-family:Georgia,"Times New Roman",serif;fill:#1e1e1e}.ink{fill:none;stroke:#1e1e1e;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.ghost{fill:none;stroke:#1e1e1e;stroke-width:1;opacity:.32}.orange{fill:none;stroke:#f08c00;stroke-width:2.4;stroke-linecap:round}.red{fill:none;stroke:#e03131;stroke-width:2.2;stroke-linecap:round}.rule{fill:none;stroke:#ced4da;stroke-width:1}
+    </style>
   </defs>
+  <rect width="1000" height="500" fill="#fff"/>
+  <text class="sk" x="45" y="48" font-size="29">A 3D pose = position + orientation</text>
 
-  <rect width="960" height="510" rx="20" fill="url(#panel)"/>
-  <circle cx="640" cy="250" r="260" fill="url(#halo)"/>
-  <text x="48" y="52" font-family="system-ui, sans-serif" font-size="28" font-weight="700" fill="#f8fafc">A 3D pose has six degrees of freedom</text>
-  <text x="48" y="83" font-family="system-ui, sans-serif" font-size="18" fill="#94a3b8">Three locate the body frame. Three determine how it is oriented.</text>
+  <!-- position -->
+  <text class="sk" x="85" y="103" font-size="25">position</text>
+  <g transform="translate(115 330)">
+    <circle r="5" fill="#1e1e1e"/>
+    <path class="ghost" d="M0 0L105 0M0 0L0-100M0 0L-50 48" transform="translate(2 1)"/>
+    <path class="ink" d="M0 0L105 0" marker-end="url(#ink-arrow)"/><path class="ink" d="M0 0L0-100" marker-end="url(#ink-arrow)"/><path class="ink" d="M0 0L-50 48" marker-end="url(#ink-arrow)"/>
+    <text class="math" x="116" y="8" font-size="21">x</text><text class="math" x="-8" y="-114" font-size="21">z</text><text class="math" x="-70" y="69" font-size="21">y</text>
+  </g>
+  <path class="orange" d="M122 324C202 288 276 226 357 165" marker-end="url(#orange-arrow)"/>
+  <circle cx="368" cy="157" r="8" fill="#f08c00"/><circle cx="368" cy="157" r="12" fill="none" stroke="#fab005" stroke-width="1.2"/>
+  <text class="sk" x="389" y="164" font-size="22">body origin</text>
+  <text class="math" x="165" y="205" font-size="21"><tspan font-weight="700">t</tspan><tspan> = [t</tspan><tspan baseline-shift="sub" font-size="13">x</tspan><tspan baseline-shift="baseline">, t</tspan><tspan baseline-shift="sub" font-size="13">y</tspan><tspan baseline-shift="baseline">, t</tspan><tspan baseline-shift="sub" font-size="13">z</tspan><tspan baseline-shift="baseline">]</tspan><tspan baseline-shift="super" font-size="13">T</tspan></text>
 
-  <!-- Robot render -->
-  <image x="348" y="78" width="576" height="384" preserveAspectRatio="xMidYMid meet" href="quadruped-robot-cutout.png" xlink:href="quadruped-robot-cutout.png"/>
+  <path class="rule" d="M500 82L498 390"/>
 
-  <!-- World frame -->
-  <g transform="translate(135 380)" font-family="system-ui, sans-serif">
-    <circle r="6" fill="#f8fafc"/>
-    <line x1="0" y1="0" x2="112" y2="0" stroke="#22c55e" stroke-width="4" marker-end="url(#axis-green)"/>
-    <line x1="0" y1="0" x2="0" y2="-108" stroke="#38bdf8" stroke-width="4" marker-end="url(#axis-blue)"/>
-    <line x1="0" y1="0" x2="-61" y2="61" stroke="#fb7185" stroke-width="4" marker-end="url(#axis-red)"/>
-    <text x="124" y="7" font-size="22" font-style="italic" fill="#86efac">x<tspan baseline-shift="sub" font-size="13">W</tspan></text>
-    <text x="-7" y="-120" font-size="22" font-style="italic" fill="#7dd3fc">y<tspan baseline-shift="sub" font-size="13">W</tspan></text>
-    <text x="-86" y="82" font-size="22" font-style="italic" fill="#fda4af">z<tspan baseline-shift="sub" font-size="13">W</tspan></text>
-    <text x="-31" y="105" font-size="18" font-weight="700" fill="#e2e8f0">World W</text>
+  <!-- orientation -->
+  <text class="sk" x="545" y="103" font-size="25">orientation</text>
+  <g transform="translate(585 220)">
+    <path class="ghost" d="M-34-24L34-24L34 24L-34 24Z" transform="translate(2 -2)"/><path class="ink" d="M-34-24L34-24L34 24L-34 24Z"/>
+    <path class="ink" d="M0 0L74 0" marker-end="url(#ink-arrow)"/>
+    <path class="red" d="M-6-45C-43-31-43 30-6 45" marker-end="url(#red-arrow)"/>
+    <text class="math" x="-27" y="91" font-size="21">roll α</text><text class="sk" x="-22" y="119" font-size="17">about x</text>
+  </g>
+  <g transform="translate(760 220)">
+    <path class="ghost" d="M-34-24L34-24L34 24L-34 24Z" transform="translate(2 -2)"/><path class="ink" d="M-34-24L34-24L34 24L-34 24Z"/>
+    <path class="ink" d="M0 0L-53 53" marker-end="url(#ink-arrow)"/>
+    <path class="red" d="M-43-17C-17-53 29-48 45-15" marker-end="url(#red-arrow)"/>
+    <text class="math" x="-34" y="91" font-size="21">pitch β</text><text class="sk" x="-22" y="119" font-size="17">about y</text>
+  </g>
+  <g transform="translate(920 220)">
+    <path class="ghost" d="M-34-24L34-24L34 24L-34 24Z" transform="translate(2 -2)"/><path class="ink" d="M-34-24L34-24L34 24L-34 24Z"/>
+    <path class="ink" d="M0 0L0-74" marker-end="url(#ink-arrow)"/>
+    <path class="red" d="M-42 32C-70 3-63-38-32-54" marker-end="url(#red-arrow)"/>
+    <text class="math" x="-30" y="91" font-size="21">yaw γ</text><text class="sk" x="-22" y="119" font-size="17">about z</text>
   </g>
 
-  <!-- Translation from world origin to body origin -->
-  <line x1="143" y1="376" x2="598" y2="220" stroke="#fbbf24" stroke-width="4" stroke-dasharray="10 8" marker-end="url(#axis-amber)"/>
-  <text x="320" y="302" font-family="system-ui, sans-serif" font-size="17" font-weight="650" fill="#fde68a">position</text>
-
-  <!-- Body frame -->
-  <g transform="translate(610 216)" font-family="system-ui, sans-serif">
-    <circle r="7" fill="#f8fafc" stroke="#0f172a" stroke-width="2"/>
-    <line x1="0" y1="0" x2="-102" y2="48" stroke="#22c55e" stroke-width="5" marker-end="url(#axis-green)"/>
-    <line x1="0" y1="0" x2="91" y2="64" stroke="#38bdf8" stroke-width="5" marker-end="url(#axis-blue)"/>
-    <line x1="0" y1="0" x2="0" y2="-112" stroke="#fb7185" stroke-width="5" marker-end="url(#axis-red)"/>
-    <text x="-128" y="63" font-size="22" font-style="italic" fill="#86efac">x<tspan baseline-shift="sub" font-size="13">B</tspan></text>
-    <text x="100" y="79" font-size="22" font-style="italic" fill="#7dd3fc">y<tspan baseline-shift="sub" font-size="13">B</tspan></text>
-    <text x="9" y="-117" font-size="22" font-style="italic" fill="#fda4af">z<tspan baseline-shift="sub" font-size="13">B</tspan></text>
-  </g>
-  <rect x="532" y="163" width="80" height="30" rx="8" fill="#0f172a" stroke="#475569"/>
-  <text x="572" y="184" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" font-weight="700" fill="#f8fafc">Body B</text>
-
-  <!-- Rotation arcs -->
-  <path d="M487 227 C462 195 477 164 511 160" fill="none" stroke="#22c55e" stroke-width="4" stroke-dasharray="7 6" marker-end="url(#axis-green)"/>
-  <rect x="418" y="145" width="60" height="29" rx="8" fill="#0f172a" stroke="#22c55e"/>
-  <text x="448" y="165" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" font-weight="700" fill="#86efac">roll</text>
-
-  <path d="M703 239 C739 265 772 242 764 208" fill="none" stroke="#38bdf8" stroke-width="4" stroke-dasharray="7 6" marker-end="url(#axis-blue)"/>
-  <rect x="760" y="216" width="72" height="29" rx="8" fill="#0f172a" stroke="#38bdf8"/>
-  <text x="796" y="236" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" font-weight="700" fill="#7dd3fc">pitch</text>
-
-  <path d="M574 116 C590 87 628 86 646 113" fill="none" stroke="#fb7185" stroke-width="4" stroke-dasharray="7 6" marker-end="url(#axis-red)"/>
-  <rect x="647" y="84" width="62" height="29" rx="8" fill="#0f172a" stroke="#fb7185"/>
-  <text x="678" y="104" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" font-weight="700" fill="#fda4af">yaw</text>
-
-  <line x1="48" y1="472" x2="912" y2="472" stroke="#334155" stroke-width="1"/>
-  <text x="480" y="494" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" fill="#94a3b8">translation: x, y, z  ·  rotation: roll, pitch, yaw</text>
+  <!-- exact article formula -->
+  <path class="rule" d="M245 415C405 412 586 418 750 414"/>
+  <text class="math" x="500" y="466" text-anchor="middle" font-size="24"><tspan font-weight="700">x</tspan><tspan> = [ </tspan><tspan font-weight="700">t</tspan><tspan baseline-shift="sub" font-size="14">x</tspan><tspan baseline-shift="baseline">, </tspan><tspan font-weight="700">t</tspan><tspan baseline-shift="sub" font-size="14">y</tspan><tspan baseline-shift="baseline">, </tspan><tspan font-weight="700">t</tspan><tspan baseline-shift="sub" font-size="14">z</tspan><tspan baseline-shift="baseline">, α, β, γ ]</tspan><tspan baseline-shift="super" font-size="14">T</tspan></text>
 </svg>

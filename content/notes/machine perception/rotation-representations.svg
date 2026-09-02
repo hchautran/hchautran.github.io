@@ -1,36 +1,49 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="960" height="560" viewBox="0 0 960 560" role="img" aria-labelledby="title desc">
-  <title id="title">Comparison of four 3D rotation representations</title>
-  <desc id="desc">Cards compare rotation matrices, Euler angles, axis-angle, and unit quaternions.</desc>
-  <rect width="960" height="560" rx="18" fill="#f8fafc"/>
-  <text x="480" y="50" text-anchor="middle" font-family="system-ui, sans-serif" font-size="26" font-weight="700" fill="#0f172a">Four coordinate systems for the same rotation</text>
-  <g font-family="system-ui, sans-serif">
-    <g transform="translate(50 92)">
-      <rect width="410" height="190" rx="16" fill="#dbeafe" stroke="#2563eb" stroke-width="3"/>
-      <text x="24" y="42" font-size="24" font-weight="700" fill="#1e3a8a">Rotation matrix</text>
-      <text x="24" y="78" font-size="19" fill="#0f172a">orthonormal 3 × 3 matrix · 9 values</text>
-      <text x="24" y="118" font-size="18" fill="#334155">✓ direct action and composition</text>
-      <text x="24" y="151" font-size="18" fill="#334155">△ redundant, constrained storage</text>
-    </g>
-    <g transform="translate(500 92)">
-      <rect width="410" height="190" rx="16" fill="#fef3c7" stroke="#d97706" stroke-width="3"/>
-      <text x="24" y="42" font-size="24" font-weight="700" fill="#78350f">Euler angles</text>
-      <text x="24" y="78" font-size="19" fill="#0f172a">roll, pitch, yaw · 3 values</text>
-      <text x="24" y="118" font-size="18" fill="#334155">✓ intuitive for people</text>
-      <text x="24" y="151" font-size="18" fill="#334155">△ order-dependent; gimbal lock</text>
-    </g>
-    <g transform="translate(50 320)">
-      <rect width="410" height="190" rx="16" fill="#dcfce7" stroke="#16a34a" stroke-width="3"/>
-      <text x="24" y="42" font-size="24" font-weight="700" fill="#14532d">Axis-angle / rotation vector</text>
-      <text x="24" y="78" font-size="19" fill="#0f172a">axis with rotation angle · 3 or 4 values</text>
-      <text x="24" y="118" font-size="18" fill="#334155">✓ natural local update</text>
-      <text x="24" y="151" font-size="18" fill="#334155">△ wraps at the angle boundary</text>
-    </g>
-    <g transform="translate(500 320)">
-      <rect width="410" height="190" rx="16" fill="#f3e8ff" stroke="#9333ea" stroke-width="3"/>
-      <text x="24" y="42" font-size="24" font-weight="700" fill="#581c87">Unit quaternion</text>
-      <text x="24" y="78" font-size="19" fill="#0f172a">normalized four-vector · 4 values</text>
-      <text x="24" y="118" font-size="18" fill="#334155">✓ stable composition, interpolation</text>
-      <text x="24" y="151" font-size="18" fill="#334155">△ q and −q mean the same rotation</text>
-    </g>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="650" viewBox="0 0 1100 650" role="img" aria-labelledby="title desc">
+<title id="title">Four representations of the same 3D rotation</title><desc id="desc">An Excalidraw-style comparison with separate regions for rotation matrix, Euler angles, axis-angle, and unit quaternion.</desc>
+<defs><style>
+@font-face{font-family:Excalifont;src:url("Excalifont-Latin.woff2")}@font-face{font-family:Excalifont;src:url("Excalifont-Greek.woff2")}
+.sk{font-family:Excalifont,"Comic Sans MS",sans-serif;fill:#1e1e1e}.math{font-family:Georgia,"Times New Roman",serif;fill:#1e1e1e}.ink{fill:none;stroke:#1e1e1e;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.ghost{fill:none;stroke:#1e1e1e;stroke-width:1;opacity:.38;stroke-linecap:round}.good{fill:#1971c2}.bad{fill:#e03131}.rule{stroke:#ced4da;stroke-width:1.3}
+</style></defs>
+<rect width="1100" height="650" fill="#fff"/>
+<text class="sk" x="45" y="48" font-size="29">Four ways to write the same rotation</text>
+<path class="rule" d="M550 78L548 615M40 342C305 340 760 345 1060 342"/>
+
+<!-- rotation matrix -->
+<g transform="translate(45 105)">
+ <text class="sk" x="0" y="0" font-size="27">rotation matrix</text>
+ <path class="ghost" d="M17 38L17 191M17 38L38 38M17 191L38 191M227 38L227 191M227 38L206 38M227 191L206 191" transform="translate(2 -2)"/>
+ <path class="ink" d="M17 38L17 191M17 38L38 38M17 191L38 191M227 38L227 191M227 38L206 38M227 191L206 191"/>
+ <text class="math" x="55" y="82" font-size="23">r₁₁   r₁₂   r₁₃</text><text class="math" x="55" y="125" font-size="23">r₂₁   r₂₂   r₂₃</text><text class="math" x="55" y="168" font-size="23">r₃₁   r₃₂   r₃₃</text>
+ <text class="sk good" x="285" y="82" font-size="21">direct action</text><text class="sk good" x="285" y="111" font-size="21">easy composition</text>
+ <text class="sk bad" x="285" y="157" font-size="21">9 values</text><text class="sk bad" x="285" y="186" font-size="21">with constraints</text>
+ <text class="math" x="35" y="225" font-size="20"><tspan font-weight="700">R</tspan><tspan baseline-shift="super" font-size="12">T</tspan><tspan baseline-shift="baseline" font-weight="700">R</tspan><tspan> = </tspan><tspan font-weight="700">I</tspan><tspan>,   det(</tspan><tspan font-weight="700">R</tspan><tspan>) = 1</tspan></text>
+</g>
+
+<!-- Euler angles -->
+<g transform="translate(595 105)">
+ <text class="sk" x="0" y="0" font-size="27">Euler angles</text>
+ <g transform="translate(98 127)"><path class="ghost" d="M-50 65C-91 38-92-39-50-67M-57-63L-48-69L-49-57M50 65C91 38 92-39 50-67M57-63L48-69L49-57M0-75L0 76" transform="translate(2 1)"/><path class="ink" d="M-50 65C-91 38-92-39-50-67M-57-63L-48-69L-49-57M50 65C91 38 92-39 50-67M57-63L48-69L49-57M0-75L0 76"/></g>
+ <text class="math" x="188" y="89" font-size="22">roll α</text><text class="math" x="188" y="127" font-size="22">pitch β</text><text class="math" x="188" y="165" font-size="22">yaw γ</text>
+ <text class="sk good" x="320" y="83" font-size="21">3 intuitive angles</text><text class="sk bad" x="320" y="132" font-size="21">order-dependent</text><text class="sk bad" x="320" y="161" font-size="21">gimbal lock</text>
+ <text class="math" x="45" y="225" font-size="19"><tspan font-weight="700">R</tspan><tspan> = </tspan><tspan font-weight="700">R</tspan><tspan baseline-shift="sub" font-size="12">z</tspan><tspan baseline-shift="baseline">(γ) </tspan><tspan font-weight="700">R</tspan><tspan baseline-shift="sub" font-size="12">y</tspan><tspan baseline-shift="baseline">(β) </tspan><tspan font-weight="700">R</tspan><tspan baseline-shift="sub" font-size="12">x</tspan><tspan baseline-shift="baseline">(α)</tspan></text>
+</g>
+
+<!-- axis-angle -->
+<g transform="translate(45 390)">
+ <text class="sk" x="0" y="0" font-size="27">axis–angle</text>
+ <path class="ghost" d="M35 177L202 35M190 39L205 31L199 47M82 126C99 153 137 156 159 132" transform="translate(2 2)"/>
+ <path class="ink" d="M35 177L202 35M190 39L205 31L199 47M82 126C99 153 137 156 159 132"/>
+ <text class="math" x="215" y="45" font-size="22">axis u</text><text class="math" x="108" y="175" font-size="22">angle θ</text>
+ <text class="sk good" x="300" y="89" font-size="21">compact local update</text><text class="sk bad" x="300" y="138" font-size="21">wraps at angle</text><text class="sk bad" x="300" y="167" font-size="21">boundary</text>
+ <text class="math" x="195" y="220" font-size="21"><tspan font-weight="700">ω</tspan><tspan> = θ</tspan><tspan font-weight="700">u</tspan></text>
+</g>
+
+<!-- quaternion -->
+<g transform="translate(595 390)">
+ <text class="sk" x="0" y="0" font-size="27">unit quaternion</text>
+ <g transform="translate(105 125)"><circle class="ghost" r="76" transform="translate(2 -2)"/><circle class="ink" r="76"/><path class="ghost" d="M0 0L45-46M0 0L-49-27M0 0L17 61" transform="translate(2 1)"/><path class="ink" d="M0 0L45-46M0 0L-49-27M0 0L17 61"/></g>
+ <text class="math" x="205" y="76" font-size="21"><tspan font-weight="700">q</tspan><tspan> = (w, </tspan><tspan font-weight="700">v</tspan><tspan>)</tspan></text><text class="math" x="205" y="108" font-size="21"><tspan>w² + ‖</tspan><tspan font-weight="700">v</tspan><tspan>‖² = 1</tspan></text>
+ <text class="sk good" x="205" y="153" font-size="19">stable composition</text><text class="sk good" x="205" y="180" font-size="19">and interpolation</text>
+ <text class="sk bad" x="205" y="222" font-size="19">q and −q agree</text>
+</g>
 </svg>

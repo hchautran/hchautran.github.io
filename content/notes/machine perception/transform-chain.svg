@@ -1,29 +1,20 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="960" height="420" viewBox="0 0 960 420" role="img" aria-labelledby="title desc">
-  <title id="title">Composition from sensor frame through body frame to world frame</title>
-  <desc id="desc">A three-node chain showing a sensor point transformed to the body and then the world.</desc>
-  <defs>
-    <marker id="chain-arrow" markerWidth="12" markerHeight="12" refX="10" refY="4" orient="auto"><path d="M0,0 L0,8 L11,4 z" fill="#315f7d"/></marker>
-  </defs>
-  <rect width="960" height="420" rx="18" fill="#f8fafc"/>
-  <text x="480" y="48" text-anchor="middle" font-family="system-ui, sans-serif" font-size="25" font-weight="700" fill="#0f172a">Follow the frame chain from source to destination</text>
-  <g font-family="system-ui, sans-serif" text-anchor="middle">
-    <rect x="60" y="118" width="220" height="138" rx="18" fill="#dbeafe" stroke="#2563eb" stroke-width="3"/>
-    <text x="170" y="163" font-size="24" font-weight="700" fill="#1e3a8a">Sensor frame S</text>
-    <text x="170" y="202" font-size="20" fill="#334155">perception</text>
-    <text x="170" y="232" font-size="18" fill="#0f172a">sensor coordinates</text>
-    <rect x="370" y="118" width="220" height="138" rx="18" fill="#dcfce7" stroke="#16a34a" stroke-width="3"/>
-    <text x="480" y="163" font-size="24" font-weight="700" fill="#14532d">Body frame B</text>
-    <text x="480" y="202" font-size="20" fill="#334155">calibration</text>
-    <text x="480" y="232" font-size="18" fill="#0f172a">vehicle coordinates</text>
-    <rect x="680" y="118" width="220" height="138" rx="18" fill="#ffedd5" stroke="#ea580c" stroke-width="3"/>
-    <text x="790" y="163" font-size="24" font-weight="700" fill="#7c2d12">World frame W</text>
-    <text x="790" y="202" font-size="20" fill="#334155">localization</text>
-    <text x="790" y="232" font-size="18" fill="#0f172a">map coordinates</text>
-  </g>
-  <line x1="282" y1="187" x2="356" y2="187" stroke="#315f7d" stroke-width="5" marker-end="url(#chain-arrow)"/>
-  <line x1="592" y1="187" x2="666" y2="187" stroke="#315f7d" stroke-width="5" marker-end="url(#chain-arrow)"/>
-  <text x="324" y="164" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" fill="#315f7d">calibrate</text>
-  <text x="634" y="164" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" fill="#315f7d">localize</text>
-  <rect x="145" y="305" width="670" height="72" rx="14" fill="#e2e8f0"/>
-  <text x="480" y="350" text-anchor="middle" font-family="system-ui, sans-serif" font-size="22" font-weight="700" fill="#0f172a">sensor → body → world</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="455" viewBox="0 0 960 455" role="img" aria-labelledby="t d">
+<title id="t">Transform chain from sensor to vehicle to world</title><desc id="d">Three sketched coordinate frames joined by calibration and localization arrows.</desc>
+<defs><marker id="a" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9" fill="none" stroke="#1e1e1e" stroke-width="1.5"/></marker><style>@font-face{font-family:Excalifont;src:url("Excalifont-Latin.woff2")}@font-face{font-family:Excalifont;src:url("Excalifont-Greek.woff2")}.i{fill:none;stroke:#1e1e1e;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.n{font:20px Excalifont,"Comic Sans MS",sans-serif;fill:#1e1e1e}.blue{fill:none;stroke:#228be6;stroke-width:2;stroke-dasharray:3 6}.red{fill:#fa5252}</style></defs>
+<rect width="960" height="455" fill="#fffefb"/><text class="n" x="44" y="43" font-size="25">Follow the frames from the measurement to the map</text>
+<g fill="none" stroke-width="1.1"><path d="M82 94L158 94L175 158L99 158Z" transform="translate(-6 -4)" stroke="#228be6"/><path d="M82 94L158 94L175 158L99 158Z" transform="translate(-3 -2)" stroke="#40c057"/><path d="M400 121c31-17 95-17 126 0l-10 48H410z" transform="translate(-5 -4)" stroke="#fab005"/><path d="M716 84h151v118H716z" transform="translate(-5 -4)" stroke="#fa5252"/></g>
+<g class="i"><path d="M82 94L158 94L175 158L99 158Z"/><circle cx="129" cy="112" r="12"/><path d="M102 158l-14 28M165 158l18 28"/><path d="M400 121c31-17 95-17 126 0l-10 48H410zM421 169l-10 30M505 169l12 30"/><path d="M716 84h151v118H716zM716 142h151M791 84v118"/></g>
+<circle cx="129" cy="112" r="3" class="red"/><path class="blue" d="M129 112C300 86 513 91 790 144"/>
+<g transform="translate(150 280)"><circle r="4" fill="#202020"/><path class="i" d="M0 0L70 0" marker-end="url(#a)"/><path class="i" d="M0 0L0-65" marker-end="url(#a)"/><path class="i" d="M0 0L-37-38" marker-end="url(#a)"/></g><text class="n" x="91" y="328">LiDAR frame S</text>
+<path class="i" d="M257 280L359 280" marker-end="url(#a)"/><text class="n" x="270" y="257">calibration</text>
+<g transform="translate(455 280)"><circle r="4" fill="#202020"/><path class="i" d="M0 0L70 0" marker-end="url(#a)"/><path class="i" d="M0 0L0-65" marker-end="url(#a)"/><path class="i" d="M0 0L-37-38" marker-end="url(#a)"/></g><text class="n" x="388" y="328">Vehicle frame B</text>
+<path class="i" d="M566 280L668 280" marker-end="url(#a)"/><text class="n" x="574" y="257">localization</text>
+<g transform="translate(765 280)"><circle r="4" fill="#202020"/><path class="i" d="M0 0L70 0" marker-end="url(#a)"/><path class="i" d="M0 0L0-65" marker-end="url(#a)"/><path class="i" d="M0 0L-37-38" marker-end="url(#a)"/></g><text class="n" x="706" y="328">World frame W</text>
+<path d="M190 365C385 363 582 368 775 364" fill="none" stroke="#ced4da" stroke-width="1"/>
+<g transform="translate(321 416)" font-family="Georgia,serif" fill="#1e1e1e">
+ <text x="0" y="-10" font-size="14">W</text><text x="17" y="4" font-size="25" font-weight="700">p̂</text><text x="45" y="4" font-size="25">=</text>
+ <text x="78" y="-10" font-size="14">W</text><text x="95" y="4" font-size="25" font-weight="700">T</text><text x="113" y="13" font-size="14">B</text>
+ <text x="139" y="-10" font-size="14">B</text><text x="156" y="4" font-size="25" font-weight="700">T</text><text x="174" y="13" font-size="14">S</text>
+ <text x="200" y="-10" font-size="14">S</text><text x="217" y="4" font-size="25" font-weight="700">p̂</text>
+</g>
 </svg>

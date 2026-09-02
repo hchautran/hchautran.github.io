@@ -1,27 +1,65 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="900" height="360" viewBox="0 0 900 360" role="img" aria-labelledby="title desc">
-  <title id="title">Step 1: locate the body origin</title>
-  <desc id="desc">An orange translation vector runs from the world origin to the body origin.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="430" viewBox="0 0 920 430" role="img" aria-labelledby="title description">
+  <title id="title">Step 1: translate frame B relative to frame W</title>
+  <desc id="description">Two coordinate frames with parallel axes. An orange vector labelled W t sub B runs from the origin of world frame W to the origin of body frame B.</desc>
   <defs>
-    <marker id="s1-blue" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#2563eb"/></marker>
-    <marker id="s1-green" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#16a34a"/></marker>
-    <marker id="s1-orange" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#ea580c"/></marker>
+    <style>
+      @font-face{font-family:Excalifont;src:url("Excalifont-Latin.woff2")}
+      @font-face{font-family:Excalifont;src:url("Excalifont-Greek.woff2")}
+      .hand{font-family:Excalifont,"Comic Sans MS",sans-serif;fill:#1e1e1e}
+      .math{font-family:Georgia,"Times New Roman",serif;fill:#1e1e1e;font-style:italic}
+      .ink{fill:none;stroke:#1e1e1e;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+      .ghost{fill:none;stroke:#1e1e1e;stroke-width:1.1;stroke-linecap:round;stroke-linejoin:round;opacity:.24}
+      .move{fill:none;stroke:#f08c00;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+    </style>
+    <marker id="ink-arrow" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto" markerUnits="strokeWidth">
+      <path d="M1 1L9 5.5L1 10" fill="none" stroke="#1e1e1e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="orange-arrow" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto" markerUnits="strokeWidth">
+      <path d="M1 1L9 5.5L1 10" fill="none" stroke="#f08c00" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
   </defs>
-  <rect width="900" height="360" rx="18" fill="#f8fafc"/>
-  <text x="42" y="47" font-family="system-ui, sans-serif" font-size="25" font-weight="700" fill="#0f172a">Step 1 · Locate the body origin</text>
-  <g transform="translate(120 286)" font-family="system-ui, sans-serif">
-    <circle r="7" fill="#0f172a"/>
-    <line x1="0" y1="0" x2="125" y2="0" stroke="#16a34a" stroke-width="5" marker-end="url(#s1-green)"/>
-    <line x1="0" y1="0" x2="0" y2="-115" stroke="#2563eb" stroke-width="5" marker-end="url(#s1-blue)"/>
-    <text x="134" y="8" font-size="23" font-style="italic" fill="#166534">x<tspan baseline-shift="sub" font-size="14">W</tspan></text>
-    <text x="-8" y="-128" font-size="23" font-style="italic" fill="#1d4ed8">y<tspan baseline-shift="sub" font-size="14">W</tspan></text>
-    <text x="-45" y="43" font-size="19" font-weight="650" fill="#334155">World W</text>
+
+  <rect width="920" height="430" fill="#fffefb"/>
+  <text class="hand" x="42" y="46" font-size="26">Step 1 · Translate one frame to another</text>
+  <text class="hand" x="42" y="78" font-size="18" fill="#555">Only the origin moves; the axes keep the same orientation.</text>
+
+  <!-- World frame W -->
+  <g transform="translate(155 325)">
+    <path class="ghost" d="M2 2C47 3 90 1 132 2"/>
+    <path class="ghost" d="M2 2C1-38 3-82 2-123"/>
+    <path class="ink" d="M0 0C46 0 90 1 132 0" marker-end="url(#ink-arrow)"/>
+    <path class="ink" d="M0 0C0-41 1-83 0-123" marker-end="url(#ink-arrow)"/>
+    <circle cx="0" cy="0" r="4.5" fill="#1e1e1e"/>
+    <text class="math" x="143" y="8" font-size="22">x<tspan baseline-shift="sub" font-size="14">W</tspan></text>
+    <text class="math" x="-13" y="-138" font-size="22">y<tspan baseline-shift="sub" font-size="14">W</tspan></text>
+    <text class="hand" x="-41" y="43" font-size="22">frame W</text>
+    <text class="math" x="-28" y="-10" font-size="17">O<tspan baseline-shift="sub" font-size="11">W</tspan></text>
   </g>
-  <line x1="128" y1="282" x2="644" y2="122" stroke="#ea580c" stroke-width="7" marker-end="url(#s1-orange)"/>
-  <rect x="326" y="180" width="158" height="38" rx="10" fill="#ffedd5"/>
-  <text x="405" y="205" text-anchor="middle" font-family="system-ui, sans-serif" font-size="18" font-weight="650" fill="#9a3412">translation vector</text>
-  <circle cx="660" cy="117" r="11" fill="#f59e0b" stroke="#92400e" stroke-width="3"/>
-  <text x="682" y="124" font-family="system-ui, sans-serif" font-size="21" font-weight="700" fill="#334155">body origin</text>
-  <rect x="525" y="254" width="324" height="67" rx="12" fill="#e2e8f0"/>
-  <text x="687" y="282" text-anchor="middle" font-family="system-ui, sans-serif" font-size="17" fill="#475569">This answers “Where is frame B?”</text>
-  <text x="687" y="307" text-anchor="middle" font-family="system-ui, sans-serif" font-size="17" fill="#475569">The point has not been considered yet.</text>
+
+  <!-- Body frame B, translated but not rotated -->
+  <g transform="translate(650 190)">
+    <path class="ghost" d="M2 2C46 3 88 1 128 2"/>
+    <path class="ghost" d="M2 2C1-34 3-72 2-108"/>
+    <path class="ink" d="M0 0C44 0 86 1 128 0" marker-end="url(#ink-arrow)"/>
+    <path class="ink" d="M0 0C0-36 1-73 0-108" marker-end="url(#ink-arrow)"/>
+    <circle cx="0" cy="0" r="5.5" fill="#f08c00" stroke="#1e1e1e" stroke-width="1.8"/>
+    <text class="math" x="139" y="8" font-size="22">x<tspan baseline-shift="sub" font-size="14">B</tspan></text>
+    <text class="math" x="-13" y="-123" font-size="22">y<tspan baseline-shift="sub" font-size="14">B</tspan></text>
+    <text class="hand" x="-42" y="43" font-size="22">frame B</text>
+    <text class="math" x="-28" y="-12" font-size="17">O<tspan baseline-shift="sub" font-size="11">B</tspan></text>
+  </g>
+
+  <!-- Translation from the world origin to the body origin -->
+  <path class="move" d="M162 319C319 278 476 235 640 193" marker-end="url(#orange-arrow)"/>
+  <path d="M163 323C319 282 477 239 639 197" fill="none" stroke="#f08c00" stroke-width="1" opacity=".28" stroke-linecap="round"/>
+
+  <!-- Exact article notation, placed above rather than on the vector -->
+  <g transform="translate(360 206)">
+    <text class="math" x="0" y="-10" font-size="16">W</text>
+    <text class="math" x="17" y="3" font-size="27" font-weight="700">t</text>
+    <text class="math" x="31" y="12" font-size="16">B</text>
+  </g>
+
+  <path d="M365 362C445 370 526 369 607 361" fill="none" stroke="#adb5bd" stroke-width="1.4" stroke-linecap="round"/>
+  <text class="hand" x="376" y="398" font-size="20">same axes, new origin</text>
 </svg>

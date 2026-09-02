@@ -7,7 +7,7 @@ lastmod: 2026-04-02
 
 <div class="profile-hero">
   <div class="profile-avatar">
-    <img src="./avatar.png" alt="Profile Picture" width="160" height="160">
+    <img src="./avatar.webp" alt="Profile Picture" width="160" height="160" loading="eager" decoding="async" fetchpriority="high">
   </div>
   <div class="profile-bio">
     <h2 class="profile-name">Hoai-Chau Tran</h2>
@@ -123,7 +123,7 @@ You'll also find my [notes](notes/) here - continuously evolving as I learn and 
 ---
 
 
-<script type="text/javascript" id="clustrmaps" src="//clustrmaps.com/map_v2.js?d=VV_9AxgUp6rEn_vluenH0AQsjlWKPLdDalJIaJg96ms&cl=ffffff&w=a"></script>
+<script async type="text/javascript" id="clustrmaps" src="//clustrmaps.com/map_v2.js?d=VV_9AxgUp6rEn_vluenH0AQsjlWKPLdDalJIaJg96ms&cl=ffffff&w=a"></script>
 
 <style>
 /* ── Profile Hero ── */
