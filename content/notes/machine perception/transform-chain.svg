@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="420" viewBox="0 0 960 420" role="img" aria-labelledby="title desc">
+  <title id="title">Composition from sensor frame through body frame to world frame</title>
+  <desc id="desc">A three-node chain showing a sensor point transformed to the body and then the world.</desc>
+  <defs>
+    <marker id="chain-arrow" markerWidth="12" markerHeight="12" refX="10" refY="4" orient="auto"><path d="M0,0 L0,8 L11,4 z" fill="#315f7d"/></marker>
+  </defs>
+  <rect width="960" height="420" rx="18" fill="#f8fafc"/>
+  <text x="480" y="48" text-anchor="middle" font-family="system-ui, sans-serif" font-size="25" font-weight="700" fill="#0f172a">Follow the frame chain from source to destination</text>
+  <g font-family="system-ui, sans-serif" text-anchor="middle">
+    <rect x="60" y="118" width="220" height="138" rx="18" fill="#dbeafe" stroke="#2563eb" stroke-width="3"/>
+    <text x="170" y="163" font-size="24" font-weight="700" fill="#1e3a8a">Sensor frame S</text>
+    <text x="170" y="202" font-size="20" fill="#334155">perception</text>
+    <text x="170" y="232" font-size="18" fill="#0f172a">sensor coordinates</text>
+    <rect x="370" y="118" width="220" height="138" rx="18" fill="#dcfce7" stroke="#16a34a" stroke-width="3"/>
+    <text x="480" y="163" font-size="24" font-weight="700" fill="#14532d">Body frame B</text>
+    <text x="480" y="202" font-size="20" fill="#334155">calibration</text>
+    <text x="480" y="232" font-size="18" fill="#0f172a">vehicle coordinates</text>
+    <rect x="680" y="118" width="220" height="138" rx="18" fill="#ffedd5" stroke="#ea580c" stroke-width="3"/>
+    <text x="790" y="163" font-size="24" font-weight="700" fill="#7c2d12">World frame W</text>
+    <text x="790" y="202" font-size="20" fill="#334155">localization</text>
+    <text x="790" y="232" font-size="18" fill="#0f172a">map coordinates</text>
+  </g>
+  <line x1="282" y1="187" x2="356" y2="187" stroke="#315f7d" stroke-width="5" marker-end="url(#chain-arrow)"/>
+  <line x1="592" y1="187" x2="666" y2="187" stroke="#315f7d" stroke-width="5" marker-end="url(#chain-arrow)"/>
+  <text x="324" y="164" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" fill="#315f7d">calibrate</text>
+  <text x="634" y="164" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" fill="#315f7d">localize</text>
+  <rect x="145" y="305" width="670" height="72" rx="14" fill="#e2e8f0"/>
+  <text x="480" y="350" text-anchor="middle" font-family="system-ui, sans-serif" font-size="22" font-weight="700" fill="#0f172a">sensor → body → world</text>
+</svg>

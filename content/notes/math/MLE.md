@@ -1,6 +1,8 @@
 ---
-title: Maximum Likelihood Estimation
+title: 4. Maximum Likelihood Estimation
 description: A derivation of MLE from first principles.
+date: 2026-03-22
+lastmod: 2026-08-30
 draft: false
 tags:
   - math
@@ -9,10 +11,10 @@ tags:
 
 ## Maximum Likelihood Estimation (MLE)
 
-
 Maximum Likelihood Estimation (MLE) is one of the most fundamental methods for fitting a parametric model to observed data. The core idea is simple: given a dataset, find the parameters $\theta$ that make the observed data **most probable** under the model.
 
 ---
+
 ## Setup
 
 Suppose we observe a dataset $\mathcal{X} = \{\mathbf{x}^{(1)}, \dots, \mathbf{x}^{(N)}\}$ drawn i.i.d (independent and identically distributed sampling). from an unknown distribution $p_{data}(\mathbf{x})$. We posit a parametric family of [joint distributions](join_prob.md) $p_\theta(\mathbf{x})$ (note that $\mathbf{x}\in \mathbb{R}^d$ is vector of multiple features) and want to find the $\theta$ that best explains the data - assigning high probability to frequently occurring data and low probability to rare observations.
@@ -23,13 +25,14 @@ $$
 p_\theta(\mathcal{X}) = \prod_{i=1}^{N} p_\theta(\mathbf{x}^{(i)}) \tag{1}
 $$
 
-
 Thus the MLE objective is:
+
 $$
 \hat{\theta}_{\text{MLE}} = \underset{\theta}{\arg\max} \prod_{i=1}^{N} p_\theta(\mathbf{x}^{(i)}) \tag{2}
 $$
 
 ---
+
 ## Log-Likelihood
 
 Products are numerically unstable and hard to differentiate. Taking the logarithm - a monotone transformation - converts the product into a sum without changing the argmax:
@@ -51,6 +54,7 @@ $$
 $$
 
 ---
+
 ## Examples
 
 ### Example 1: Coin Flipping (Bernoulli MLE)
@@ -84,7 +88,6 @@ $$
 $$
 
 The MLE estimate is simply the **empirical fraction of heads** - exactly what intuition suggests.
-
 
 ### Example 2: Gaussian MLE
 
@@ -170,10 +173,11 @@ $$
 
 This is the well-known **ordinary least squares (OLS)** solution. The key insight is that **minimizing MSE in linear regression is exactly MLE under a Gaussian noise assumption**.
 
----   
+---
+
 ## Connection to KL Divergence
 
-Minimizing the NLL is equivalent to minimizing the KL divergence between $p_{data}(\mathbf{x})$ and $p_\theta(\mathbf{x})$:
+Minimizing the NLL is equivalent to minimizing the [[entropy-relative-entropy-mutual-information#3. Relative Entropy (KL Divergence)|KL divergence]] between $p_{data}(\mathbf{x})$ and $p_\theta(\mathbf{x})$:
 
 $$
 \begin{align}
@@ -184,14 +188,13 @@ $$
 
 Since the second term does not depend on $\theta$, minimizing $\mathcal{D}_{KL}$ reduces exactly to minimizing the NLL.
 
-
---- 
+---
 
 ## Summary
 
 This note has covered MLE and its application to simple parametric distribution families, illustrated through three classical examples: Gaussian estimation, Bernoulli coin flipping, and Gaussian linear regression. Note that in practice, $p_\theta(\mathbf{x})$ rarely admits a closed-form solution like in the examples above - it is often a deep, expressive neural network, in which case the MLE objective must be optimized iteratively via [gradient descent](https://en.wikipedia.org/wiki/Gradient_descent).
 
-
 ---
+
 > [!note]- Notations
 > See the [notation reference](notation.md) for a summary of symbols used across all notes.

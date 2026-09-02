@@ -41,6 +41,14 @@ button#explorer {
   overflow: hidden;
 }
 
+#explorer-ul {
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 #explorer-content {
   list-style: none;
   overflow: hidden;

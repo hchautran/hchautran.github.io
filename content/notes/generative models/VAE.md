@@ -1,17 +1,17 @@
 ---
-title: Variational AutoEncoder
+title: 1. Variational AutoEncoder
 description: A ground-up derivation of the VAE, covering the ELBO, encoder/decoder construction.
+date: 2026-03-22
+lastmod: 2026-08-30
 draft: false
 tags:
   - generative models
   - notes
 ---
 
-
-
 In a lot of generative models courses, the starting point of training a neural network to generate new realistic data is the Variational Autoencoder (VAE). This model has its origins in the AutoEncoder (AE), which serves a different purpose: to reconstruct data:
 
-![AE](AE.svg) *Figure 2: The standard autoencoder compresses input $\mathbf{x}$ into a fixed latent code $\mathbf{z}$ via the encoder, then reconstructs $\mathbf{x}'$ via the decoder.  $\mathbf{z}$ is a single point with no probabilistic structure.*
+![AE](AE.svg) _Figure 2: The standard autoencoder compresses input $\mathbf{x}$ into a fixed latent code $\mathbf{z}$ via the encoder, then reconstructs $\mathbf{x}'$ via the decoder. $\mathbf{z}$ is a single point with no probabilistic structure._
 
 Formally, AE consists of two parts: an encoder $f_\phi$ that compresses the input $\mathbf{x}$ into a compact latent representation $\mathbf{z} = f_\phi(\mathbf{x})$, and a decoder $g_\theta$ that reconstructs the input from that representation $\hat{\mathbf{x}} = g_\theta(\mathbf{z})$. The network is trained end-to-end by minimizing a reconstruction loss, typically mean squared error:
 
@@ -19,30 +19,30 @@ $$
 \mathcal{L} = \| \mathbf{x} - g_\theta(f_\phi(\mathbf{x})) \|^2
 $$
 
-
 The bottleneck forces the encoder to learn a compressed, meaningful representation of the data. Once trained, the latent space can be used for tasks like dimensionality reduction or feature extraction. However, autoencoders have a critical limitation to serve as a generative model: the latent space has no guaranteed structure. Points in latent space are not organized in any principled way, so randomly sampling an arbitrary $\mathbf{z}$ and decoding it often yields garbage. There is no way to smoothly interpolate between examples or generate novel, realistic samples.
 
-The Variational Autoencoder (VAE), introduced by [Kingma & Welling (2013)](https://arxiv.org/abs/1312.6114), addresses this by imposing a probabilistic structure on the latent space. Instead of mapping $\mathbf{x}$ to a fixed point $\mathbf{z}$, the encoder $q_\phi(\mathbf{z}\mid \mathbf{x})$ outputs the parameters of a distribution (usually a Gaussian). A latent vector $\mathbf{z}$ is then sampled from this distribution rather than deterministically computed. The decoder $p_\theta(\mathbf{x} \mid \mathbf{z})$ learns to reconstruct $\mathbf{x}$ from these sampled latents. A prior $p(\mathbf{z})$ is placed over the latent space, and the encoder is regularized to stay close to this prior via KL divergence. This shift - from a deterministic bottleneck to a learned posterior - gives the latent space two important properties:
+The Variational Autoencoder (VAE), introduced by [Kingma & Welling (2013)](https://arxiv.org/abs/1312.6114), addresses this by imposing a probabilistic structure on the latent space. Instead of mapping $\mathbf{x}$ to a fixed point $\mathbf{z}$, the encoder $q_\phi(\mathbf{z}\mid \mathbf{x})$ outputs the parameters of a distribution (usually a Gaussian). A latent vector $\mathbf{z}$ is then sampled from this distribution rather than deterministically computed. The decoder $p_\theta(\mathbf{x} \mid \mathbf{z})$ learns to reconstruct $\mathbf{x}$ from these sampled latents. A prior $p(\mathbf{z})$ is placed over the latent space, and the encoder is regularized to stay close to this prior via [[entropy-relative-entropy-mutual-information#3. Relative Entropy (KL Divergence)|KL divergence]]. This shift - from a deterministic bottleneck to a learned posterior - gives the latent space two important properties:
 
 - **Continuity**: Nearby points in latent space decode to similar outputs. Because the encoder maps each input $\mathbf{x}$ to a distribution over $\mathbf{z}$ rather than a single point, inputs that are similar naturally produce overlapping distributions - and thus neighboring regions in latent space correspond to similar decoded outputs.
 
 - **Completeness**: Any point sampled from the prior produces a meaningful output. By regularizing the encoder's posterior $q_\phi(\mathbf{z} \mid \mathbf{x})$ to stay close to the prior $\mathcal{N}(\mathbf{0}, \mathbf{I})$, the model ensures that the high-probability regions of the latent space are densely covered with meaningful structure, so random samples from the prior reliably decode into coherent outputs.
 
 ---
-![VAE](vae.svg) *Figure 2: The VAE encoder $q_\phi(\mathbf{z} \mid \mathbf{x})$ maps input $\mathbf{x}$ to a Gaussian distribution in latent space, regularized toward the prior $p(\mathbf{z}) = \mathcal{N}(\mathbf{0}, \mathbf{I})$. A vector $\mathbf{z}$ is then sampled from $q_\phi(\mathbf{z} \mid \mathbf{x})$ and decoded by $p_\theta(\mathbf{x} \mid \mathbf{z})$ to reconstruct $\mathbf{x}'$.*
+
+![VAE](vae.svg) _Figure 2: The VAE encoder $q_\phi(\mathbf{z} \mid \mathbf{x})$ maps input $\mathbf{x}$ to a Gaussian distribution in latent space, regularized toward the prior $p(\mathbf{z}) = \mathcal{N}(\mathbf{0}, \mathbf{I})$. A vector $\mathbf{z}$ is then sampled from $q_\phi(\mathbf{z} \mid \mathbf{x})$ and decoded by $p_\theta(\mathbf{x} \mid \mathbf{z})$ to reconstruct $\mathbf{x}'$._
 
 ## 1. Constructions of VAE
-Suppose we have a dataset of samples drawn i.i.d. from an unknown, complex [distribution](join_prob.md) $p_{data}(\mathbf{x})$.  Since the true form of $p_{data}$ is unknown, we cannot generate new sample by drawing from $p_{data}(\mathbf{x})$ directly. The goal of a generative model is to learn a tractable approximation $p_\theta(\mathbf{x})$ from this finite dataset by minimizing a divergence $\mathcal{D}_f$ between the two distributions. 
 
-![genai](genai.svg) *Figure 3: The goal of a generative model: find parameters $\theta$ that minimize the divergence $\mathcal{D}(p_{data}(\mathbf{x}),\, p_\theta(\mathbf{x}))$ between the true data distribution (blue) and the learned model distribution (yellow). As $\mathcal{D} \to 0$, the model distribution increasingly overlaps with the data distribution.*
+Suppose we have a dataset of samples drawn i.i.d. from an unknown, complex [distribution](join_prob.md) $p_{data}(\mathbf{x})$. Since the true form of $p_{data}$ is unknown, we cannot generate new sample by drawing from $p_{data}(\mathbf{x})$ directly. The goal of a generative model is to learn a tractable approximation $p_\theta(\mathbf{x})$ from this finite dataset by minimizing a divergence $\mathcal{D}_f$ between the two distributions.
 
+![genai](genai.svg) _Figure 3: The goal of a generative model: find parameters $\theta$ that minimize the divergence $\mathcal{D}(p_{data}(\mathbf{x}),\, p_\theta(\mathbf{x}))$ between the true data distribution (blue) and the learned model distribution (yellow). As $\mathcal{D} \to 0$, the model distribution increasingly overlaps with the data distribution._
 
-Once the optimal parameters $\theta$ are found, $p_\theta(\mathbf{x})$  can be used to serve as a proxy for $p_{data}(\mathbf{x})$, enabling two key capabilities:
+Once the optimal parameters $\theta$ are found, $p_\theta(\mathbf{x})$ can be used to serve as a proxy for $p_{data}(\mathbf{x})$, enabling two key capabilities:
 
 - **Generation**: Draw new, realistic samples from $p_{data}(\mathbf{x})$ via sampling methods such as [Monte Carlo Sampling](https://en.wikipedia.org/wiki/Monte_Carlo_method) via $p_\theta(\mathbf{x})$.
 - **Evaluation**: Assess how likely a given sample $\mathbf{x}'$ is under the learned distribution $p_\theta(\mathbf{x})$ - for instance, judging whether an image $\mathbf{x}'$ looks realistic by computing the likelihood $p_\theta(\mathbf{x}')$.
 
-<!-- 
+<!--
 > [!note]- What does it mean by being tractable/intractable?
 > **Tractable** means a computation that is practically feasible - it has a closed-form solution or can be evaluated efficiently in finite time. **Intractable** means the opposite: evaluating it exactly is computationally impossible in practice.
 >
@@ -57,21 +57,22 @@ Once the optimal parameters $\theta$ are found, $p_\theta(\mathbf{x})$  can be u
 > This is why VAEs introduce an encoder $q_\phi(\mathbf{z} \mid \mathbf{x})$ - to avoid integrating over all $\mathbf{z}$ and instead focus only on the regions that actually explain $\mathbf{x}$. -->
 
 In the case of VAEs, $\mathcal{D}_f$ is the KL divergence $\mathcal{D}_{KL}$:
+
 $$
 \mathcal{D}_{KL}(p_{data}(\mathbf{x}) \| p_{\theta}(\mathbf{x}))
 $$
 
 > [!note]- KL divergence intuition
->$$
->\begin{align}
->\mathcal{D}_{KL}(p_{data}(\mathbf{x}) \| p_\theta(\mathbf{x})) &= \int p_{data}(\mathbf{x}) \log \frac{p_{data}(\mathbf{x})}{p_{\theta}(\mathbf{x})} \, d\mathbf{x} \\
->&= \mathbb{E}_{\mathbf{x} \sim p_{data}(\mathbf{x})}\left[\log \frac{p_{data}(\mathbf{x})}{p_{\theta}(\mathbf{x})}\right] \\
->&= \mathbb{E}_{\mathbf{x} \sim p_{data}(\mathbf{x})}\left[\log p_{data}(\mathbf{x}) - \log p_{\theta}(\mathbf{x})\right] \\
->\end{align}
->$$
+>
+> $$
+> \begin{align}
+> \mathcal{D}_{KL}(p_{data}(\mathbf{x}) \| p_\theta(\mathbf{x})) &= \int p_{data}(\mathbf{x}) \log \frac{p_{data}(\mathbf{x})}{p_{\theta}(\mathbf{x})} \, d\mathbf{x} \\
+> &= \mathbb{E}_{\mathbf{x} \sim p_{data}(\mathbf{x})}\left[\log \frac{p_{data}(\mathbf{x})}{p_{\theta}(\mathbf{x})}\right] \\
+> &= \mathbb{E}_{\mathbf{x} \sim p_{data}(\mathbf{x})}\left[\log p_{data}(\mathbf{x}) - \log p_{\theta}(\mathbf{x})\right] \\
+> \end{align}
+> $$
+>
 > As we can see, the KL divergence measures the expected log-likelihood difference between $p_{data}(\mathbf{x})$ and $p_\theta(\mathbf{x})$. Therefore, minimizing $\mathcal{D}_{KL}(p_{data}(\mathbf{x}) \| p_\theta(\mathbf{x}))$ pushes $p_\theta(\mathbf{x})$ to assign high likelihood to real data $\mathbf{x}$ sampled from $p_{data}(\mathbf{x})$.
-> 
-
 
 Now, We can rewrite the KL divergence as follow:
 
@@ -95,33 +96,33 @@ $$
 \hat{\mathcal{L}}_{\text{MLE}}(\theta) := -\frac{1}{N} \sum_{i=1}^{N} \log p_\theta(\mathbf{x}^{(i)}) \tag 1
 $$
 
-Where $N$ is the number of samples in the dataset. This objective is then optimized  via SGD  over minibatches.
+Where $N$ is the number of samples in the dataset. This objective is then optimized via SGD over minibatches.
 
 ### 1.1 Decoder (Generator)
+
 Returning to the autoencoder setting, the goal is to generate a new sample $\mathbf{x}$ from a latent variable $\mathbf{z}$ via a neural network decoder $p_\theta(\mathbf{x} \mid \mathbf{z})$. We can express the target distribution $p_\theta(\mathbf{x})$ in equation (1) as the [marginal distribution](join_prob.md):
 
 $$
 \boxed{p_\theta(\mathbf{x}) = \int p_\theta(\mathbf{x} \mid \mathbf{z}) p(\mathbf{z}) \, d\mathbf{z}}
 $$
 
-Unfortunately, directly optimizing this objective via MLE is intractable: it requires integrating over the entire high-dimensional latent space, and since $p_\theta(\mathbf{x} \mid \mathbf{z})$ is a deep, expressive neural network with no closed-form solution, evaluating this integral exactly is computationally infeasible.  To make this optimization tractable, we need a way to focus only on latent states $\mathbf{z}$ that are likely to have generated the current input $\mathbf{x}$, rather than integrating over the entire latent space.
-
+Unfortunately, directly optimizing this objective via MLE is intractable: it requires integrating over the entire high-dimensional latent space, and since $p_\theta(\mathbf{x} \mid \mathbf{z})$ is a deep, expressive neural network with no closed-form solution, evaluating this integral exactly is computationally infeasible. To make this optimization tractable, we need a way to focus only on latent states $\mathbf{z}$ that are likely to have generated the current input $\mathbf{x}$, rather than integrating over the entire latent space.
 
 ### 1.2 Encoder (Inference Model)
+
 We can reframe the problem: instead of integrating over all possible $\mathbf{z}$, can we identify which latent states $\mathbf{z}$ are most likely to have produced the observed sample $\mathbf{x}$? This leads us to consider the [posterior distribution](join_prob.md) $p_\theta(\mathbf{z} \mid \mathbf{x})$, which by Bayes' rule is:
 
 $$
 p_\theta(\mathbf{z} \mid \mathbf{x}) = \frac{p_\theta(\mathbf{x} \mid \mathbf{z})\, p(\mathbf{z})}{p_\theta(\mathbf{x})}
 $$
 
-However, computing this posterior directly is equally intractable, as the denominator $p_\theta(\mathbf{x})$ is the same marginal likelihood we started with. This motivates approximating the true posterior with a learned inference model: 
+However, computing this posterior directly is equally intractable, as the denominator $p_\theta(\mathbf{x})$ is the same marginal likelihood we started with. This motivates approximating the true posterior with a learned inference model:
 
 $$
 q_\phi(\mathbf{z}\mid\mathbf{x}) \approx p_\theta(\mathbf{z}\mid \mathbf{x})
-$$  
+$$
 
 And yes, this is exactly the encoder of the VAE! Which can be trained to concentrates probability mass on the $\mathbf{z}$ state that is most relevant to $\mathbf{x}$.
-
 
 <!-- > [!note]- What make a tractable integral?
 >
@@ -132,8 +133,8 @@ And yes, this is exactly the encoder of the VAE! Which can be trained to concent
 > The VAE consists of a **decoder** $p_\theta(\mathbf{x}\mid\mathbf{z})$ that generates data from latents, and an **encoder** $q_\phi(\mathbf{z}\mid\mathbf{x})$ that approximates the intractable posterior. -->
 
 ---
-## 2. ELBO (Evidence Lower Bound)
 
+## 2. ELBO (Evidence Lower Bound)
 
 Now that we have a controllable encoder model to generate $\mathbf{z}\sim q_\phi(\mathbf{z}\mid\mathbf{x})$. We can redefine the MLE optimization goal using $q_\phi(\mathbf{z} \mid \mathbf{x})$.
 
@@ -145,13 +146,17 @@ p_\theta(\mathbf{x}) &= \int p_\theta(\mathbf{z}, \mathbf{x}) d\mathbf{z} \notag
 &= \log \mathbb{E}_{\mathbf{z} \sim q_\phi(\mathbf{z} \mid \mathbf{x})} \left[ \frac{p_\theta(\mathbf{z}, \mathbf{x})}{q_\phi(\mathbf{z} \mid \mathbf{x})} \right] \notag
 \end{align}
 $$
+
 The learning objective is now tractable. Now according to [Jensen's inequality](https://en.wikipedia.org/wiki/Jensen%27s_inequality). We have the the evidence lower bound $\mathcal{L}_{ELBO}$ where:
+
 $$
 \begin{align}
 \log \mathbb{E}_{\mathbf{z} \sim q_\phi(\mathbf{z} \mid \mathbf{x})} \left[ \frac{p_\theta(\mathbf{z}, \mathbf{x})}{q_\phi(\mathbf{z} \mid \mathbf{x})} \right] \geq \mathbb{E}_{\mathbf{z} \sim q_\phi(\mathbf{z} \mid \mathbf{x})} \left[ \log \frac{p_\theta(\mathbf{z}, \mathbf{x})}{q_\phi(\mathbf{z} \mid \mathbf{x})} \right] = \mathcal{L}_{ELBO}  \tag 2
 \end{align}
 $$
+
 Deriving further, we can see that $\mathcal{L}_{ELBO}$ consists of 2 terms:
+
 $$
 \begin{align}
   \mathcal{L}_{ELBO}  &= \mathbb{E}_{\mathbf{z} \sim q_\phi(\mathbf{z} \mid \mathbf{x})} \left[ \log \frac{p_\theta(\mathbf{z}, \mathbf{x})}{ q_\phi(\mathbf{z} \mid \mathbf{x})} \right] \notag \\
@@ -165,8 +170,6 @@ $$
 
 - **Regularization term** - $\mathcal{D}_{KL}(q_\phi(\mathbf{z} \mid \mathbf{x}) \| p(\mathbf{z}))$: This penalizes the encoder's posterior $q_\phi(\mathbf{z} \mid \mathbf{x})$ for deviating from the prior $p(\mathbf{z}) = \mathcal{N}(\mathbf{0}, \mathbf{I})$, enforcing the latent space structure needed for generation.
 
-
-
 > [!note]- Why is the learning objective tractable now?
 >
 > The original MLE objective $\log p_\theta(\mathbf{x}) = \log \int p_\theta(\mathbf{x} \mid \mathbf{z})\, p(\mathbf{z})\, d\mathbf{z}$ is intractable because it requires integrating $p_\theta(\mathbf{x} \mid \mathbf{z})$ - a neural network - over the entire latent space. The ELBO resolves this in two key ways:
@@ -174,11 +177,10 @@ $$
 > **1. Replacing the integral with a tractable expectation**:
 > Instead of integrating over all $\mathbf{z}$, the reconstruction term
 > $$\mathbb{E}_{\mathbf{z} \sim q_\phi(\mathbf{z} \mid \mathbf{x})}[\log p_\theta(\mathbf{x} \mid \mathbf{z})]$$
-> only requires sampling $\mathbf{z}$ from the encoder $q_\phi(\mathbf{z} \mid \mathbf{x})$, which concentrates mass on the latent regions most relevant to $\mathbf{x}$. 
+> only requires sampling $\mathbf{z}$ from the encoder $q_\phi(\mathbf{z} \mid \mathbf{x})$, which concentrates mass on the latent regions most relevant to $\mathbf{x}$.
 >
 > **2. A closed-form KL term**:
->  $q_\phi(\mathbf{z} \mid \mathbf{x})$ is usually modeled as a simple distribution, usually a gaussian and the KL divergence between two Gaussians has a closed-form solution - no integration is needed at all. And it can also be easily trainable via the [reparameterization trick](https://en.wikipedia.org/wiki/Reparameterization_trick)
-
+> $q_\phi(\mathbf{z} \mid \mathbf{x})$ is usually modeled as a simple distribution, usually a gaussian and the KL divergence between two Gaussians has a closed-form solution - no integration is needed at all. And it can also be easily trainable via the [reparameterization trick](https://en.wikipedia.org/wiki/Reparameterization_trick)
 
 Together, the two terms create a natural tension: maximizing $\mathcal{L}_{ELBO}$ encourages the decoder to recover the original input $\mathbf{x}$ as accurately as possible from latent samples $\mathbf{z} \sim q_\phi(\mathbf{z} \mid \mathbf{x})$ (reconstruction term), while the regularization term pulls the encoder's posterior $q_\phi(\mathbf{z} \mid \mathbf{x})$ back toward the prior $p(\mathbf{z})$. The VAE learns by striking a balance between these two competing objectives.
 
@@ -186,14 +188,18 @@ Together, the two terms create a natural tension: maximizing $\mathcal{L}_{ELBO}
 >
 > So what is the relationship between ELBO and the true MLE goal $p_\theta(\mathbf{x})$?
 > Recall that maximum likelihood training amounts to minimizing the KL divergence between $p_{data}(\mathbf{x})$ and the learned distribution $p_\theta(\mathbf{x})$:
+>
 > $$
 > \mathcal{D}_{KL}(p_{data}(\mathbf{x}) \| p_{\theta}(\mathbf{x}))
 > $$
->  Since this term is intractable in general, the variational framework of VAE introduces a joint comparison $\mathbf{z}$. Specifically, consider two join distributions 
->  - Generative Join (Decoder): $p_\theta(\mathbf{z}, \mathbf{x})$ 
->  - Inference Join (Encoder):  $q_\phi(\mathbf{z}, \mathbf{x})$ 
+>
+> Since this term is intractable in general, the variational framework of VAE introduces a joint comparison $\mathbf{z}$. Specifically, consider two join distributions
+>
+> - Generative Join (Decoder): $p_\theta(\mathbf{z}, \mathbf{x})$
+> - Inference Join (Encoder): $q_\phi(\mathbf{z}, \mathbf{x})$
 >
 > The total error bound is to match these join together is:
+>
 > $$
 > \begin{align}
 > \mathcal{D}_{KL}(q_\phi(\mathbf{x}, \mathbf{z}) \| p_\theta(\mathbf{x}, \mathbf{z})) &= \iint q_\phi(\mathbf{x}, \mathbf{z}) \log \frac{q_\phi(\mathbf{x}, \mathbf{z})}{p_\theta(\mathbf{x}, \mathbf{z})}  d\mathbf{x}  d\mathbf{z}  \notag \\
@@ -202,36 +208,43 @@ Together, the two terms create a natural tension: maximizing $\mathcal{L}_{ELBO}
 > &+ \iint p_{data}(\mathbf{x}) q_{\phi}(\mathbf{z}\mid \mathbf{x}) \log(\frac{q_\phi(\mathbf{z}\mid \mathbf{x})}{ p_\theta(\mathbf{z}\mid \mathbf{x})}) d\mathbf{z}  d\mathbf{x}  \notag  \\
 > &= \underbrace{\mathcal{D}_{KL}(p_{data}(\mathbf{x}) \| p_{\theta}(\mathbf{x}))}_{\text{True Modeling Error}}  \notag \\
 > &+ \underbrace{\mathbb{E}_{\mathbf{x}\sim p_{data}(\mathbf{x})}\left[\mathcal{D}_{KL}(q_\phi(\mathbf{z} \mid \mathbf{x}) \| p_\theta(\mathbf{z} \mid \mathbf{x}))  \right]}_{\text{Inference Error}} \notag\\
-> \end{align} 
+> \end{align}
 > $$
-> Thus we have 
->$$
->\mathcal{D}_{KL}(q_\phi(\mathbf{x}, \mathbf{z}) \| p_\theta(\mathbf{x}, \mathbf{z})) \geq \mathcal{D}_{KL}(p_{data}(\mathbf{x}) \| p_{\theta}(\mathbf{x}))
->$$
-> Where equality happens when inference error is zeros, which also means the encoder $q_\phi(\mathbf{z} \mid \mathbf{x})$ perfectly model the unknow posterior distribution $p_\theta(\mathbf{z} \mid \mathbf{x})$.  
 >
-> Note  that $\mathcal{L}_{ELBO}$ can also be rewritten as :  
+> Thus we have
+>
 > $$
->\begin{align}
-> \mathcal{L}_{ELBO} = \log p_\theta(\mathbf{x}) - \mathcal{D}_{KL}(q_\phi(\mathbf{z} \mid \mathbf{x}) \| p_\theta(\mathbf{z} \mid \mathbf{x}))  \notag \\ 
-> \rightarrow \log p_\theta(\mathbf{x}) - \mathcal{L}_{ELBO} =  \mathcal{D}_{KL}(q_\phi(\mathbf{z} \mid \mathbf{x}) \| p_\theta(\mathbf{z} \mid \mathbf{x}))  \notag 
->\end{align}
+> \mathcal{D}_{KL}(q_\phi(\mathbf{x}, \mathbf{z}) \| p_\theta(\mathbf{x}, \mathbf{z})) \geq \mathcal{D}_{KL}(p_{data}(\mathbf{x}) \| p_{\theta}(\mathbf{x}))
 > $$
+>
+> Where equality happens when inference error is zeros, which also means the encoder $q_\phi(\mathbf{z} \mid \mathbf{x})$ perfectly model the unknow posterior distribution $p_\theta(\mathbf{z} \mid \mathbf{x})$.
+>
+> Note that $\mathcal{L}_{ELBO}$ can also be rewritten as :
+>
+> $$
+> \begin{align}
+> \mathcal{L}_{ELBO} = \log p_\theta(\mathbf{x}) - \mathcal{D}_{KL}(q_\phi(\mathbf{z} \mid \mathbf{x}) \| p_\theta(\mathbf{z} \mid \mathbf{x}))  \notag \\
+> \rightarrow \log p_\theta(\mathbf{x}) - \mathcal{L}_{ELBO} =  \mathcal{D}_{KL}(q_\phi(\mathbf{z} \mid \mathbf{x}) \| p_\theta(\mathbf{z} \mid \mathbf{x}))  \notag
+> \end{align}
+> $$
+>
 > We can see that the gap between the true log-likelihood $\log p_\theta(\mathbf{x})$ and the ELBO is precisely the inference error of the current sample $\mathbf{x}$. Maximizing the ELBO therefore directly reduces this gap. Specifically, optimizing the encoder $q_\phi(\mathbf{z}\mid\mathbf{x})$ tightens the bound by bringing the approximate posterior closer to the true one $p_\theta(\mathbf{z}\mid\mathbf{x})$, while optimizing the decoder $p_\theta(\mathbf{x}\mid\mathbf{z})$ pushes the $p_\theta(\mathbf{x})$ itself upward - lifting the entire lower bound and improving the overall log-likelihood.
->
 
 <!-- > [!summary] TL;DR - ELBO
 > By Jensen's inequality, $\log p_\theta(\mathbf{x}) \geq \mathcal{L}_\text{ELBO}$. The ELBO decomposes into a **reconstruction term** (maximize decoder fidelity) minus a **KL term** (keep encoder close to prior), both of which are tractable to optimize. -->
 
 ---
+
 ## 3. Gaussian VAEs
 
 The most common instantiation of the VAE framework is the **Gaussian VAE**, where the encoder, decoder and prior are modeled as Gaussians.
 
-![VAE_v2](gaussian_vae.svg) *Figure 4: Overview of the Gaussian VAE. Each input $\mathbf{x}$ is encoded into a class-conditional Gaussian $q_\phi(\mathbf{z} \mid \mathbf{x})$ (colored clusters). The aggregate posterior $q_\phi(\mathbf{z}) = \mathbb{E}_{\mathbf{x}\sim p_\text{data}(\mathbf{x})}[q_\phi(\mathbf{z} \mid \mathbf{x})]$ is matched to the isotropic prior $p(\mathbf{z})$ via the KL term in the ELBO. Samples from $q_\phi(\mathbf{z} \mid \mathbf{x})$ are decoded by $p_\theta(\mathbf{x} \mid \mathbf{z})$ to produce reconstructions $\mathbf{x}'$, whose marginal $p_\theta(\mathbf{x})$ approximates the data distribution.*
+![VAE_v2](gaussian_vae.svg) _Figure 4: Overview of the Gaussian VAE. Each input $\mathbf{x}$ is encoded into a class-conditional Gaussian $q_\phi(\mathbf{z} \mid \mathbf{x})$ (colored clusters). The aggregate posterior $q_\phi(\mathbf{z}) = \mathbb{E}_{\mathbf{x}\sim p_\text{data}(\mathbf{x})}[q_\phi(\mathbf{z} \mid \mathbf{x})]$ is matched to the isotropic prior $p(\mathbf{z})$ via the KL term in the ELBO. Samples from $q_\phi(\mathbf{z} \mid \mathbf{x})$ are decoded by $p_\theta(\mathbf{x} \mid \mathbf{z})$ to produce reconstructions $\mathbf{x}'$, whose marginal $p_\theta(\mathbf{x})$ approximates the data distribution._
 
 ### 3.1 The encoder part
+
 For each input $\mathbf{x}$, the encoder produces a Gaussian distribution centered at $\boldsymbol{\mu}_\phi(\mathbf{x})$ with variance $\boldsymbol{\sigma}^2_\phi(\mathbf{x})$, so that similar inputs yield overlapping distributions in the latent space:
+
 $$
 \begin{align}
 \mathbf{z} &= \boldsymbol{\mu}_\phi(\mathbf{x}) + \boldsymbol{\sigma}_\phi(\mathbf{x}) \odot \boldsymbol{\varepsilon}, \boldsymbol{\varepsilon} \sim \mathcal{N}(\mathbf{0}, \mathbf{I}) \notag \\
@@ -239,43 +252,42 @@ $$
 \end{align}
 $$
 
-
 This is the reparameterization trick: by expressing $\mathbf{z}$ as a deterministic function of $\phi$ and a fixed noise variable $\boldsymbol{\varepsilon}$, the stochasticity is separated from the parameters, making the sampling step differentiable and allowing gradients to flow back through $\mathbf{z}$ to the encoder.
 
 Since the prior $p(\mathbf{z}) = \mathcal{N}(\mathbf{0}, \mathbf{I})$ is also Gaussian, the KL divergence between two Gaussians admits a closed-form solution - no numerical integration required:
 
 $$
 \begin{align}
-\mathcal{L}_{KL} = \mathcal{D}_{KL}( \mathcal{N}(\boldsymbol{\mu}_\phi, \text{diag}(\boldsymbol{\sigma}_\phi^2)) \| \mathcal{N}(\mathbf{0}, \mathbf{I})) \\  
+\mathcal{L}_{KL} = \mathcal{D}_{KL}( \mathcal{N}(\boldsymbol{\mu}_\phi, \text{diag}(\boldsymbol{\sigma}_\phi^2)) \| \mathcal{N}(\mathbf{0}, \mathbf{I})) \\
 \boxed{ \mathcal{L}_{KL} =  -\frac{1}{2} \sum_{j=1}^{d} \left(1 + \log\sigma_j^2 - \mu_j^2 - \sigma_j^2\right)}
 \end{align}
 $$
-With $d$ is the number of dimension of the latent space. 
+
+With $d$ is the number of dimension of the latent space.
 
 > [!note]- Derivation of closed-form KL loss
->Since both $q_\phi(\mathbf{z} \mid \mathbf{x}) = \mathcal{N}(\boldsymbol{\mu}_\phi, \text{diag}(\boldsymbol{\sigma}_\phi^2))$ and $p(\mathbf{z}) = \mathcal{N}(\mathbf{0}, \mathbf{I})$ are diagonal, the KL factorizes over dimensions. It suffices to derive for a single scalar dimension $z \sim \mathcal{N}(\mu, \sigma^2)$ vs $z \sim \mathcal{N}(0, 1)$:
+> Since both $q_\phi(\mathbf{z} \mid \mathbf{x}) = \mathcal{N}(\boldsymbol{\mu}_\phi, \text{diag}(\boldsymbol{\sigma}_\phi^2))$ and $p(\mathbf{z}) = \mathcal{N}(\mathbf{0}, \mathbf{I})$ are diagonal, the KL factorizes over dimensions. It suffices to derive for a single scalar dimension $z \sim \mathcal{N}(\mu, \sigma^2)$ vs $z \sim \mathcal{N}(0, 1)$:
 >
->$$
->\begin{align}
->\mathcal{D}_{KL}(\mathcal{N}(\mu, \sigma^2) \| \mathcal{N}(0, 1))
->&= \int \mathcal{N}(z;\mu,\sigma^2) \log \frac{\mathcal{N}(z;\mu,\sigma^2)}{\mathcal{N}(z;0,1)} \, dz \notag \\
->&= \mathbb{E}_q \left[ \log \mathcal{N}(z;\mu,\sigma^2) - \log \mathcal{N}(z;0,1) \right] \notag \\
->&= \mathbb{E}_q \left[ \left(-\frac{1}{2}\log(2\pi\sigma^2) - \frac{(z-\mu)^2}{2\sigma^2}\right) - \left(-\frac{1}{2}\log(2\pi) - \frac{z^2}{2}\right) \right] \notag \\
->&= \mathbb{E}_q \left[ -\frac{1}{2}\log\sigma^2 - \frac{(z-\mu)^2}{2\sigma^2} + \frac{z^2}{2} \right] \notag \\
->&= -\frac{1}{2}\log\sigma^2 - \frac{1}{2\sigma^2}\underbrace{\mathbb{E}_q[(z-\mu)^2]}_{=\,\sigma^2} + \frac{1}{2}\underbrace{\mathbb{E}_q[z^2]}_{=\,\sigma^2 + \mu^2} \notag \\
->&= -\frac{1}{2}\log\sigma^2 - \frac{1}{2} + \frac{\sigma^2 + \mu^2}{2} \notag \\
->&= -\frac{1}{2}\left(1 + \log\sigma^2 - \mu^2 - \sigma^2\right) \notag
->\end{align}
->$$
+> $$
+> \begin{align}
+> \mathcal{D}_{KL}(\mathcal{N}(\mu, \sigma^2) \| \mathcal{N}(0, 1))
+> &= \int \mathcal{N}(z;\mu,\sigma^2) \log \frac{\mathcal{N}(z;\mu,\sigma^2)}{\mathcal{N}(z;0,1)} \, dz \notag \\
+> &= \mathbb{E}_q \left[ \log \mathcal{N}(z;\mu,\sigma^2) - \log \mathcal{N}(z;0,1) \right] \notag \\
+> &= \mathbb{E}_q \left[ \left(-\frac{1}{2}\log(2\pi\sigma^2) - \frac{(z-\mu)^2}{2\sigma^2}\right) - \left(-\frac{1}{2}\log(2\pi) - \frac{z^2}{2}\right) \right] \notag \\
+> &= \mathbb{E}_q \left[ -\frac{1}{2}\log\sigma^2 - \frac{(z-\mu)^2}{2\sigma^2} + \frac{z^2}{2} \right] \notag \\
+> &= -\frac{1}{2}\log\sigma^2 - \frac{1}{2\sigma^2}\underbrace{\mathbb{E}_q[(z-\mu)^2]}_{=\,\sigma^2} + \frac{1}{2}\underbrace{\mathbb{E}_q[z^2]}_{=\,\sigma^2 + \mu^2} \notag \\
+> &= -\frac{1}{2}\log\sigma^2 - \frac{1}{2} + \frac{\sigma^2 + \mu^2}{2} \notag \\
+> &= -\frac{1}{2}\left(1 + \log\sigma^2 - \mu^2 - \sigma^2\right) \notag
+> \end{align}
+> $$
 >
->Summing over all $d$ independent dimensions:
+> Summing over all $d$ independent dimensions:
 >
->$$
->\boxed{\mathcal{D}_{KL}(q_\phi(\mathbf{z} \mid \mathbf{x}) \| p(\mathbf{z})) = -\frac{1}{2} \sum_{j=1}^{d} \left(1 + \log\sigma_j^2 - \mu_j^2 - \sigma_j^2\right)}
->$$
->
+> $$
+> \boxed{\mathcal{D}_{KL}(q_\phi(\mathbf{z} \mid \mathbf{x}) \| p(\mathbf{z})) = -\frac{1}{2} \sum_{j=1}^{d} \left(1 + \log\sigma_j^2 - \mu_j^2 - \sigma_j^2\right)}
+> $$
 
-Taking the gradient of the KL term with respect to $\mu_j$ and $\sigma_j^2$ we have: 
+Taking the gradient of the KL term with respect to $\mu_j$ and $\sigma_j^2$ we have:
 
 $$
 \begin{align}
@@ -292,15 +304,17 @@ $$
 
 This is why the reconstruction term is essential: it pulls $\mu_j$ away from zero and $\sigma_j^2$ toward smaller values to make $\mathbf{z}$ informative about $\mathbf{x}$.
 
-
 ### 3.2 The Decoder part
-To counteract collapse from the regularization term, the reconstruction term enforces that $\mathbf{z}$ remains informative about $\mathbf{x}$. Specifically, the decoder is trained to output a sample $\mathbf{x}'$ that resembles the original input as closely as possible, given a latent vector $\mathbf{z}$ drawn from the encoder's posterior $q_\phi(\mathbf{z} \mid \mathbf{x})$. Note that $\mathbf{x}'$ need not be identical to $\mathbf{x}$: 
+
+To counteract collapse from the regularization term, the reconstruction term enforces that $\mathbf{z}$ remains informative about $\mathbf{x}$. Specifically, the decoder is trained to output a sample $\mathbf{x}'$ that resembles the original input as closely as possible, given a latent vector $\mathbf{z}$ drawn from the encoder's posterior $q_\phi(\mathbf{z} \mid \mathbf{x})$. Note that $\mathbf{x}'$ need not be identical to $\mathbf{x}$:
+
 $$
 \begin{align}
-\mathbf{x} =  \boldsymbol{\mu}_\theta(\mathbf{z}) + \sigma \odot \boldsymbol{\varepsilon} \sim \mathcal{N}(\mathbf{0}, \mathbf{I}) \notag  \notag\\ 
+\mathbf{x} =  \boldsymbol{\mu}_\theta(\mathbf{z}) + \sigma \odot \boldsymbol{\varepsilon} \sim \mathcal{N}(\mathbf{0}, \mathbf{I}) \notag  \notag\\
  \Rightarrow p_\theta(\mathbf{x} \mid \mathbf{z}) = \mathcal{N}(\mathbf{x};\, \boldsymbol{\mu}_\theta(\mathbf{z}),\, \mathbf{I}\sigma)
 \end{align}
 $$
+
 Here $\boldsymbol{\mu}_\theta(\mathbf{z})$ is the output of a neural network decoder, and $\sigma$ is a fixed hyperparameter controlling the spread of the output distribution - large $\sigma$ allows more deviation from the input, while small $\sigma$ forces the reconstruction to stay close to the input $\mathbf{x}$. The reconstruction loss can now be rewritten as:
 
 $$
@@ -309,15 +323,15 @@ $$
 &\propto -\mathbb{E}_{\mathbf{z} \sim q_\phi(\mathbf{z} \mid \mathbf{x})} \left[ \|\mathbf{x} - \boldsymbol{\mu}_\theta(\mathbf{z})\|^2 \right] \notag \\
 \end{align}
 $$
+
 $$
 \boxed{\mathcal{L}_{recon} = \mathbb{E}_{\mathbf{z} \sim q_\phi(\mathbf{z} \mid \mathbf{x})} \left[ \|\mathbf{x} - \boldsymbol{\mu}_\theta(\mathbf{z})\|^2 \right]}
 $$
 
-This is equivalent to minimizing the expected MSE between the input $\mathbf{x}$ and the decoder output $\boldsymbol{\mu}_\theta(\mathbf{z})$ - which is similar to the original AE loss.   
-
-
+This is equivalent to minimizing the expected MSE between the input $\mathbf{x}$ and the decoder output $\boldsymbol{\mu}_\theta(\mathbf{z})$ - which is similar to the original AE loss.
 
 ### 3.3 Overall Training Procedure
+
 With both the encoder and decoder defined, the full training procedure follows directly from maximizing the ELBO. Each training step processes a minibatch of inputs:
 
 $$
@@ -348,21 +362,25 @@ $$
 \end{array}
 $$
 
-
 ---
+
 ## 4. Drawbacks of Gaussian VAEs
 
 Despite its elegance, the Gaussian VAE has several well-known limitations:
 
 ### 4.1 Blurry reconstructions
-Modeling $p_\theta(\mathbf{x} \mid \mathbf{z})$ as a Gaussian with a fixed variance corresponds to minimizing MSE, which tends to average over multiple plausible reconstructions using the sampled code $\mathbf{z}$. 
+
+Modeling $p_\theta(\mathbf{x} \mid \mathbf{z})$ as a Gaussian with a fixed variance corresponds to minimizing MSE, which tends to average over multiple plausible reconstructions using the sampled code $\mathbf{z}$.
 
 > [!note]- Proof of blurry reconstructions in VAEs
 > Recall the per-sample reconstruction loss:
+>
 > $$
 > \mathcal{L}_{recon}=\mathbb{E}_{\mathbf{z}\sim q_\phi(\mathbf{z}\mid\mathbf{x})}\left[\|\mathbf{x}-\boldsymbol\mu_\theta(\mathbf{z})\|^2\right]
 > $$
+>
 > When training over the full dataset, we optimize its expectation over all $\mathbf{x} \sim p_{data}$:
+>
 > $$
 > \begin{align}
 > &\mathbb{E}_{\mathbf{x}\sim p_{data},\, \mathbf{z}\sim q_\phi(\mathbf{z}\mid\mathbf{x})}\left[\|\mathbf{x}-\boldsymbol\mu_\theta(\mathbf{z})\|^2\right] \notag \\
@@ -372,7 +390,9 @@ Modeling $p_\theta(\mathbf{x} \mid \mathbf{z})$ as a Gaussian with a fixed varia
 > &= \mathbb{E}_{\mathbf{z} \sim q_{\phi}(\mathbf{z})}\!\left[\mathbb{E}_{\mathbf{x}\sim q_\phi(\mathbf{x} \mid \mathbf{z})}\!\left[\|\mathbf{x}-\boldsymbol\mu_\theta(\mathbf{z})\|^2\right]\right] \notag
 > \end{align}
 > $$
+>
 > Since $\theta$ only appears in the inner expectation and has no effect on the aggregate posterior $q_\phi(\mathbf{z})$, the outer expectation acts as a constant weight. It suffices to minimize the inner term with respect to $\boldsymbol\mu_\theta(\mathbf{z})$ for each fixed $\mathbf{z}$. Taking the gradient and setting it to zero:
+>
 > $$
 > \begin{align}
 > \frac{\partial}{\partial \boldsymbol\mu_\theta}\,\mathbb{E}_{\mathbf{x}\sim q_\phi(\mathbf{x}\mid\mathbf{z})}\!\left[\|\mathbf{x}-\boldsymbol\mu_\theta(\mathbf{z})\|^2\right]
@@ -380,16 +400,19 @@ Modeling $p_\theta(\mathbf{x} \mid \mathbf{z})$ as a Gaussian with a fixed varia
 > &\Rightarrow\quad \boxed{\boldsymbol\mu_\theta^*(\mathbf{z}) = \mathbb{E}_{\mathbf{x}\sim q_\phi(\mathbf{x}\mid\mathbf{z})}\!\left[\mathbf{x}\right]}
 > \end{align}
 > $$
+>
 > The optimal decoder output is the **conditional mean** of $\mathbf{x}$ given $\mathbf{z}$ under the encoder's inverse distribution $q_\phi(\mathbf{x}\mid \mathbf{z})$. When multiple distinct images $\mathbf{x}$ map to similar latent codes $\mathbf{z}$, the MSE loss forces the decoder to output their average - producing blurry reconstructions.
 
-For image data, this produces blurry outputs rather than sharp, realistic samples. 
+For image data, this produces blurry outputs rather than sharp, realistic samples.
 
 **So what could be done to improve this?** - One natural idea is to make the encoder or decoder more expressive by adding more layers to capture richer, more complex latent structure. However, increasing depth alone does not solve the [Limited posterior expressiveness](VAE#42-limited-posterior-expressiveness) problem of the encoder. Moreover, when the decoder grows too powerful, it can reconstruct $\mathbf{x}$ without relying on $\mathbf{z}$ at all, triggering [posterior collapse](VAE#43-posterior-collapse).
 
 ### 4.2 Limited posterior expressiveness
-The diagonal Gaussian assumption for $q_\phi(\mathbf{z} \mid \mathbf{x})$ restricts the variational family distribution to an axis-aligned ellipsoid (i.e., zero off-diagonal [covariance](covariance.md)). If the true posterior $p_\theta(\mathbf{z} \mid \mathbf{x})$ has complex, multimodal, or highly correlated structure, a single Gaussian cannot capture it - leading to a persistently loose ELBO bound regardless of the encoder capacity. 
+
+The diagonal Gaussian assumption for $q_\phi(\mathbf{z} \mid \mathbf{x})$ restricts the variational family distribution to an axis-aligned ellipsoid (i.e., zero off-diagonal [covariance](covariance.md)). If the true posterior $p_\theta(\mathbf{z} \mid \mathbf{x})$ has complex, multimodal, or highly correlated structure, a single Gaussian cannot capture it - leading to a persistently loose ELBO bound regardless of the encoder capacity.
 
 ### 4.3 Posterior Collapse
+
 Why does this happen? One key reason is that when the decoder becomes too expressive (a sufficiently deep neural network), at some point during training, for some $\mathbf{x} \sim p_{data}(\mathbf{x})$, the decoder finds it easier to simply approximate the data distribution directly:
 
 $$
@@ -401,40 +424,40 @@ This sounds like a win for reconstruction quality, but it also breaks the encode
 $$
 \mathcal{L}_{ELBO} = \underbrace{\mathbb{E}_{\mathbf{z}\sim q_\phi(\mathbf{z} \mid \mathbf{x})}[\log p_\theta(\mathbf{x} \mid \mathbf{z})]}_{\text{reconstruction}} - \underbrace{\mathcal{D}_{KL}(q_\phi(\mathbf{z} \mid \mathbf{x}) \| p(\mathbf{z}))}_{\text{regularization}}
 
+
 $$
 
 When the decoder is powerful enough to reconstruct $\mathbf{x}$ without using $\mathbf{z}$, by exploiting its own internal structure, the reconstruction term becomes approximately constant with respect to $\mathbf{z}$. The gradient signal that would normally force the encoder to encode information into $\mathbf{z}$ disappears. The optimizer then finds the path of least resistance: collapse the KL term to zero by driving $q_\phi(\mathbf{z} \mid \mathbf{x}) \to p(\mathbf{z})$. At this point, $\mathbf{z}$ and $\mathbf{x}$ become statistically independent, the latent code carries no information about the input, and the decoder can no longer be used to control the output. The VAE reduces to a decoder-only model. so the ELBO degenerates to:
 
 $$
-\mathcal{L}_{ELBO} \approx\log p_\theta(\mathbf{x})
+\mathcal{L}_{ELBO} \approx\log \underbrace{p_\theta(\mathbf{x})}_{\text{since} p(\mathbf{x}) = p(\mathbf{x} \mid \mathbf{z})}
 $$
-
 
 > [!note]- Proof for the independence of $\mathbf{x}$ and $\mathbf{z}$ after postierior corruption
 > We can rewrite the regularization term, averaged over all $\mathbf{x} \sim p_{data}(\mathbf{x})$, as:
 >
->$$
->\begin{align}
->\mathbb{E}_{\mathbf{x} \sim p_{data}(\mathbf{x})}\left[D_{KL}(q_\phi(\mathbf{z} \mid \mathbf{x}) \mid p(\mathbf{z}))\right] &= \iint p_{data}(\mathbf{x}) q_\phi(\mathbf{z} \mid \mathbf{x}) \log \frac{q_\phi(\mathbf{z} \mid \mathbf{x})}{p(\mathbf{z})}   d\mathbf{z}  d\mathbf{x} \notag \\
->&= \iint q_\phi(\mathbf{z} , \mathbf{x}) \log (\frac{q_\phi(\mathbf{x} \mid \mathbf{z})q_\phi(\mathbf{z})}{p(\mathbf{z}) p_{data}(\mathbf{x})})  d\mathbf{z}  d\mathbf{x} \notag \\
+> $$
+> \begin{align}
+> \mathbb{E}_{\mathbf{x} \sim p_{data}(\mathbf{x})}\left[D_{KL}(q_\phi(\mathbf{z} \mid \mathbf{x}) \mid p(\mathbf{z}))\right] &= \iint p_{data}(\mathbf{x}) q_\phi(\mathbf{z} \mid \mathbf{x}) \log \frac{q_\phi(\mathbf{z} \mid \mathbf{x})}{p(\mathbf{z})}   d\mathbf{z}  d\mathbf{x} \notag \\
+> &= \iint q_\phi(\mathbf{z} , \mathbf{x}) \log (\frac{q_\phi(\mathbf{x} \mid \mathbf{z})q_\phi(\mathbf{z})}{p(\mathbf{z}) p_{data}(\mathbf{x})})  d\mathbf{z}  d\mathbf{x} \notag \\
 >
->&= \iint q_\phi(\mathbf{z} , \mathbf{x}) \log(\frac{p_\phi(\mathbf{x} \mid \mathbf{z})}{p_{data}(\mathbf{x})}) d\mathbf{z}  d\mathbf{x} + \iint q_\phi(\mathbf{z} , \mathbf{x}) \log (\frac{q_\phi(\mathbf{z})}{p(\mathbf{z})})  d\mathbf{z}  d\mathbf{x} \notag \\
->&= \iint q_\phi(\mathbf{z} , \mathbf{x}) \log (\frac{q_\phi(\mathbf{x} , \mathbf{z})}{p_{data}(\mathbf{x})q_\phi(\mathbf{z})} ) d\mathbf{z}  d\mathbf{x} + \int q_\phi(\mathbf{z}) \log (\frac{q_\phi(\mathbf{z})}{p(\mathbf{z})} ) d\mathbf{z} \notag \\
->&= \boxed{\underbrace{\mathcal{I}(\mathbf{x}, \mathbf{z})}_{\text{mutual information}} + D_{KL}(q_\phi(\mathbf{z}) \| p(\mathbf{z}))}
->\end{align}
->$$
+> &= \iint q_\phi(\mathbf{z} , \mathbf{x}) \log(\frac{p_\phi(\mathbf{x} \mid \mathbf{z})}{p_{data}(\mathbf{x})}) d\mathbf{z}  d\mathbf{x} + \iint q_\phi(\mathbf{z} , \mathbf{x}) \log (\frac{q_\phi(\mathbf{z})}{p(\mathbf{z})})  d\mathbf{z}  d\mathbf{x} \notag \\
+> &= \iint q_\phi(\mathbf{z} , \mathbf{x}) \log (\frac{q_\phi(\mathbf{x} , \mathbf{z})}{p_{data}(\mathbf{x})q_\phi(\mathbf{z})} ) d\mathbf{z}  d\mathbf{x} + \int q_\phi(\mathbf{z}) \log (\frac{q_\phi(\mathbf{z})}{p(\mathbf{z})} ) d\mathbf{z} \notag \\
+> &= \boxed{\underbrace{\mathcal{I}(\mathbf{x}, \mathbf{z})}_{\text{mutual information}} + D_{KL}(q_\phi(\mathbf{z}) \| p(\mathbf{z}))}
+> \end{align}
+> $$
 >
->This decomposition reveals what posterior collapse actually destroys. When the regularization term is driven to zero, both components must vanish simultaneously:
+> This decomposition reveals what posterior collapse actually destroys. When the regularization term is driven to zero, both components must vanish simultaneously:
 >
->- $\mathcal{I}(\mathbf{x}, \mathbf{z}) \rightarrow 0$ - The latent code $\mathbf{z}$ becomes statistically independent of $\mathbf{x}$ (recall [independent property](join_prob)), i.e. $q_\phi(\mathbf{x}, \mathbf{z}) = q_\phi(\mathbf{z}) p_{data}(\mathbf{x})$.  
->- $D_{KL}(q_\phi(\mathbf{z}) \| p(\mathbf{z}))\rightarrow 0$ - The aggregate posterior $q_\phi(\mathbf{z})$ collapses to the isotropic Gaussian $p(\mathbf{z}) = \mathcal{N}(\mathbf{0}, \mathbf{I})$. The latent space loses all input class-specific structure, the per-class mixture components that distinguish different types of $\mathbf{x}$ are wiped out.
-
+> - $\mathcal{I}(\mathbf{x}, \mathbf{z}) \rightarrow 0$ - The latent code $\mathbf{z}$ becomes statistically independent of $\mathbf{x}$ (recall [independent property](join_prob)), i.e. $q_\phi(\mathbf{x}, \mathbf{z}) = q_\phi(\mathbf{z}) p_{data}(\mathbf{x})$.
+> - $D_{KL}(q_\phi(\mathbf{z}) \| p(\mathbf{z}))\rightarrow 0$ - The aggregate posterior $q_\phi(\mathbf{z})$ collapses to the isotropic Gaussian $p(\mathbf{z}) = \mathcal{N}(\mathbf{0}, \mathbf{I})$. The latent space loses all input class-specific structure, the per-class mixture components that distinguish different types of $\mathbf{x}$ are wiped out.
 
 ### 4.4 Mismatch between aggregate posterior and prior
-Another weakness of standard VAEs is that even if each individual posterior $q_\phi(\mathbf{z} \mid \mathbf{x})$ is close to the prior, the aggregated posterior $q_\phi(\mathbf{z})$  may not match $p(\mathbf{z}) = \mathcal{N}(\mathbf{0}, \mathbf{I})$ at some regions. This mismatch creates "holes" in the latent space - regions with high prior probability but low posterior density - causing poor sample quality at generation time.
 
+Another weakness of standard VAEs is that even if each individual posterior $q_\phi(\mathbf{z} \mid \mathbf{x})$ is close to the prior, the aggregated posterior $q_\phi(\mathbf{z})$ may not match $p(\mathbf{z}) = \mathcal{N}(\mathbf{0}, \mathbf{I})$ at some regions. This mismatch creates "holes" in the latent space - regions with high prior probability but low posterior density - causing poor sample quality at generation time.
 
 ---
+
 ## 5. Conclusion
 
 The Variational Autoencoder is a foundational generative model that elegantly combines probabilistic inference with deep learning. By replacing the deterministic bottleneck of a standard autoencoder with a learned posterior distribution, VAEs endow the latent space with a structured, continuous geometry that supports both generation and interpolation. The ELBO provides a tractable training objective that simultaneously encourages faithful reconstruction and regularizes the latent space toward a simple prior - a tension that lies at the heart of all latent-variable generative models.
@@ -445,24 +468,21 @@ That said, the Gaussian VAE is far from perfect. The four drawbacks discussed ab
 
 - [Hierarchical VAEs (HVAEs)](DDPM.md) address the expressiveness problem by stacking multiple layers of stochastic latent variables. Rather than compressing $\mathbf{x}$ into a single $\mathbf{z}$, HVAEs learn a hierarchy $\mathbf{z}_1, \mathbf{z}_2, \dots, \mathbf{z}_L$ where each layer captures structure at a different level of abstraction. This allows the model to represent far richer posteriors, and the ELBO generalizes naturally to the hierarchical setting.
 
-- [Denoising Diffusion Probabilistic Models (DDPMs)](DDPM.md) take a different philosophical path. Instead of learning a compact latent code, diffusion models define a fixed forward process that gradually corrupts data with Gaussian noise over $T$ steps, then learn to reverse this process step by step. Remarkably, this can be seen as a special case of a hierarchical latent-variable model where the encoder is fixed (the forward noising process) and only the decoder (the denoising network) is learned. This design sidesteps the blurry-reconstruction and posterior-collapse problems entirely - the fixed encoder cannot collapse, and the step-by-step denoising objective enforces sharp, high-frequency detail at each scale. 
-
-
+- [Denoising Diffusion Probabilistic Models (DDPMs)](DDPM.md) take a different philosophical path. Instead of learning a compact latent code, diffusion models define a fixed forward process that gradually corrupts data with Gaussian noise over $T$ steps, then learn to reverse this process step by step. Remarkably, this can be seen as a special case of a hierarchical latent-variable model where the encoder is fixed (the forward noising process) and only the decoder (the denoising network) is learned. This design sidesteps the blurry-reconstruction and posterior-collapse problems entirely - the fixed encoder cannot collapse, and the step-by-step denoising objective enforces sharp, high-frequency detail at each scale.
 
 ---
+
 ## References
 
-[1]-- Kingma, D. P., & Welling, M. (2013). *Auto-encoding variational Bayes*. 
+[1]-- Kingma, D. P., & Welling, M. (2013). _Auto-encoding variational Bayes_.
 
 [2]--The Principles of Diffusion Models. (n.d.). <https://the-principles-of-diffusion-models.github.io/>
 
-[3]--Wikipedia contributors. (n.d.). *Jensen's inequality*. Wikipedia. <https://en.wikipedia.org/wiki/Jensen%27s_inequality>
+[3]--Wikipedia contributors. (n.d.). _Jensen's inequality_. Wikipedia. <https://en.wikipedia.org/wiki/Jensen%27s_inequality>
 
-[4]--Wikipedia contributors. (n.d.). *Monte Carlo method*. Wikipedia. <https://en.wikipedia.org/wiki/Monte_Carlo_method>
+[4]--Wikipedia contributors. (n.d.). _Monte Carlo method_. Wikipedia. <https://en.wikipedia.org/wiki/Monte_Carlo_method>
 
-[5]--Wikipedia contributors. (n.d.). *Reparameterization trick*. Wikipedia. <https://en.wikipedia.org/wiki/Reparameterization_trick>
-
-
+[5]--Wikipedia contributors. (n.d.). _Reparameterization trick_. Wikipedia. <https://en.wikipedia.org/wiki/Reparameterization_trick>
 
 > [!note]- Notations
 > See the [notation reference](notation.md) for a summary of symbols used across all notes.

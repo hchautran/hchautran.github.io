@@ -1,6 +1,8 @@
 ---
-title: Joint Probability Distributions
+title: 2. Joint Probability Distributions
 description: An introduction to joint, marginal, and conditional probability distributions, covering the chain rule, independence, and Bayes' theorem with worked examples.
+date: 2025-09-14
+lastmod: 2026-08-30
 draft: false
 tags:
   - math
@@ -10,10 +12,10 @@ tags:
 Joint probability distributions are fundamental to understanding how multiple random variables behave together.
 
 ---
+
 ## Joint Distribution
 
 A joint probability distribution describes the probability of events involving multiple random variables simultaneously. Think of it as extending our understanding from single-variable probability to multi-variable scenarios where we can capture complex relationships and dependencies.
-
 
 > Joint distributions are high-dimensional PDFs (continuous variables) or PMFs (discrete variables).
 
@@ -43,10 +45,9 @@ As we add more variables, the dimensionality grows naturally:
 Every distributbion must satisfy these fundamental properties:
 
 1. **Non-negativity**: $p(\mathbf{x}) \geq 0$ for all $\mathbf{x} = (x_1, x_2, ..., x_n)$
-2. **Normalization**: $\sum p(\mathbf{x}) = 1$ (discrete) or $\int_{-\infty}^{\infty} f(\mathbf{x})  d \mathbf{x} = 1 $ (continuous)
+2. **Normalization**: $\sum p(\mathbf{x}) = 1$ (discrete) or $\int\_{-\infty}^{\infty} f(\mathbf{x}) d \mathbf{x} = 1 $ (continuous)
 
 These properties ensure that joint distributions are valid probability measures.
-
 
 ---
 
@@ -59,8 +60,7 @@ p(Y \mid X) = \frac{p(X, Y)}{p(X)}
 \Rightarrow p(Y=y \mid X=x) = \frac{p(X=x, Y=y)}{p(X=x)}, \forall x,y
 $$
 
-You might wonder: "what is the difference between this and the joint distribution $p(x,y)$?" You can think of conditional probability as focusing on the "world" in which $X = x$ has occurred, and asking: "Within that restricted world, what's the likelihood that $Y = y$ also occurs?". And like the any distribution, conditional distributions also satisfy the same fundamental properties like non-negativity and  Normalization
-
+You might wonder: "what is the difference between this and the joint distribution $p(x,y)$?" You can think of conditional probability as focusing on the "world" in which $X = x$ has occurred, and asking: "Within that restricted world, what's the likelihood that $Y = y$ also occurs?". And like the any distribution, conditional distributions also satisfy the same fundamental properties like non-negativity and Normalization
 
 ### The Chain Rule
 
@@ -72,6 +72,8 @@ $$
 
 The chain rule decomposes a joint probability into a sequence of conditional probabilities. Each factor represents the probability of one variable given all the previous variables in the sequence:
 
+The same factorization becomes the [[entropy-relative-entropy-mutual-information#51-chain-rule-for-entropy|entropy chain rule]] after taking logarithms and expectations.
+
 $$
 p(x,y,z) = p(x \mid y, z)  p(y \mid z) \cdot p(z),\quad \forall x,y,z
 $$
@@ -79,17 +81,19 @@ $$
 For $n$ variables $X_1, X_2, \ldots, X_n$:
 
 $$
-p(\mathbf{x})=p(x_1, x_2, \ldots, x_n) = p(x_1 \mid x_2, \ldots, x_n)  \cdots p(x_{n-1} \mid x_n) \cdot p(x_n),\quad  \forall \mathbf{x} 
+p(\mathbf{x})=p(x_1, x_2, \ldots, x_n) = p(x_1 \mid x_2, \ldots, x_n)  \cdots p(x_{n-1} \mid x_n) \cdot p(x_n),\quad  \forall \mathbf{x}
 $$
 
 > [!example]- Multi-Variable Chain Rule
 >
 > **Scenario**: Consider three variables:
+>
 > - $W$: Weather (sunny, rainy)
 > - $T$: Traffic (light, heavy)
 > - $M$: Meeting attendance (attend, skip)
 >
 > **Given probabilities**:
+>
 > - $p(W = \text{sunny}) = 0.7$
 > - $p(T = \text{light} \mid W = \text{sunny}) = 0.8$
 > - $p(T = \text{light} \mid W = \text{rainy}) = 0.3$
@@ -107,7 +111,6 @@ $$
 >
 > **Interpretation**: There's a 50.4% chance of attending a meeting on a sunny day with light traffic.
 
-
 ### Independence
 
 Two random variables $X$ and $Y$ are independent if and only if:
@@ -121,13 +124,14 @@ Independence means that knowing the value of one variable doesn't change our bel
 > [!example]- Coin Toss Independence
 >
 > **Scenario**: Consider two fair coin tosses:
+>
 > - $X$: First coin (H = 1, T = 0)
 > - $Y$: Second coin (H = 1, T = 0)
 >
 > **Joint probability table**:
 >
 > | $x$ | $y$ | $p(x, y)$ |
-> |-----|-----|-----------|
+> | --- | --- | --------- |
 > | 0   | 0   | 0.25      |
 > | 0   | 1   | 0.25      |
 > | 1   | 0   | 0.25      |
@@ -136,12 +140,14 @@ Independence means that knowing the value of one variable doesn't change our bel
 > **Test for independence**:
 >
 > **Step 1: Calculate marginal probabilities**
+>
 > - $p(X = 0) = 0.25 + 0.25 = 0.5$
 > - $p(X = 1) = 0.25 + 0.25 = 0.5$
 > - $p(Y = 0) = 0.25 + 0.25 = 0.5$
 > - $p(Y = 1) = 0.25 + 0.25 = 0.5$
 >
 > **Step 2: Check independence condition**
+>
 > - $p(X = 0, Y = 0) = 0.25$
 > - $p(X = 0) \cdot p(Y = 0) = 0.5 \times 0.5 = 0.25$ ✓
 > - $p(X = 0, Y = 1) = 0.25$
@@ -153,17 +159,17 @@ Independence means that knowing the value of one variable doesn't change our bel
 >
 > **Conclusion**: All conditions hold, so $X$ and $Y$ are **independent**.
 
-
 > [!example]- Dependent Coin Tosses
 >
 > **Scenario**: Consider a modified experiment where the second coin is biased based on the first:
+>
 > - If first coin is H, second coin has 0.8 probability of H
 > - If first coin is T, second coin has 0.3 probability of H
 >
 > **Joint probability table**:
 >
 > | $x$ | $y$ | $p(x, y)$ |
-> |-----|-----|-----------|
+> | --- | --- | --------- |
 > | 0   | 0   | 0.35      |
 > | 0   | 1   | 0.15      |
 > | 1   | 0   | 0.10      |
@@ -172,35 +178,41 @@ Independence means that knowing the value of one variable doesn't change our bel
 > **Test for independence**:
 >
 > **Step 1: Calculate marginal probabilities**
+>
 > - $p(X = 0) = 0.35 + 0.15 = 0.5$
 > - $p(X = 1) = 0.10 + 0.40 = 0.5$
 > - $p(Y = 0) = 0.35 + 0.10 = 0.45$
 > - $p(Y = 1) = 0.15 + 0.40 = 0.55$
 >
 > **Step 2: Check independence condition**
+>
 > - $p(X = 0, Y = 0) = 0.35$
 > - $p(X = 0) \cdot p(Y = 0) = 0.5 \times 0.45 = 0.225$ ✗
 >
 > **Conclusion**: Since $0.35 \neq 0.225$, $X$ and $Y$ are **not independent**.
 
-
 ---
+
 ## Marginal Distributions
 
 From a joint distribution, we can derive marginal distributions for individual variables by "summing out" or "integrating out" the other variables:
 
 **Discrete case:**
+
 $$
 p(x) = \sum_y p(x, y)
 $$
+
 $$
 p(y) = \sum_x p(x, y)
 $$
 
 **Continuous case:**
+
 $$
 f(x) = \int_{-\infty}^{\infty} f(x,y) \, dy
 $$
+
 $$
 f(y) = \int_{-\infty}^{\infty} f(x,y) \, dx
 $$
@@ -234,6 +246,7 @@ Components of Bayes' Theorem:
 > **Question**: If someone tests positive, what's the probability they actually have the disease?
 >
 > **Solution using Bayes' rule**:
+>
 > - $p(\text{disease}) = 0.01$ (prior: 1% of population)
 > - $p(\text{positive} \mid \text{disease}) = 0.95$ (likelihood: test accuracy)
 > - $p(\text{positive}) = p(\text{positive} \mid \text{disease}) \cdot p(\text{disease}) + p(\text{positive} \mid \text{healthy}) \cdot p(\text{healthy})$
@@ -266,15 +279,14 @@ Components of Bayes' Theorem:
 ### Fundamental Concepts
 
 - **Joint distributions**: high-dimensional PDFs (continuous variables) or PMFs (discrete variables).
-- **Marginal distributions**:  can be derived by "summing out" other variables from joint distributions.
-- **Conditional distributions**:  describe how one variable behaves given knowledge of another.
+- **Marginal distributions**: can be derived by "summing out" other variables from joint distributions.
+- **Conditional distributions**: describe how one variable behaves given knowledge of another.
 
 **Independence** means variables don't influence each other:
 
 $$
 p(x, y) = p(x) \cdot p(y)  \quad \forall x,y
 $$
-
 
 **Bayes' theorem**:
 
@@ -285,18 +297,17 @@ $$
 **Chain rule**:
 
 $$
-p(\mathbf{x})=p(x_1, x_2, \ldots, x_n) = p(x_1 \mid x_2, \ldots, x_n)  \cdots p(x_{n-1} \mid x_n) \cdot p(x_n),\quad  \forall \mathbf{x} 
+p(\mathbf{x})=p(x_1, x_2, \ldots, x_n) = p(x_1 \mid x_2, \ldots, x_n)  \cdots p(x_{n-1} \mid x_n) \cdot p(x_n),\quad  \forall \mathbf{x}
 $$
-
 
 ### Essential Properties
 
 All kind of distribution must satisfy:
 
 1. **Non-negativity**: $p(\mathbf{x}) \geq 0$ for all $\mathbf{x} = (x_1, x_2, ..., x_n)$
-2. **Normalization**: $\sum p(\mathbf{x}) = 1$ (discrete) or $\int_{-\infty}^{\infty} f(\mathbf{x})  d \mathbf{x} = 1 $ (continuous)
+2. **Normalization**: $\sum p(\mathbf{x}) = 1$ (discrete) or $\int\_{-\infty}^{\infty} f(\mathbf{x}) d \mathbf{x} = 1 $ (continuous)
 
 ---
 
-> [!note]- Notations 
+> [!note]- Notations
 > See the [notation reference](notation.md) for a full summary of symbols used across all notes. In brief: capital letters ($X, Y$) denote random variables, lowercase ($x, y$) their values, and bold lowercase ($\mathbf{x}$) vectors.

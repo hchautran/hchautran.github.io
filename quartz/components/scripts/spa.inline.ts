@@ -42,6 +42,32 @@ function notifyNav(url: FullSlug) {
 const cleanupFns: Set<(...args: any[]) => void> = new Set()
 window.addCleanup = (fn) => cleanupFns.add(fn)
 
+const nextAnimationFrame = () =>
+  new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+
+const waitForImages = () =>
+  Promise.all(
+    Array.from(document.images).map((image) => {
+      if (image.complete) return Promise.resolve()
+      return new Promise<void>((resolve) => {
+        image.addEventListener("load", () => resolve(), { once: true })
+        image.addEventListener("error", () => resolve(), { once: true })
+      })
+    }),
+  )
+
+async function scrollToHash(url: URL) {
+  const id = decodeURIComponent(url.hash.substring(1))
+
+  // SPA navigation replaces the body before fonts and images have necessarily
+  // reached their final sizes. Scrolling too early leaves the target above or
+  // below the viewport after layout shifts.
+  await Promise.all([document.fonts.ready, waitForImages()])
+  await nextAnimationFrame()
+  await nextAnimationFrame()
+  document.getElementById(id)?.scrollIntoView()
+}
+
 let p: DOMParser
 async function navigate(url: URL, isBack: boolean = false) {
   p = p || new DOMParser()
@@ -83,16 +109,6 @@ async function navigate(url: URL, isBack: boolean = false) {
   // morph body
   micromorph(document.body, html.body)
 
-  // scroll into place and add history
-  if (!isBack) {
-    if (url.hash) {
-      const el = document.getElementById(decodeURIComponent(url.hash.substring(1)))
-      el?.scrollIntoView()
-    } else {
-      window.scrollTo({ top: 0 })
-    }
-  }
-
   // now, patch head
   const elementsToRemove = document.head.querySelectorAll(":not([spa-preserve])")
   elementsToRemove.forEach((el) => el.remove())
@@ -105,6 +121,16 @@ async function navigate(url: URL, isBack: boolean = false) {
     history.pushState({}, "", url)
   }
   notifyNav(getFullSlug(window))
+
+  // Scroll only after the new page has completed its initial layout.
+  if (!isBack) {
+    if (url.hash) {
+      await scrollToHash(url)
+    } else {
+      window.scrollTo({ top: 0 })
+    }
+  }
+
   delete announcer.dataset.persist
 }
 

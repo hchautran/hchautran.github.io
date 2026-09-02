@@ -1,14 +1,17 @@
 ---
-title: Denoising Diffusion Probabilistic Models (DDPMs)
+title: 2. Denoising Diffusion Probabilistic Models (DDPMs)
 description: A ground-up derivation of the DDPM.
+date: 2026-04-01
+lastmod: 2026-04-02
 draft: false
 tags:
   - generative models
   - notes
 ---
+
 ...Writing....
 
-![VAE](HVAE.svg) *Figure 1: Hierachical Variational AutoEncoder*
+![VAE](HVAE.svg) _Figure 1: Hierachical Variational AutoEncoder_
 
 <!-- The Variational Autoencoder is an elegant framework, but its Gaussian design comes with fundamental limitations: blurry reconstructions from the MSE objective, an approximate posterior restricted to a diagonal Gaussian, and an aggregate posterior that can drift away from the prior. All three problems share a common root — a single latent variable $\mathbf{z}$ is too weak a representation to capture the full complexity of real-world data.
 

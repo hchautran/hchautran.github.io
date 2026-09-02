@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="560" viewBox="0 0 960 560" role="img" aria-labelledby="title desc">
+  <title id="title">Comparison of four 3D rotation representations</title>
+  <desc id="desc">Cards compare rotation matrices, Euler angles, axis-angle, and unit quaternions.</desc>
+  <rect width="960" height="560" rx="18" fill="#f8fafc"/>
+  <text x="480" y="50" text-anchor="middle" font-family="system-ui, sans-serif" font-size="26" font-weight="700" fill="#0f172a">Four coordinate systems for the same rotation</text>
+  <g font-family="system-ui, sans-serif">
+    <g transform="translate(50 92)">
+      <rect width="410" height="190" rx="16" fill="#dbeafe" stroke="#2563eb" stroke-width="3"/>
+      <text x="24" y="42" font-size="24" font-weight="700" fill="#1e3a8a">Rotation matrix</text>
+      <text x="24" y="78" font-size="19" fill="#0f172a">orthonormal 3 × 3 matrix · 9 values</text>
+      <text x="24" y="118" font-size="18" fill="#334155">✓ direct action and composition</text>
+      <text x="24" y="151" font-size="18" fill="#334155">△ redundant, constrained storage</text>
+    </g>
+    <g transform="translate(500 92)">
+      <rect width="410" height="190" rx="16" fill="#fef3c7" stroke="#d97706" stroke-width="3"/>
+      <text x="24" y="42" font-size="24" font-weight="700" fill="#78350f">Euler angles</text>
+      <text x="24" y="78" font-size="19" fill="#0f172a">roll, pitch, yaw · 3 values</text>
+      <text x="24" y="118" font-size="18" fill="#334155">✓ intuitive for people</text>
+      <text x="24" y="151" font-size="18" fill="#334155">△ order-dependent; gimbal lock</text>
+    </g>
+    <g transform="translate(50 320)">
+      <rect width="410" height="190" rx="16" fill="#dcfce7" stroke="#16a34a" stroke-width="3"/>
+      <text x="24" y="42" font-size="24" font-weight="700" fill="#14532d">Axis-angle / rotation vector</text>
+      <text x="24" y="78" font-size="19" fill="#0f172a">axis with rotation angle · 3 or 4 values</text>
+      <text x="24" y="118" font-size="18" fill="#334155">✓ natural local update</text>
+      <text x="24" y="151" font-size="18" fill="#334155">△ wraps at the angle boundary</text>
+    </g>
+    <g transform="translate(500 320)">
+      <rect width="410" height="190" rx="16" fill="#f3e8ff" stroke="#9333ea" stroke-width="3"/>
+      <text x="24" y="42" font-size="24" font-weight="700" fill="#581c87">Unit quaternion</text>
+      <text x="24" y="78" font-size="19" fill="#0f172a">normalized four-vector · 4 values</text>
+      <text x="24" y="118" font-size="18" fill="#334155">✓ stable composition, interpolation</text>
+      <text x="24" y="151" font-size="18" fill="#334155">△ q and −q mean the same rotation</text>
+    </g>
+  </g>
+</svg>

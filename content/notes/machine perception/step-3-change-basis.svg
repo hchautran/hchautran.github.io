@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="400" viewBox="0 0 900 400" role="img" aria-labelledby="title desc">
+  <title id="title">Step 3: express the displacement in the world basis</title>
+  <desc id="desc">The same geometric displacement is shown first against rotated body axes and then against world-aligned axes.</desc>
+  <defs>
+    <marker id="s3-blue" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#2563eb"/></marker>
+    <marker id="s3-green" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#16a34a"/></marker>
+    <marker id="s3-red" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#dc2626"/></marker>
+    <marker id="s3-slate" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#475569"/></marker>
+  </defs>
+  <rect width="900" height="400" rx="18" fill="#f8fafc"/>
+  <text x="42" y="47" font-family="system-ui, sans-serif" font-size="25" font-weight="700" fill="#0f172a">Step 3 · Change the basis, not the physical vector</text>
+  <g font-family="system-ui, sans-serif">
+    <rect x="46" y="82" width="318" height="254" rx="16" fill="#eff6ff" stroke="#bfdbfe" stroke-width="2"/>
+    <text x="205" y="113" text-anchor="middle" font-size="19" font-weight="700" fill="#334155">components in body frame B</text>
+    <g transform="translate(153 285) rotate(-25)">
+      <circle r="6" fill="#f59e0b"/>
+      <line x1="0" y1="0" x2="105" y2="0" stroke="#16a34a" stroke-width="4" marker-end="url(#s3-green)"/>
+      <line x1="0" y1="0" x2="0" y2="-102" stroke="#2563eb" stroke-width="4" marker-end="url(#s3-blue)"/>
+    </g>
+    <line x1="157" y1="279" x2="307" y2="151" stroke="#dc2626" stroke-width="6" marker-end="url(#s3-red)"/>
+    <line x1="390" y1="210" x2="500" y2="210" stroke="#475569" stroke-width="5" marker-end="url(#s3-slate)"/>
+    <text x="445" y="177" text-anchor="middle" font-size="17" font-weight="650" fill="#475569">change basis</text>
+    <rect x="536" y="82" width="318" height="254" rx="16" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="2"/>
+    <text x="695" y="113" text-anchor="middle" font-size="19" font-weight="700" fill="#334155">components in world frame W</text>
+    <g transform="translate(643 285)">
+      <circle r="6" fill="#f59e0b"/>
+      <line x1="0" y1="0" x2="108" y2="0" stroke="#16a34a" stroke-width="4" marker-end="url(#s3-green)"/>
+      <line x1="0" y1="0" x2="0" y2="-105" stroke="#2563eb" stroke-width="4" marker-end="url(#s3-blue)"/>
+    </g>
+    <line x1="647" y1="279" x2="797" y2="151" stroke="#dc2626" stroke-width="6" marker-end="url(#s3-red)"/>
+    <text x="450" y="374" text-anchor="middle" font-size="18" fill="#475569">Its length and direction stay fixed; only the coordinate components change.</text>
+  </g>
+</svg>

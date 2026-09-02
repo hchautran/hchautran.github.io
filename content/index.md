@@ -1,6 +1,8 @@
 ---
 title: About Me 
-description: Personal site of Hoai-Chau Tran, CS PhD student @ UIUC.
+description: Hoai-Chau Tran is a Computer Science PhD student at UIUC researching efficient foundation models, edge AI, and generative models.
+date: 2021-07-18
+lastmod: 2026-04-02
 ---
 
 <div class="profile-hero">
@@ -109,8 +111,7 @@ description: Personal site of Hoai-Chau Tran, CS PhD student @ UIUC.
 
 ## 🛠️ Service
 
-* **2026**: [NeurIPS](https://icml.cc) - Reviewer
-* **2026**: [ICML](https://icml.cc) - Reviewer
+* **2026**: [ICML](https://icml.cc), [NeurIPS](https://icml.cc), [ICLR](https://iclr.cc), [AAAI](https://aaai.org/conference/aaai/aaai-26/) - Reviewer
 * **2025**: [NeurIPS](https://neurips.cc) - Volunteer, Reviewer
 
 ---
@@ -123,20 +124,6 @@ You'll also find my [notes](notes/) here - continuously evolving as I learn and 
 
 
 <script type="text/javascript" id="clustrmaps" src="//clustrmaps.com/map_v2.js?d=VV_9AxgUp6rEn_vluenH0AQsjlWKPLdDalJIaJg96ms&cl=ffffff&w=a"></script>
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "Person",
-  "name": "Hoai-Chau Tran",
-  "url": "https://hchautran.github.io",
-  "affiliation": {"@type": "Organization", "name": "University of Illinois Urbana-Champaign"},
-  "sameAs": [
-    "https://github.com/hchautran",
-    "https://scholar.google.com/citations?user=FZH2vcEAAAAJ"
-  ]
-}
-</script>
 
 <style>
 /* ── Profile Hero ── */
@@ -171,6 +158,7 @@ You'll also find my [notes](notes/) here - continuously evolving as I learn and 
   margin: 0 0 12px;
   font-size: 0.95em;
 }
+
 /* ── Research Tags ── */
 .research-tags {
   display: flex;
@@ -405,6 +393,7 @@ You'll also find my [notes](notes/) here - continuously evolving as I learn and 
   .profile-name {
     font-size: 1.3em;
   }
+
 }
 
 @media (prefers-color-scheme: dark) {

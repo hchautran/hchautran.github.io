@@ -13,7 +13,11 @@ const defaultOptions: Options = {
 }
 
 function coerceDate(fp: string, d: any): Date {
-  const dt = new Date(d)
+  // Treat date-only frontmatter as a local calendar date instead of UTC midnight,
+  // which can display as the previous day in time zones west of UTC.
+  const normalizedDate =
+    typeof d === "string" && /^\d{4}-\d{2}-\d{2}$/.test(d) ? `${d}T12:00:00` : d
+  const dt = new Date(normalizedDate)
   const invalidDate = isNaN(dt.getTime()) || dt.getTime() === 0
   if (invalidDate && d !== undefined) {
     console.log(
