@@ -13,15 +13,14 @@ lastmod: 2026-04-02
     <h2 class="profile-name">Hoai-Chau Tran</h2>
     <p class="profile-title">PhD Student · Computer Science · UIUC</p>
     <p>
-      Hi! 👋 I am a first-year CS PhD student advised by
+      Hi! 👋 I am a CS PhD student at the University of Illinois at Urbana-Champaign advised by
       <a href="https://www.fanlai.me" target="_blank">Fan Lai</a> (UIUC) and
       <a href="https://scholar.google.com/citations?user=Zz2hMgcAAAAJ&hl=en&oi=ao" target="_blank">Khoa D Doan</a> (VinUniversity).
-      I received my Bachelor's degree from VNU - Ho Chi Minh City University of Science in 2018.
+      I received my Bachelor's degree from VNUHCM-University of Science in 2018.
     </p>
     <p>My research lies at the intersection of machine learning and systems, with a focus on:</p>
     <div class="research-tags">
       <span class="tag">Efficient Foundation Models</span>
-      <span class="tag">Edge AI</span>
       <span class="tag">Generative Models</span>
     </div>
 
