@@ -15,7 +15,7 @@ export default (() => {
     const isArticle =
       fileData.slug?.startsWith("notes/") && !fileData.filePath?.endsWith("index.md")
     const seoTitle = isHomepage
-      ? "Hoai-Chau Tran | Machine Learning Systems Researcher"
+      ? "Hoai-Chau Tran"
       : `${title} | Hoai-Chau Tran`
 
     const url = new URL(`https://${cfg.baseUrl ?? "example.com"}`)
