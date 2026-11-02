@@ -236,6 +236,18 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
 .list.notes li { display: grid; gap: 2px; justify-content: stretch; }
 .ntitle { font-weight: 500; }
 .ntext { margin: 0; font-size: 13.5px; color: var(--muted); white-space: pre-wrap; overflow-wrap: anywhere; }
+.paper { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--spark); border-radius: 14px; padding: 14px 16px; display: grid; gap: 6px; }
+.paper .kind .pill { background: var(--spark-soft); color: var(--spark); }
+.paper h3 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 18px; line-height: 1.25; text-wrap: balance; }
+.paper h3 a { text-decoration: none; }
+.paper h3 a:hover { text-decoration: underline; }
+.paper .why { margin: 0; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.paper .actions { padding: 4px 0 0; }
+.paper.done { opacity: .7; }
+.newsitem { display: grid !important; gap: 2px; justify-content: stretch !important; }
+.newsitem > a { font-size: 14px; font-weight: 500; }
+.newsitem .label { text-transform: none; letter-spacing: 0; font-family: var(--body); font-size: 12px; }
+.newsitem .label a { font-size: 12px; text-decoration: underline; }
 .mini .meta { margin: 0; font-size: 12.5px; color: var(--muted); }
 /* Real thumbnails */
 .thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -375,6 +387,7 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
         <p><b>Want to watch videos right on this page?</b> YouTube's player only works when StudyTube runs from a web address. Close this tab and double-click <b>Open StudyTube</b> in the same folder. Until then, videos open on YouTube.</p>
         <button class="linkbtn" id="hintClose" type="button">Got it</button>
       </div>
+      <div id="paperSlot" hidden></div>
       <div>
         <div class="sec-h"><h2>Watch this now</h2><span class="streak" id="streak"></span></div>
         <div id="hero"></div>
@@ -421,6 +434,12 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
         </form>
         <p class="note">StudyTube finds the playlist it belongs to and puts the next video at the top.</p>
       </div>
+      <details class="panel" id="newsPanel">
+        <summary>AI news</summary>
+        <ul class="list" id="newsList"></ul>
+        <p class="empty" id="newsEmpty">Loading the top stories…</p>
+        <p class="note">The 3 most-discussed AI stories on Hacker News from the last 3 days.</p>
+      </details>
       <details class="panel">
         <summary>Study music</summary>
         <div class="moods" id="moods"></div>
@@ -448,6 +467,61 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
 (function () {
   "use strict";
   var KEY = "studytube.v2";
+
+  // ---------- One home for your data ----------
+  // Browsers keep saved data separately for each address, so StudyTube always runs from your website.
+  // Opening the file (or the launcher) moves you there and carries over what was saved under that address, once.
+  var SITE = "https://hchautran.github.io/static/studytube.html";
+  var STORE_KEYS = ["studytube.v2", "studytube.live.v1", "studytube.ytkey"];
+  if ((location.protocol === "file:" || /^(localhost|127\.0\.0\.1)$/.test(location.hostname)) && navigator.onLine !== false && !/[?&]stay=1/.test(location.search)) {
+    var pack = {}, moved = false;
+    try {
+      moved = localStorage.getItem("studytube.moved") === "1";
+      STORE_KEYS.forEach(function (k) { var v = localStorage.getItem(k); if (v) pack[k] = v; });
+      localStorage.setItem("studytube.moved", "1");
+    } catch (e) {}
+    var carry = !moved && Object.keys(pack).length ? "#import=" + encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(pack))))) : "";
+    location.replace(SITE + carry);
+    return;
+  }
+  function importPack(pack) {
+    function get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+    function put(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+    if (pack["studytube.ytkey"] && !get("studytube.ytkey")) put("studytube.ytkey", pack["studytube.ytkey"]);
+    if (pack["studytube.live.v1"]) {
+      var here = get("studytube.live.v1");
+      if (!here) put("studytube.live.v1", pack["studytube.live.v1"]);
+      else {
+        try {
+          var a = JSON.parse(here), b = JSON.parse(pack["studytube.live.v1"]), ids = new Set(a.items.map(function (x) { return x.id; }));
+          (b.items || []).forEach(function (x) { if (!ids.has(x.id)) a.items.push(x); });
+          a.items = a.items.slice(-900); put("studytube.live.v1", JSON.stringify(a));
+        } catch (e) {}
+      }
+    }
+    if (pack["studytube.v2"]) {
+      var mine = get("studytube.v2");
+      if (!mine) put("studytube.v2", pack["studytube.v2"]);
+      else {
+        try {
+          var A = JSON.parse(mine), B = JSON.parse(pack["studytube.v2"]);
+          var union = function (x, y) { var out = (x || []).slice(); (y || []).forEach(function (v) { if (out.indexOf(v) === -1) out.push(v); }); return out; };
+          A.watched = union(A.watched, B.watched); A.hidden = union(A.hidden, B.hidden);
+          var savedKeys = new Set((A.saved || []).map(function (c) { return (c.id || "") + "|" + (c.list || "") + "|" + (c.q || ""); }));
+          A.saved = (A.saved || []).concat((B.saved || []).filter(function (c) { return !savedKeys.has((c.id || "") + "|" + (c.list || "") + "|" + (c.q || "")); }));
+          A.notes = A.notes || {}; Object.keys(B.notes || {}).forEach(function (id) { if (!A.notes[id] || (B.notes[id].at || 0) > (A.notes[id].at || 0)) A.notes[id] = B.notes[id]; });
+          ["topics", "chans"].forEach(function (f) { A[f] = A[f] || {}; Object.keys(B[f] || {}).forEach(function (k) { A[f][k] = Math.max(A[f][k] || 0, B[f][k]); }); });
+          if (!A.goal && B.goal) A.goal = B.goal;
+          put("studytube.v2", JSON.stringify(A));
+        } catch (e) {}
+      }
+    }
+  }
+  if (location.hash.indexOf("#import=") === 0) {
+    try { importPack(JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(location.hash.slice(8))))))); } catch (e) {}
+    history.replaceState(null, "", location.pathname + location.search);   // keep the key out of your history
+  }
+  if (navigator.storage && navigator.storage.persist) { try { navigator.storage.persist(); } catch (e) {} }
   var SEARCH = function (q) { return "https://www.youtube.com/results?search_query=" + encodeURIComponent(q); };
   function urlOf(v) {
     if (v.list && v.id && v.pos) return "https://www.youtube.com/watch?v=" + v.id + "&list=" + v.list;
@@ -1492,6 +1566,135 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
     return !inPlaylist && yt.autoChain >= 2;
   }
 
+  // ---------- Paper of the day + AI news (free sources, no key needed) ----------
+  var PKEY = "studytube.paper.v1", NKEY = "studytube.news.v1";
+  var PAPER_Q = {
+    diffusion: ["diffusion models", "flow matching", "diffusion transformer"],
+    world: ["world models", "world model video", "model-based reinforcement learning"],
+    mlsys: ["LLM inference", "efficient training", "kv cache", "attention kernel"],
+    math: ["optimization theory", "optimal transport", "stochastic differential equations"]
+  };
+  var TOPIC_WORDS = {
+    diffusion: ["diffusion", "flow matching", "rectified flow", "score-based", "denois", "consistency model", "generative"],
+    world: ["world model", "jepa", "model-based", "embodied", "video prediction", "dreamer", "simulat"],
+    mlsys: ["inference", "kv cache", "attention", "serving", "quantiz", "sparsity", "throughput", "latency", "gpu", "kernel", "parallel", "efficient", "llm", "training", "speculative", "memory"],
+    math: ["theory", "optimal transport", "convergence", "stochastic", "optimization", "bound", "theorem"]
+  };
+  function readJSON(k) { try { return JSON.parse(localStorage.getItem(k) || "null"); } catch (e) { return null; } }
+  function writeJSON(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  function getJSON(url) { return fetch(url, { credentials: "omit" }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }); }
+
+  function paperTopics() {
+    return state.interests.filter(function (i) { return i.on; }).map(function (i) {
+      var k = topicKeyFor(i.name);
+      return { name: i.name, queries: k ? PAPER_Q[k] : [plainName(i.name)], words: k ? TOPIC_WORDS[k] : plainName(i.name).toLowerCase().split(" ") };
+    });
+  }
+  function fromHF(x, topic) {
+    var p = x.paper || {};
+    return { id: p.id, t: x.title || p.title || "", sum: p.ai_summary || "", abs: (p.summary || x.summary || "").replace(/\s+/g, " "), up: +p.upvotes || 0,
+      pub: (p.publishedAt || x.publishedAt || "").slice(0, 10), thumb: x.thumbnail || "", stars: +p.githubStars || 0, gh: p.githubRepo || "", org: (p.organization && p.organization.fullname) || "", topic: topic || null,
+      kw: (p.ai_keywords || []).join(" ").toLowerCase() };
+  }
+  function matchTopic(pp, topics) {
+    var hay = (pp.t + " " + pp.kw + " " + pp.sum).toLowerCase(), best = null, bestN = 0;
+    topics.forEach(function (tp) { var n = tp.words.filter(function (w) { return w && hay.indexOf(w) !== -1; }).length; if (n > bestN) { bestN = n; best = tp.name; } });
+    return { topic: best, n: bestN };
+  }
+  function pickPaper(force) {
+    var today = new Date().toDateString(), cached = readJSON(PKEY) || { seen: [] };
+    if (!force && cached.d === today && cached.paper) { renderPaper(cached.paper, cached); return; }
+    var topics = paperTopics();
+    if (!topics.length) { renderPaper(null); return; }
+    var reqs = [getJSON("https://huggingface.co/api/daily_papers?limit=100").then(function (arr) { return arr.map(function (x) { return fromHF(x, null); }); }).catch(function () { return []; })];
+    topics.forEach(function (tp) {
+      tp.queries.slice(0, 2).forEach(function (q) {
+        reqs.push(getJSON("https://huggingface.co/api/papers/search?q=" + encodeURIComponent(q)).then(function (arr) { return arr.map(function (x) { return fromHF(x, tp.name); }); }).catch(function () { return []; }));
+      });
+    });
+    Promise.all(reqs).then(function (lists) {
+      var seen = new Set(cached.seen || []), byId = {};
+      [].concat.apply([], lists).forEach(function (pp) {
+        if (!pp.id || !pp.t || seen.has(pp.id)) return;
+        var age = (Date.now() - Date.parse(pp.pub)) / 864e5;
+        if (!(age >= 0 && age <= 60)) return;
+        var m = matchTopic(pp, topics);
+        // Only papers about your topics: a topic search result must mention the topic at least once;
+        // a general daily paper must match a topic on two or more words.
+        if (pp.topic ? m.n < 1 : m.n < 2) return;
+        var topic = pp.topic || m.topic;
+        var score = (pp.up + 1) * Math.exp(-age / 20) * (1 + 0.4 * m.n);
+        if (!byId[pp.id] || byId[pp.id].score < score) { pp.topic = topic; pp.score = score; byId[pp.id] = pp; }
+      });
+      var list = Object.keys(byId).map(function (k) { return byId[k]; }).sort(function (a, b) { return b.score - a.score; });
+      // Rotate topics day by day, as long as that topic has a reasonably popular new paper.
+      var turn = topics[Math.floor(Date.now() / 864e5) % topics.length].name;
+      var best = list[0] || null, mine = list.filter(function (x) { return x.topic === turn; })[0];
+      var paper = mine && best && mine.score >= 0.25 * best.score ? mine : best;
+      var seenArr = (cached.seen || []).slice(-300);
+      if (paper) seenArr.push(paper.id);
+      var rec = { d: today, paper: paper, seen: seenArr, read: false };
+      writeJSON(PKEY, rec);
+      renderPaper(paper, rec);
+    }).catch(function () { renderPaper(null); });
+  }
+  function renderPaper(pp, rec) {
+    var slot = document.getElementById("paperSlot"); slot.textContent = "";
+    if (!pp) { slot.hidden = true; return; }
+    slot.hidden = false;
+    var days = Math.floor((Date.now() - Date.parse(pp.pub)) / 864e5);
+    var when = days <= 0 ? "today" : days === 1 ? "yesterday" : days + " days ago";
+    var read = rec && rec.read;
+    var readBtn = h("button", { class: "act", type: "button", "aria-pressed": read ? "true" : "false", text: read ? "Read ✓" : "Mark as read" });
+    readBtn.addEventListener("click", function () { var r = readJSON(PKEY) || {}; r.read = !r.read; writeJSON(PKEY, r); renderPaper(pp, r); });
+    var vidBtn = h("button", { class: "act", type: "button", text: "Find a video about it" });
+    vidBtn.addEventListener("click", function () { runSearch(pp.t, false); });
+    var summary = pp.sum || (pp.abs.length > 260 ? pp.abs.slice(0, 257) + "…" : pp.abs);
+    slot.appendChild(h("article", { class: "paper" + (read ? " done" : "") }, [
+      h("div", { class: "kind" }, [h("span", { class: "pill", text: "Paper of the day" }), h("span", { class: "from", text: pp.topic + " · " + when + " · ▲ " + pp.up + " upvotes" + (pp.org ? " · " + pp.org : "") })]),
+      h("h3", null, [h("a", { href: "https://huggingface.co/papers/" + pp.id, target: "_blank", rel: "noopener", text: pp.t })]),
+      summary ? h("p", { class: "why", text: summary }) : null,
+      h("div", { class: "actions" }, [
+        h("a", { class: "act go", href: "https://arxiv.org/abs/" + pp.id, target: "_blank", rel: "noopener", text: "Read on arXiv" }),
+        h("a", { class: "act", href: "https://huggingface.co/papers/" + pp.id, target: "_blank", rel: "noopener", text: "Discussion" }),
+        pp.gh ? h("a", { class: "act", href: pp.gh, target: "_blank", rel: "noopener", text: "Code" }) : null,
+        vidBtn, readBtn
+      ])
+    ]));
+  }
+
+  function loadNews(force) {
+    var cached = readJSON(NKEY);
+    if (!force && cached && Date.now() - cached.at < 3 * 3600e3) { renderNews(cached.items); return; }
+    var since = Math.floor(Date.now() / 1000) - 3 * 86400;
+    var words = ["AI", "LLM", "OpenAI", "Anthropic", "DeepMind", "GPU"];
+    paperTopics().forEach(function (tp) { var k = topicKeyFor(tp.name); if (k === "diffusion") words.push("diffusion"); if (k === "world") words.push("world model"); });
+    Promise.all(words.map(function (w) {
+      return getJSON("https://hn.algolia.com/api/v1/search?tags=story&hitsPerPage=20&query=" + encodeURIComponent(w) + "&numericFilters=" + encodeURIComponent("created_at_i>" + since + ",points>80"))
+        .then(function (r) { return r.hits || []; }).catch(function () { return []; });
+    })).then(function (lists) {
+      var byId = {};
+      [].concat.apply([], lists).forEach(function (x) {
+        if (!x.title || byId[x.objectID]) return;
+        if (!/\b(ai|llm|llms|gpt|model|models|openai|anthropic|claude|gemini|deepmind|nvidia|gpu|neural|agent|agents|diffusion|transformer|machine learning|robot)\b/i.test(x.title)) return;
+        byId[x.objectID] = { id: x.objectID, t: x.title, url: x.url || "https://news.ycombinator.com/item?id=" + x.objectID, pts: x.points, at: x.created_at, site: x.url ? x.url.replace(/^https?:\/\/(www\.)?/, "").split("/")[0] : "news.ycombinator.com" };
+      });
+      var items = Object.keys(byId).map(function (k) { return byId[k]; }).sort(function (a, b) { return b.pts - a.pts; }).slice(0, 3);
+      writeJSON(NKEY, { at: Date.now(), items: items });
+      renderNews(items);
+    });
+  }
+  function renderNews(items) {
+    var list = document.getElementById("newsList"); list.textContent = "";
+    (items || []).forEach(function (n) {
+      list.appendChild(h("li", { class: "newsitem" }, [
+        h("a", { href: n.url, target: "_blank", rel: "noopener", text: n.t }),
+        h("span", { class: "label", text: n.site + " · " + n.pts + " points · " }, [h("a", { href: "https://news.ycombinator.com/item?id=" + n.id, target: "_blank", rel: "noopener", text: "discussion" })])
+      ]));
+    });
+    document.getElementById("newsEmpty").hidden = !!(items && items.length);
+  }
+
   // ---------- Search box ----------
   var srch = { q: "", token: null, items: [], busy: false };
   function allKnown() {
@@ -1995,6 +2198,7 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
   });
   document.addEventListener("visibilitychange", timerTick);
   renderNotes(); timerRender(); applyFocus();
+  pickPaper(); loadNews();
   document.getElementById("howClose").addEventListener("click", function () { document.getElementById("howDlg").hidden = true; });
   document.getElementById("howAlways").addEventListener("click", function () { state.fileOk = true; save(); document.getElementById("howDlg").hidden = true; });
   document.getElementById("hintClose").addEventListener("click", function () { state.hintSeen = true; save(); document.getElementById("embedHint").hidden = true; });
