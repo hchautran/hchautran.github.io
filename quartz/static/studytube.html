@@ -1,0 +1,1644 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>StudyTube</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a study desk. Header band with your interest chips, then a feed of video "tapes" beside a side rail for music and saved picks. */
+:root {
+  --bg: #EDF0EA; --surface: #FAFBF8; --ink: #17201C; --muted: #59665E; --line: #D3DBD1;
+  --accent: #2E6B4F; --accent-ink: #FFFFFF; --accent-soft: #DCEAE1;
+  --spark: #6A4FB0; --spark-soft: #E9E3F7; --music: #A65A17; --music-soft: #F5E7D8;
+  --thumb-s: 32%; --thumb-l: 83%; --thumb-ink: #1C2621; --danger: #A83A2C;
+  --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --body: "IBM Plex Sans", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #111714; --surface: #19211D; --ink: #E5ECE6; --muted: #98A69D; --line: #2B3631;
+  --accent: #74C79F; --accent-ink: #0D1511; --accent-soft: #1F3329;
+  --spark: #B7A2F2; --spark-soft: #2A2340; --music: #E5A462; --music-soft: #3A2A1A;
+  --thumb-s: 26%; --thumb-l: 25%; --thumb-ink: #E8EEE9; --danger: #F08A7A; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #111714; --surface: #19211D; --ink: #E5ECE6; --muted: #98A69D; --line: #2B3631;
+  --accent: #74C79F; --accent-ink: #0D1511; --accent-soft: #1F3329;
+  --spark: #B7A2F2; --spark-soft: #2A2340; --music: #E5A462; --music-soft: #3A2A1A;
+  --thumb-s: 26%; --thumb-l: 25%; --thumb-ink: #E8EEE9; --danger: #F08A7A; color-scheme: dark; }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+img { max-width: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+a { color: inherit; }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+header { border-bottom: 1px solid var(--line); background: var(--surface); }
+header .wrap { padding-block: 20px 18px; display: grid; gap: 14px; }
+.brand { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.logo { font-family: var(--display); font-weight: 800; font-size: 30px; letter-spacing: -0.02em; margin: 0; display: flex; align-items: center; gap: 8px; }
+.logo .tri { width: 22px; height: 22px; border-radius: 6px; background: var(--accent); display: inline-grid; place-items: center; }
+.logo .tri::after { content: ""; border-left: 8px solid var(--accent-ink); border-top: 5px solid transparent; border-bottom: 5px solid transparent; margin-left: 2px; }
+.tag { color: var(--muted); font-size: 14px; }
+
+.label { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.chip { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--bg); overflow: hidden; }
+.chip button { border: 0; background: none; cursor: pointer; padding: 6px 4px 6px 12px; font-weight: 500; font-size: 14px; display: inline-flex; align-items: center; gap: 7px; }
+.chip button .dot { width: 8px; height: 8px; border-radius: 50%; background: hsl(var(--h) 45% 50%); }
+.chip .x { padding: 6px 10px 6px 6px; color: var(--muted); font-size: 15px; line-height: 1; }
+.chip .x:hover { color: var(--danger); }
+.chip[data-on="false"] { opacity: .55; }
+.chip[data-on="false"] .name { text-decoration: line-through; }
+.addform { display: inline-flex; gap: 6px; }
+.addform input { border: 1px dashed var(--line); background: transparent; border-radius: 999px; padding: 6px 12px; width: 190px; max-width: 100%; }
+
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.goal { flex: 1 1 280px; min-width: 0; display: flex; gap: 8px; align-items: center; }
+.goal input { flex: 1; min-width: 0; border: 1px solid var(--line); background: var(--bg); border-radius: 10px; padding: 9px 12px; }
+.btn { border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 9px 14px; cursor: pointer; font-weight: 500; white-space: nowrap; }
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn:disabled { opacity: .6; cursor: progress; }
+select.btn { padding-right: 10px; max-width: 100%; }
+
+main .wrap { padding-block: 22px 48px; display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 28px; align-items: start; }
+@media (max-width: 900px) { main .wrap { grid-template-columns: minmax(0, 1fr); } }
+
+.status { font-size: 14px; color: var(--muted); margin: 0 0 12px; }
+.status:empty { display: none; }
+.status.err { color: var(--danger); }
+.feed { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 18px; }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; min-width: 0; }
+.card.watched { opacity: .72; }
+.thumb { aspect-ratio: 16 / 8; max-width: 100%; position: relative; text-decoration: none; display: block; color: var(--thumb-ink);
+  background:
+    radial-gradient(circle at 85% 20%, hsl(var(--h) var(--thumb-s) calc(var(--thumb-l) + 6%)) 0 18%, transparent 19%),
+    repeating-linear-gradient(135deg, transparent 0 14px, hsl(var(--h) var(--thumb-s) calc(var(--thumb-l) - 4%)) 14px 15px),
+    hsl(var(--h) var(--thumb-s) var(--thumb-l)); }
+.thumb .angle { position: absolute; left: 12px; top: 10px; font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; display: flex; gap: 6px; }
+.thumb .badge { position: absolute; right: 12px; top: 9px; font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; background: var(--surface); color: var(--ink); padding: 2px 7px; border-radius: 4px; }
+.thumb .play { position: absolute; right: 12px; bottom: 10px; width: 38px; height: 38px; border-radius: 50%; background: var(--surface); display: grid; place-items: center; box-shadow: 0 1px 0 var(--line); }
+.thumb .play::after { content: ""; border-left: 11px solid var(--ink); border-top: 7px solid transparent; border-bottom: 7px solid transparent; margin-left: 3px; }
+.thumb .big { position: absolute; left: 12px; bottom: 8px; right: 60px; font-family: var(--display); font-weight: 800; font-size: 22px; line-height: 1.05; letter-spacing: -0.01em; overflow-wrap: anywhere; }
+.thumb:hover .play { transform: scale(1.06); }
+.card.spark .thumb { background: repeating-radial-gradient(circle at 20% 120%, var(--spark-soft) 0 10px, transparent 10px 22px), var(--spark-soft); color: var(--ink); }
+.card.music .thumb { background: var(--music-soft); color: var(--ink); }
+.card.search .thumb { background: repeating-linear-gradient(90deg, transparent 0 18px, var(--line) 18px 19px), var(--bg); color: var(--ink); }
+.bars { position: absolute; left: 12px; right: 60px; bottom: 12px; height: 34px; display: flex; align-items: flex-end; gap: 4px; }
+.bars i { flex: 1; background: var(--music); border-radius: 2px; opacity: .8; animation: eq 1.4s ease-in-out infinite alternate; transform-origin: bottom; }
+@keyframes eq { from { transform: scaleY(.35); } to { transform: scaleY(1); } }
+@media (prefers-reduced-motion: reduce) { .bars i { animation: none; } }
+
+.body { padding: 12px 14px 12px; display: grid; gap: 6px; flex: 1; align-content: start; }
+.kind { font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.kind .pill { padding: 2px 7px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
+.card.spark .kind .pill { background: var(--spark-soft); color: var(--spark); }
+.card.music .kind .pill { background: var(--music-soft); color: var(--music); }
+.card.search .kind .pill { background: var(--bg); color: var(--muted); border: 1px solid var(--line); }
+.kind .from { color: var(--muted); text-transform: none; letter-spacing: 0; font-family: var(--body); font-size: 12.5px; }
+.card h3 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 17.5px; line-height: 1.22; text-wrap: balance; overflow-wrap: anywhere; }
+.card h3 a { text-decoration: none; }
+.card h3 a:hover { text-decoration: underline; }
+.by { margin: 0; font-size: 13px; color: var(--ink); font-weight: 500; }
+.why { margin: 0; color: var(--muted); font-size: 14px; }
+.actions { display: flex; gap: 6px; padding: 0 14px 14px; flex-wrap: wrap; align-items: center; }
+.act { border: 1px solid var(--line); background: transparent; border-radius: 8px; padding: 5px 10px; font-size: 13px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; }
+.act.go { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.act[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+.alt { font-size: 12.5px; color: var(--muted); margin-left: auto; }
+
+aside { display: grid; gap: 18px; min-width: 0; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: grid; gap: 12px; min-width: 0; }
+.panel h2 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 19px; }
+.moods { display: flex; flex-wrap: wrap; gap: 6px; }
+.mood { border: 1px solid var(--line); background: transparent; border-radius: 999px; padding: 5px 11px; font-size: 13px; cursor: pointer; }
+.mood[aria-pressed="true"] { background: var(--music-soft); color: var(--music); border-color: var(--music); }
+.list { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.list li { display: flex; gap: 8px; align-items: center; justify-content: space-between; padding: 7px 0; border-top: 1px solid var(--line); min-width: 0; }
+.list li:first-child { border-top: 0; }
+.list a { text-decoration: none; font-size: 14px; min-width: 0; overflow-wrap: anywhere; }
+.list a:hover { text-decoration: underline; }
+.list .rm { border: 0; background: none; color: var(--muted); cursor: pointer; font-size: 13px; flex: none; }
+.list .label { flex: none; }
+.empty { color: var(--muted); font-size: 14px; margin: 0; }
+.note { font-size: 12.5px; color: var(--muted); margin: 0; }
+.linkbtn { border: 0; background: none; padding: 0; color: var(--accent); cursor: pointer; font-size: 13px; text-decoration: underline; }
+
+/* Calm "Up next" layout: one hero, a short queue, one spark. */
+.stage { display: grid; gap: 22px; }
+.sec-h { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin: 0 0 10px; flex-wrap: wrap; }
+.sec-h h2 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 19px; }
+.hero { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); grid-template-rows: 1fr auto; }
+.hero .thumb { aspect-ratio: auto; min-height: 230px; height: 100%; grid-column: 1; grid-row: 1 / span 2; }
+.hero .body, .hero .actions { grid-column: 2; }
+.hero .thumb .big { font-size: 34px; right: 76px; }
+.hero .thumb .play { width: 54px; height: 54px; }
+.hero .thumb .play::after { border-left-width: 15px; border-top-width: 10px; border-bottom-width: 10px; }
+.hero .body { padding: 18px 20px 10px; gap: 8px; }
+.hero h3 { font-size: 23px; }
+.hero .why { font-size: 15px; }
+.hero .actions { padding: 6px 20px 20px; }
+.hero .act { padding: 8px 14px; font-size: 14px; }
+@media (max-width: 640px) { .hero { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; } .hero .thumb { min-height: 0; aspect-ratio: 16 / 8; grid-row: auto; } .hero .body, .hero .actions { grid-column: 1; } }
+.queue { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 760px) { .queue { grid-template-columns: minmax(0, 1fr); } }
+.mini .thumb { aspect-ratio: 16 / 9; }
+.mini .thumb .big { font-size: 18px; }
+.mini h3 { font-size: 15.5px; }
+.mini .why { display: none; }
+.mini .actions { padding: 0 12px 12px; }
+.mini .body { padding: 10px 12px; }
+.musicline { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; background: var(--music-soft); border-radius: 12px; padding: 10px 14px; font-size: 14px; }
+.musicline a { font-weight: 500; }
+.musicline .label { color: var(--music); }
+details.panel > summary { cursor: pointer; font-family: var(--display); font-weight: 600; font-size: 19px; list-style: none; display: flex; justify-content: space-between; align-items: baseline; }
+details.panel > summary::-webkit-details-marker { display: none; }
+details.panel > summary::after { content: "Show"; font-family: var(--body); font-weight: 400; font-size: 13px; color: var(--muted); }
+details.panel[open] > summary::after { content: "Hide"; }
+.streak { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.keyrow { display: flex; gap: 6px; min-width: 0; }
+.keyrow .btn { flex: none; }
+.keyrow { width: 100%; }
+.keyrow input { flex: 1 1 0; width: 0; min-width: 0; border: 1px solid var(--line); background: var(--bg); border-radius: 10px; padding: 8px 10px; font-size: 14px; }
+.livestate { margin: 0; font-size: 13.5px; color: var(--muted); }
+.livestate.on { color: var(--accent); font-weight: 500; }
+#liveMsg:empty { display: none; }
+#liveMsg.err { color: var(--danger); }
+.howto > summary { cursor: pointer; font-size: 13px; color: var(--accent); }
+.howto ol { padding-left: 18px; margin: 8px 0 0; display: grid; gap: 6px; }
+.panel h2.small { font-size: 16px; }
+.searchbar { display: flex; gap: 8px; min-width: 0; }
+.searchbar input { flex: 1 1 0; width: 0; min-width: 0; border: 1px solid var(--line); background: var(--bg); border-radius: 999px; padding: 10px 16px; font-size: 15px; }
+.searchbar input:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px var(--accent-soft); }
+.searchbar .btn { border-radius: 999px; flex: none; }
+#searchView .queue { row-gap: 18px; }
+#searchMsg:empty { display: none; }
+#searchMsg.err { color: var(--danger); }
+.playerbox { position: relative; aspect-ratio: 16 / 9; width: 100%; max-width: 100%; background: #000; border-radius: 14px; overflow: hidden; }
+.playerbox iframe, #ytplayer { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.endcard { position: absolute; inset: 0; background: rgba(10, 14, 12, .88); color: #fff; display: grid; align-content: center; justify-items: center; gap: 8px; padding: 24px; text-align: center; }
+.endcard .label { color: #cfe3d7; }
+.endtitle { margin: 0; font-family: var(--display); font-weight: 600; font-size: 22px; max-width: 34ch; text-wrap: balance; }
+.endcount { margin: 0; font-family: var(--mono); font-size: 13px; color: #cfe3d7; }
+.endcard .btn:not(.primary) { background: transparent; color: #fff; border-color: rgba(255,255,255,.4); }
+.pinfo { display: grid; gap: 6px; }
+.ptitle { margin: 0; font-family: var(--display); font-weight: 600; font-size: 22px; line-height: 1.25; text-wrap: balance; }
+.pinfo .why { margin: 0; }
+#playerNote:empty { display: none; }
+#playerNote.err { color: var(--danger); font-size: 14px; }
+.pinfo .row { margin-top: 4px; }
+a.btn { text-decoration: none; display: inline-flex; align-items: center; }
+.auto { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: var(--muted); }
+.dlg { position: fixed; inset: 0; background: rgba(10, 14, 12, .55); display: grid; place-items: center; padding: 16px; z-index: 50; }
+.dlgbox { background: var(--surface); color: var(--ink); border-radius: 16px; padding: 22px; max-width: 520px; width: 100%; display: grid; gap: 10px; box-shadow: 0 20px 60px rgba(0,0,0,.25); }
+.dlgbox h2 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 21px; }
+.dlgbox p, .dlgbox ol { margin: 0; font-size: 14.5px; }
+.dlgbox ol { padding-left: 20px; display: grid; gap: 4px; }
+.hint { display: flex; gap: 12px; align-items: flex-start; justify-content: space-between; background: var(--accent-soft); border-radius: 12px; padding: 12px 14px; font-size: 14px; }
+.hint p { margin: 0; }
+.hint .linkbtn { flex: none; }
+.mini .meta { margin: 0; font-size: 12.5px; color: var(--muted); }
+/* Real thumbnails */
+.thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.thumb:has(img) { background: #000; }
+.thumb:has(img) .play { left: 50%; top: 50%; right: auto; bottom: auto; transform: translate(-50%, -50%); opacity: 0; transition: opacity .15s; }
+.thumb:has(img):hover .play, .thumb:has(img):focus-visible .play { opacity: .92; transform: translate(-50%, -50%); }
+.thumb .dur, .thumb .seen { position: absolute; bottom: 8px; font-family: var(--mono); font-size: 11.5px; padding: 2px 6px; border-radius: 4px; background: rgba(0, 0, 0, .78); color: #fff; }
+.thumb .dur { right: 8px; }
+.thumb .seen { left: 8px; }
+.thumb:has(img) .badge { left: 8px; right: auto; top: 8px; }
+.musicline { padding: 8px 10px; }
+.musicline img { width: 64px; height: 36px; object-fit: cover; border-radius: 6px; flex: none; }
+</style>
+</head>
+<body>
+
+
+<header>
+  <div class="wrap">
+    <div class="brand">
+      <h1 class="logo"><span class="tri" aria-hidden="true"></span>StudyTube</h1>
+      <span class="tag">One video at a time, picked from what you're learning now.</span>
+    </div>
+    <div>
+      <div class="label" style="margin-bottom:6px">Learning now · tap to pause a topic</div>
+      <div class="chips" id="chips"></div>
+    </div>
+    <form class="searchbar" id="searchForm" role="search">
+      <input id="q" type="search" autocomplete="off" placeholder="Search videos, e.g. flow matching, CUDA, KL divergence" aria-label="Search videos">
+      <button class="btn primary" type="submit">Search</button>
+    </form>
+    <div class="row">
+      <form class="goal" id="goalForm">
+        <label class="label" for="goal" style="flex:none">Today</label>
+        <input id="goal" placeholder="What are you working on today? e.g. derive the flow matching loss" maxlength="140">
+      </form>
+      <select class="btn" id="filter" aria-label="Show videos for"></select>
+      <button class="btn" id="shuffle" type="button">Refresh picks</button>
+      <button class="btn primary" id="fetchTop" type="button" hidden>Find new videos</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div class="dlg" id="howDlg" hidden role="dialog" aria-modal="true" aria-labelledby="howTitle">
+      <div class="dlgbox">
+        <h2 id="howTitle">Watch here, not on YouTube</h2>
+        <p>YouTube only lets its player run on pages opened from a web address, and this page was opened as a plain file.</p>
+        <ol>
+          <li>Close this tab.</li>
+          <li>In the <b>StudyTube</b> folder (inside <b>temp</b>), double-click <b>Open StudyTube</b>.</li>
+          <li>StudyTube opens in your browser at <b>localhost:47321</b>. Videos play right on the page there.</li>
+        </ol>
+        <div class="row">
+          <a class="btn" id="howYT" href="#" target="_blank" rel="noopener">Open this one on YouTube</a>
+          <button class="btn" id="howAlways" type="button">Always use YouTube from this file</button>
+          <button class="btn primary" id="howClose" type="button">OK</button>
+        </div>
+      </div>
+    </div>
+    <section aria-label="Now playing" class="stage" id="playerView" hidden>
+      <div class="playerbox">
+        <div id="ytplayer"></div>
+        <div class="endcard" id="endCard" hidden>
+          <span class="label">Up next</span>
+          <p class="endtitle" id="endTitle"></p>
+          <p class="endcount" id="endCount"></p>
+          <div class="row"><button class="btn primary" id="endPlay" type="button">Play now</button><button class="btn" id="endCancel" type="button">Cancel</button></div>
+        </div>
+      </div>
+      <div class="pinfo">
+        <h2 class="ptitle" id="pTitle"></h2>
+        <p class="by" id="pBy"></p>
+        <p class="why" id="pWhy"></p>
+        <p class="note" id="playerNote" role="status"></p>
+        <div class="row">
+          <button class="btn primary" id="pNext" type="button">Next video</button>
+          <button class="btn" id="pSave" type="button" aria-pressed="false">Save</button>
+          <a class="btn" id="pOpen" href="#" target="_blank" rel="noopener">Open on YouTube</a>
+          <label class="auto"><input type="checkbox" id="pAuto"> Autoplay next</label>
+          <button class="btn" id="pClose" type="button">Back</button>
+        </div>
+      </div>
+      <div id="playerQueueWrap" hidden>
+        <div class="sec-h"><h2>Up next</h2></div>
+        <div class="queue" id="playerQueue"></div>
+      </div>
+    </section>
+    <section aria-label="Search results" class="stage" id="searchView" hidden>
+      <div class="sec-h"><h2 id="searchTitle">Results</h2><button class="btn" id="backToFeed" type="button">Back to my feed</button></div>
+      <p class="note" id="searchMsg" role="status"></p>
+      <div class="queue" id="searchResults"></div>
+      <div class="row" id="searchMoreRow" hidden><button class="btn" id="searchMore" type="button">More results</button></div>
+    </section>
+    <section aria-label="Video suggestions" class="stage" id="feedView">
+      <p class="status" id="status" role="status"></p>
+      <div class="hint" id="embedHint" hidden>
+        <p><b>Want to watch videos right on this page?</b> YouTube's player only works when StudyTube runs from a web address. Close this tab and double-click <b>Open StudyTube</b> in the same folder. Until then, videos open on YouTube.</p>
+        <button class="linkbtn" id="hintClose" type="button">Got it</button>
+      </div>
+      <div>
+        <div class="sec-h"><h2>Watch this now</h2><span class="streak" id="streak"></span></div>
+        <div id="hero"></div>
+      </div>
+      <div id="musicSlot"></div>
+      <div id="queueWrap">
+        <div class="sec-h"><h2>Up next</h2></div>
+        <div class="queue" id="queue"></div>
+      </div>
+      <div id="sparkWrap">
+        <div class="sec-h"><h2>Something different</h2></div>
+        <div class="queue" id="sparks"></div>
+      </div>
+    </section>
+    <aside>
+      <details class="panel" id="livePanel">
+        <summary>Live YouTube search</summary>
+        <p class="livestate" id="liveState"></p>
+        <p class="note" id="liveMsg" role="status"></p>
+        <form class="keyrow" id="keyForm">
+          <input id="ytKey" type="password" autocomplete="off" spellcheck="false" placeholder="Paste your YouTube API key" aria-label="YouTube API key">
+          <button class="btn" type="submit">Save</button>
+        </form>
+        <div class="row" id="liveActions" hidden>
+          <button class="btn" id="fetchNow" type="button">Find new videos now</button>
+          <button class="linkbtn" id="forgetKey" type="button">Remove key</button>
+        </div>
+        <details class="howto">
+          <summary>How to get a free key (about 3 minutes)</summary>
+          <ol class="note">
+            <li>Go to <a href="https://console.cloud.google.com/" target="_blank" rel="noopener">console.cloud.google.com</a> and create a project (any name).</li>
+            <li>Open <b>APIs &amp; Services → Library</b>, search <b>YouTube Data API v3</b>, and click <b>Enable</b>.</li>
+            <li>Open <b>APIs &amp; Services → Credentials → Create credentials → API key</b>, then copy the key.</li>
+            <li>Recommended: edit the key, choose <b>Restrict key</b> under API restrictions, and pick YouTube Data API v3. Leave application restrictions on None.</li>
+            <li>Paste it above. It stays in this browser only. The free quota allows roughly 15–20 "Find new videos" runs a day.</li>
+          </ol>
+        </details>
+      </details>
+      <div class="panel">
+        <h2 class="small">Watching something else?</h2>
+        <form class="keyrow" id="pasteForm">
+          <input id="pasteLink" type="url" autocomplete="off" placeholder="YouTube video or playlist link" aria-label="YouTube video or playlist link">
+          <button class="btn" type="submit">Next part</button>
+        </form>
+        <p class="note">StudyTube finds the playlist it belongs to and puts the next video at the top.</p>
+      </div>
+      <details class="panel">
+        <summary>Study music</summary>
+        <div class="moods" id="moods"></div>
+        <ul class="list" id="musicList"></ul>
+      </details>
+      <details class="panel" id="savedPanel">
+        <summary>Saved for later</summary>
+        <ul class="list" id="savedList"></ul>
+        <p class="empty" id="savedEmpty">Tap Save on any video to keep it here.</p>
+      </details>
+      <div class="panel">
+        <p class="note">The built-in videos were checked on YouTube on Nov 2, 2026; live search adds more as you go. If one has been taken down, use "Find similar" on its card. When you come back from a video, the next pick moves up on its own, and topics you watch more get suggested more. Your topics, saved and watched videos stay in this browser. <button class="linkbtn" id="resetHidden" type="button">Bring back hidden videos</button></p>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<script>
+(function () {
+  "use strict";
+  var KEY = "studytube.v2";
+  var SEARCH = function (q) { return "https://www.youtube.com/results?search_query=" + encodeURIComponent(q); };
+  function urlOf(v) {
+    if (v.list && v.id && v.pos) return "https://www.youtube.com/watch?v=" + v.id + "&list=" + v.list;
+    if (v.list) return "https://www.youtube.com/playlist?list=" + v.list;
+    if (v.id) return "https://www.youtube.com/watch?v=" + v.id;
+    return SEARCH(v.q);
+  }
+
+  // ---------- Verified catalog ----------
+  // Every video below was read from live YouTube search results on Nov 1-2, 2026
+  // (id, title, channel and length as YouTube lists them).
+  // Row: [id, title, channel, length, angle, why?, extra?]  extra = {s: series, n: part, list: playlist id}
+  function rows(arr) { return arr.map(function (r) { var o = { id: r[0], t: r[1], by: r[2] || "", d: r[3] || "", a: r[4] || "", w: r[5] || "" }; if (r[6]) for (var k in r[6]) o[k] = r[6][k]; o.q = o.t.replace(/[|\[\]()]/g, " ").split(" ").slice(0, 8).join(" "); return o; }); }
+
+  var CAT = {
+    diffusion: {
+      label: "Diffusion & flow matching",
+      match: ["diffusion", "flow matching", "score-based", "score based", "generative model", "rectified flow"],
+      learn: rows([
+        ["iv-5mZ_9CPY", "But how do AI images and videos actually work?", "3Blue1Brown · Welch Labs", "37:20", "Intuition", "A beautifully animated tour from CLIP to denoising. Great first watch."],
+        ["fbLgFrlTnGU", "What are Diffusion Models?", "Ari Seff", "15:28", "Intuition", "Compact, clear intro to the forward and reverse process."],
+        ["1CIpzeNxIhU", "How AI Image Generators Work (Stable Diffusion / Dall-E) - Computerphile", "Computerphile", "17:50", "Intuition", "Whiteboard-style explanation of noise-then-denoise."],
+        ["yTAMrHVG1ew", "Diffusion models explained in 4-difficulty levels", "AssemblyAI", "7:08", "Quick intro", "Short and layered: pick the depth you want."],
+        ["i2qSxMVeVLI", "How I Understand Diffusion Models", "Jia-Bin Huang", "17:39", "Intuition", "A professor's mental model of diffusion, with great visuals."],
+        ["EhndHhIvWWw", "Diffusion Models: DDPM | Generative AI Animated", "Deepia", "32:06", "Visual", "The DDPM derivation, animated step by step."],
+        ["lUljxdkolK8", "Score-based Diffusion Models | Generative AI Animated", "Deepia", "18:44", "Visual", "Score functions and Langevin sampling, animated."],
+        ["0OsqNvrsAIY", "Score Matching Explained - The Key Idea Behind Diffusion Models", "DeepBean", "28:17", "Concept", "Why you can learn a score without knowing the density."],
+        ["HoKDTa5jHvg", "Diffusion Models | Paper Explanation | Math Explained", "Outlier", "33:27", "Math", "Careful walk through the DDPM math."],
+        ["B4oHJpEJBAA", "Diffusion Models From Scratch | Score-Based Generative Models Explained | Math Explained", "Outlier", "38:11", "Math", "The score-based view, derived from scratch."],
+        ["DDq_pIfHqLs", "How I Understand Flow Matching", "Jia-Bin Huang", "16:25", "Intuition", "The clearest short intro to flow matching."],
+        ["firXjwZ_6KI", "Flow-Matching vs Diffusion Models explained side by side", "AI Coffee Break with Letitia", "16:08", "Compare", "Exactly where the two approaches differ and agree."],
+        ["3mFNpeJQjmw", "The physics behind Flow Matching models", "Julia Turc", "24:02", "Concept", "Flow matching through fluid flow and the continuity equation."],
+        ["hXQZ6lyRCsI", "What is flow matching?", "Hugging Face", "28:22", "Intuition", "A friendly, recent walkthrough."],
+        ["7cMzfkWFWhI", "Flow Matching | Explanation + PyTorch Implementation", "Outlier", "22:04", "Build it", "Derive the loss, then code it."],
+        ["7NNxK3CqaDk", "Flow Matching for Generative Modeling (Paper Explained)", "Yannic Kilcher", "56:16", "Paper", "A full read of the Lipman et al. paper."],
+        ["5ZSwYogAxYg", "Flow Matching: Simplifying and Generalizing Diffusion Models | Yaron Lipman", "Proxima", "59:40", "Talk", "From the flow matching paper's first author."],
+        ["5zpRVD7l-h0", "Rectified Flow: The Game-Changing Technique Powering Stable Diffusion 3 (Full Reimplementation!)", "Papers in 100 Lines of Code", "17:24", "Build it", "Rectified flow, reimplemented in a few lines."],
+        ["r5KKwUIVZtw", "Monte Carlo Seminar | Qiang Liu | Rectified Flow", "Monte Carlo Seminar", "", "Talk", "Rectified flow from its author: straight paths, fewer steps."],
+        ["9eJQQVrUUoI", "MIT 6.S184: Flow Matching and Diffusion Models - Lecture 01 - Flow and Diffusion Models (2026)", "Peter Holderrieth", "1:18:03", "Lecture", "The 2026 course opener: ODEs, SDEs and generative models.", { s: "6s184", n: 1 }],
+        ["PNkMKWW8Khw", "MIT 6.S184: Flow Matching and Diffusion Models - Lecture 02: Flow Matching (2026)", "Peter Holderrieth", "", "Lecture", "Derives the flow matching objective.", { s: "6s184", n: 2 }],
+        ["ngC3QnYSVNM", "MIT 6.S184: Flow Matching and Diffusion Models - Lecture 03A - Score Functions (2026)", "Peter Holderrieth", "", "Lecture", "Score functions and how they tie flows to diffusion.", { s: "6s184", n: 3 }],
+        ["8oWZ1bHwyRI", "MIT 6.S184: Flow Matching and Diffusion Models - Lecture 03B - Classifier-free Guidance (2026)", "Peter Holderrieth", "39:12", "Lecture", "How guidance steers generation.", { s: "6s184", n: 4 }],
+        ["9eJQQVrUUoI", "MIT 6.S184: Flow Matching and Diffusion Models (2026) — full playlist", "Peter Holderrieth", "", "Full course", "The whole 2026 lecture series.", { list: "PL57nT7tSGAAXwjhDYcxEycx5W7YoSrZyt" }],
+        ["tr-CUpw--ck", "Stanford CME296 Diffusion & Large Vision Models | Spring 2026 | Lecture 1 - Diffusion", "Stanford Online", "1:46:26", "Lecture", "A brand-new Stanford course on diffusion.", { s: "cme296", n: 1 }],
+        ["_WaR2fjZpEQ", "Stanford CME296 Diffusion & Large Vision Models | Spring 2026 | Lecture 2 - Score matching", "Stanford Online", "1:48:48", "Lecture", "", { s: "cme296", n: 2 }],
+        ["agN3AlfGFrk", "Stanford CME296 Diffusion & Large Vision Models | Spring 2026 | Lecture 3 - Flow matching", "Stanford Online", "1:47:34", "Lecture", "", { s: "cme296", n: 3 }],
+        ["dqUMCzWjZSI", "Stanford CS229 Machine Learning | Spring 2026 | Lecture 11: Diffusion Models", "Stanford Online", "1:22:31", "Lecture", "Diffusion inside a general ML course."],
+        ["687zEGODmHA", "CS 198-126: Lecture 12 - Diffusion Models", "Machine Learning at Berkeley", "53:40", "Lecture", ""],
+        ["a4Yfz2FxXiY", "Diffusion models from scratch in PyTorch", "DeepFindr", "30:54", "Build it", "A compact, popular implementation walkthrough."],
+        ["TBCRlnwJtZU", "Diffusion Models | PyTorch Implementation", "Outlier", "22:26", "Build it", ""],
+        ["vu6eKteJWew", "Diffusion Models from scratch | DDPM PyTorch Implementation", "ExplainingAI", "25:52", "Build it", ""],
+        ["ZBKpAp_6TGI", "Coding Stable Diffusion from scratch in PyTorch", "Umar Jamil", "5:03:32", "Build it", "A long, careful build of the full Stable Diffusion pipeline."],
+        ["J87hffSMB60", "How does Stable Diffusion work? – Latent Diffusion Models EXPLAINED", "AI Coffee Break with Letitia", "13:16", "Concept", "Why diffusion runs in a latent space."],
+        ["jNPmSjrxGtY", "Diffusion Transformers (ViT, DiT, MMDiT)", "Julia Turc", "18:14", "Concept", "The architectures behind today's image and video models."],
+        ["aSLDXdc2hkk", "Scalable Diffusion Models with Transformers | DiT Explanation and Implementation", "ExplainingAI", "36:55", "Build it", ""],
+        ["vXtapCFctTI", "Stanford CS25: V5 I Transformers in Diffusion Models for Image Generation and Beyond", "Stanford Online", "1:14:32", "Talk", ""],
+        ["nv-WTeKRLl0", "Learning to Generate Data by Estimating Gradients of the Data Distribution (Yang Song, Stanford)", "Yingzhen Li", "", "Talk", "The score-based view, from one of its authors."],
+        ["ud6z5SkjoZI", "History of Diffusion - Yang Song", "Bain Capital Ventures", "", "History", "How the field got here."]
+      ]),
+      spark: rows([
+        ["alH3yc6tX98", "Can Math Explain How Animals Get Their Patterns?", "MinuteEarth", "4:04", "Turing patterns", "A different diffusion paints stripes and spots."],
+        ["icQ_BTtNGEo", "Turing's Cake (and other wrinkly math)", "Physics for the Birds", "13:38", "Math in nature", "Reaction-diffusion patterns, explained playfully."],
+        ["ZNzoTGv_XiQ", "The experiment that revealed the atomic world: Brownian Motion", "Steve Mould", "12:26", "Physics", "The random walk at the heart of every diffusion model."],
+        ["hi_s4T1-gBY", "MIT 6.S184: Flow Matching and Diffusion Models - Lecture 06 - Diffusion for Proteins (2025)", "Peter Holderrieth", "", "Application", "The same math, used to design proteins."],
+        ["3gSy_yN9YBo", "how AlphaFold *actually* works", "Looking Glass Universe", "12:43", "Science", "Where generative models meet biology."]
+      ])
+    },
+    world: {
+      label: "World models",
+      match: ["world model", "world-model", "jepa", "model-based", "model based"],
+      learn: rows([
+        ["MqjvfJTCuqw", "But what exactly are world models?", "Julia Turc", "28:50", "Intuition", "A great starting point: what people mean by a world model."],
+        ["ECWC-YlAk1o", "World Models explained in 10min..", "Caleb Writes Code", "9:52", "Quick intro", "Fast overview before you go deeper."],
+        ["pdV9eaLy--E", "World Foundation Models - Computerphile", "Computerphile", "12:48", "Intuition", ""],
+        ["kYkIdXwW2AE", "Yann LeCun's $1B Bet Against LLMs [Part 1]", "Welch Labs", "37:25", "Story", "Beautifully made explainer of the JEPA/world-model bet."],
+        ["oM4neOyZOi0", "What Is Yann LeCun Cooking? JEPA Explained Simply", "bycloud", "19:51", "Intuition", ""],
+        ["gVEr2cnDE_8", "How AI Learned to Teach Itself [JEPA]", "Jia-Bin Huang", "37:48", "Concept", "Self-supervised learning and JEPA, visually."],
+        ["jSdHmImyUjk", "JEPA - A Path Towards Autonomous Machine Intelligence (Paper Explained)", "Yannic Kilcher", "59:38", "Paper", "LeCun's position paper, read closely."],
+        ["7UkJPwz_N_0", "V-JEPA: Revisiting Feature Prediction for Learning Visual Representations from Video (Explained)", "Yannic Kilcher", "50:03", "Paper", "JEPA applied to video."],
+        ["6bJIkfi8H-E", "I-JEPA from Meta AI - A Human-Like Computer Vision Model | Paper Summary", "AI Papers Academy", "8:17", "Paper", ""],
+        ["JQWX_Nx5IHE", "LeCun's LeWorldModel: Finally a Stable JEPA World Model?", "AI Papers Academy", "10:31", "Latest", ""],
+        ["yUmDRxV0krg", "Yann LeCun | Self-Supervised Learning, JEPA, World Models, and the future of AI", "Harvard CMSA", "1:08:37", "Talk", ""],
+        ["72Xj8k5WQX4", "Yann LeCun: World Models: Enabling the next AI revolution", "Computer Vision and Geometry Group, ETH Zurich", "58:54", "Talk", "Why he thinks world models come next."],
+        ["vJKC31YpA8c", "Yann LeCun: Special Lecture on AI and World Models", "Al-Khwarizmi Applied Mathematics Webinar", "1:45:00", "Talk", ""],
+        ["qz4GQ0zUFRw", "World Models, JEPA And The Path To Sample-Efficient RL", "Y Combinator", "1:14:27", "Talk", ""],
+        ["vfpZu0R1s1Y", "Model Based RL Finally Works!", "Edan Meyer", "28:01", "Paper", "DreamerV3: learning inside imagination."],
+        ["viXppDhx4R0", "DreamerV3 Tutorial. Paper, Diagrams, Clean Code", "Inexperienced Me", "1:35:00", "Build it", ""],
+        ["o75ybZ-6Uu8", "Dreamer v2: Mastering Atari with Discrete World Models (Machine Learning Research Paper Explained)", "Yannic Kilcher", "", "Paper", ""],
+        ["hYV4-m7_SK8", "MuZero: DeepMind's New AI Mastered More Than 50 Games", "Two Minute Papers", "5:27", "Quick intro", "Planning with a learned model, in five minutes."],
+        ["We20YSAJZSE", "MuZero: Mastering Atari, Go, Chess and Shogi by Planning with a Learned Model", "Yannic Kilcher", "18:59", "Paper", ""],
+        ["L0A86LmH7Yw", "MuZero - ICAPS 2020", "Julian Schrittwieser", "33:55", "Talk", "From MuZero's lead author."],
+        ["n5x6yXDj0uo", "Genie 3: An infinite world model | Shlomi Fruchter and Jack Parker-Holder", "Google DeepMind", "1:00:41", "Talk", "The Genie 3 team on how it works."],
+        ["LOP8ul3KqQI", "Introducing Genie 4", "Google for Developers", "47:26", "Latest", "Released this week."],
+        ["0XvOOi6g5Ok", "Google's Genie model makes realistic worlds in realtime…", "Fireship", "4:09", "Quick intro", ""],
+        ["0DRDJ01COqo", "Visualize world models with Project Genie", "Google", "5:29", "Demo", ""],
+        ["PDKhUknuQDg", "Genie 3: Creating dynamic worlds that you can navigate in real-time", "Google DeepMind", "", "Demo", ""],
+        ["iRBs8PCBCaA", "AI Video Is Becoming a World Simulator", "Bilawal Sidhu", "8:14", "Concept", ""],
+        ["PvqyGnOirgA", "Stanford CS224R Deep Reinforcement Learning | Spring 2025 | Lecture 11: Model-Based RL", "Stanford Online", "1:13:20", "Lecture", "Model-based RL, properly grounded."],
+        ["2o1yrkbpcUk", "L6 Model-based RL (Foundations of Deep RL Series)", "Pieter Abbeel", "18:14", "Lecture", "Short and dense."],
+        ["i7q8bISGwMQ", "Reinforcement Learning Series: Overview of Methods", "Steve Brunton", "21:37", "Overview", "A map of RL so model-based methods have context."],
+        ["_b-FwaiETwM", "Prof. Sergey Levine: Robotic Foundation Models", "AI Agent Frontier", "1:00:14", "Talk", ""],
+        ["-tabaM5l3s0", "Fei-Fei Li is Solving the Hardest Problem in Robotics | World Labs with a16z", "a16z", "42:21", "Interview", ""],
+        ["2nQSoiC5VHs", "World Models and the Emergence of a “First-Person” Perspective in an AI", "Simons Institute for the Theory of Computing", "38:25", "Talk", ""]
+      ]),
+      spark: rows([
+        ["iV-EMA5g288", "Place cells: How your brain creates maps of abstract spaces", "Artem Kirsanov", "14:37", "Neuroscience", "Brains may run their own world models."],
+        ["iPj9D9LgK2A", "A Universal Theory of Brain Function", "Artem Kirsanov", "19:31", "Neuroscience", "The free energy principle: a brain that predicts."],
+        ["rSKMYc1CQHE", "Coding Adventure: Simulating Fluids", "Sebastian Lague", "47:52", "Simulation", "A hand-built world simulator."],
+        ["qsYE1wMEMPA", "But How DO Fluid Simulations Work?", "Gonkee", "15:12", "Simulation", ""],
+        ["f7vH2Li9KOw", "I Made an Evolution Simulator (with silly little guys)", "Icoso", "39:10", "Fun", ""],
+        ["r_It_X7v-1E", "Coding Adventure: Simulating an Ecosystem", "Sebastian Lague", "6:40", "Simulation", ""],
+        ["3H79ZcBuw4M", "What are neural cellular automata?", "Emergent Garden", "8:35", "Emergence", "Learned local rules that grow whole shapes."],
+        ["y8NtMZ7VGmU", "With Spatial Intelligence, AI Will Understand the Real World | Fei-Fei Li | TED", "TED", "15:12", "Big idea", ""]
+      ])
+    },
+    mlsys: {
+      label: "ML / AI systems",
+      match: ["system", "mlsys", "gpu", "inference", "distributed", "cuda", "infra", "llm serving"],
+      learn: rows([
+        ["kCc8FmEb1nY", "Let's build GPT: from scratch, in code, spelled out.", "Andrej Karpathy", "", "Build it", "A whole transformer written live. A classic."],
+        ["h9Z4oGN89MU", "How do Graphics Cards Work?  Exploring GPU Architecture", "Branch Education", "28:30", "Visual", "Stunning 3D tour of what's inside a GPU."],
+        ["pHqcHzxx6I8", "Making GPUs Actually Fast: A Deep Dive into Training Performance", "Jane Street", "47:44", "Deep dive", "Practical performance thinking from industry."],
+        ["6stDhEA0wFQ", "CUDA Explained - Why Deep Learning uses GPUs", "deeplizard", "13:33", "Intuition", ""],
+        ["xewKxorikwE", "Give Me 30 min, I'll Make CUDA Click Forever", "Zachary Huang", "28:31", "Intuition", ""],
+        ["4APkMJdiudU", "Intro to CUDA (part 1): High Level Concepts", "Josh Holloway", "9:26", "Quick intro", ""],
+        ["86FAWCzIe_4", "CUDA Programming Course – High-Performance Computing with GPUs", "freeCodeCamp.org", "11:55:11", "Full course", "A full course for a long weekend."],
+        ["LuhJEEJQgUM", "Lecture 1 How to profile CUDA kernels in PyTorch", "GPU MODE", "56:13", "Hands-on", "Start measuring your own kernels.", { s: "gpumode", n: 1 }],
+        ["lTmYrKwjSOU", "Lecture 4 Compute and Memory Basics", "GPU MODE", "56:55", "Lecture", "", { s: "gpumode", n: 4 }],
+        ["DdTsX6DQk24", "Lecture 14: Practitioners Guide to Triton", "GPU MODE", "1:21:43", "Hands-on", "", { s: "gpumode", n: 14 }],
+        ["hQ9GPnV0-50", "Lecture 23: Tensor Cores", "GPU MODE", "1:47:50", "Lecture", "", { s: "gpumode", n: 23 }],
+        ["F_BazucyCMw", "Lecture 44: NVIDIA Profiling", "GPU MODE", "2:07:16", "Hands-on", "", { s: "gpumode", n: 44 }],
+        ["dEZP1qUNTOk", "GPU Programming | Threads, Warps, HBM, FlashAttention | Triton Lecture 1", "Mayank Pratap Singh", "1:07:49", "Lecture", ""],
+        ["IrkNZG8MJ64", "A very short intro to the Roofline model", "NHR@FAU", "18:37", "Concept", "Compute-bound or memory-bound? This tells you."],
+        ["gBMO1JZav44", "How FlashAttention Accelerates Generative AI Revolution", "Jia-Bin Huang", "11:54", "Intuition", "FlashAttention's tiling idea, visually."],
+        ["gMOAud7hZg4", "FlashAttention - Tri Dao | Stanford MLSys #67", "Stanford MLSys Seminars", "58:58", "Talk", "From FlashAttention's author."],
+        ["RcFrRqcV4ZA", "FlashAttention Explained from Scratch", "ExplainingAI", "55:48", "Deep dive", ""],
+        ["JfGwP0-FgyY", "FlashAttention Finally Makes Sense: A Step-by-Step Numerical Example", "Machine Learning with PyTorch", "", "Worked example", "Follow real numbers through online softmax."],
+        ["o0gkdZBtwEg", "How KV Cache Speeds Up LLMs for Faster AI Models on GPUs", "IBM Technology", "11:15", "Intuition", ""],
+        ["80bIUggRJf4", "The KV Cache: Memory Usage in Transformers", "Efficient NLP", "8:33", "Concept", ""],
+        ["C_RnEVRvq7Y", "Give Me 20 Minutes, and the KV Cache Will Click Forever", "Zachary Huang", "20:17", "Intuition", ""],
+        ["glyu_nQH0yw", "Efficient Memory Management for Large Language Model Serving with PagedAttention", "Arxiv Papers", "", "Paper talk", "The vLLM paper: KV cache as virtual memory."],
+        ["McLdlg5Gc9s", "What is vLLM? Efficient AI Inference for Large Language Models", "IBM Technology", "4:58", "Quick intro", ""],
+        ["_xM8scs4_x4", "Inference Engines explained in 10min..", "Caleb Writes Code", "10:19", "Quick intro", ""],
+        ["9tvJ_GYJA-o", "Mastering LLM Inference Optimization From Theory to Cost Effective Deployment: Mark Moyou", "AI Engineer", "33:39", "Talk", ""],
+        ["l8gWQlrVOKQ", "How LLMs Get Faster Without Changing Their Outputs | Speculative Decoding", "Jia-Bin Huang", "24:35", "Concept", ""],
+        ["S-8yr_RibJ4", "Speculative Decoding: When Two LLMs are Faster than One", "Efficient NLP", "12:46", "Concept", ""],
+        ["0QQlYR1r6pQ", "Mixture of Experts (MoE), Visually Explained", "Jia-Bin Huang", "31:46", "Visual", ""],
+        ["sOPDGQjFcuM", "A Visual Guide to Mixture of Experts (MoE) in LLMs", "Maarten Grootendorst", "19:44", "Visual", ""],
+        ["qoQJq5UwV1c", "How LLMs survive in low precision | Quantization Fundamentals", "Julia Turc", "20:34", "Concept", ""],
+        ["SXeThN5S7u0", "Give me 30 min, I will make Quantization click forever", "Zachary Huang", "32:42", "Intuition", ""],
+        ["nx5yfCa4W98", "Training Models Too Big for One GPU | ZeRO & FSDP", "Jia-Bin Huang", "23:06", "Concept", "Released two weeks ago."],
+        ["By_O0k102PY", "How Fully Sharded Data Parallel (FSDP) works?", "Ahmed Taha", "32:31", "Concept", ""],
+        ["S1tN9a4Proc", "A friendly introduction to distributed training (ML Tech Talks)", "TensorFlow", "24:19", "Intuition", ""],
+        ["G6S5qizNuk8", "LLM Parallelism Explained: Data, Tensor, Pipeline & More", "Yi's Learning Notes", "", "Concept", ""],
+        ["D5F8kp_azzw", "Let's Build Pipeline Parallelism from Scratch – Tutorial", "freeCodeCamp.org", "", "Build it", ""],
+        ["9MvD-XsowsE", "Stanford CS231N | Spring 2025 | Lecture 11: Large Scale Distributed Training", "Stanford Online", "1:12:53", "Lecture", ""],
+        ["XoGvCBRnwLs", "Building a distributed training framework from first principles", "Umar Jamil", "19:34:45", "Full course", "Very long. Do it in chunks."],
+        ["LPv1KfUXLCo", "Stanford CS336 Language Modeling from Scratch | Spring 2025 | Lecture 4: Mixture of experts", "Stanford Online", "1:22:04", "Lecture", "", { s: "cs336", n: 4 }],
+        ["E8Mju53VB00", "Stanford CS336 Language Modeling from Scratch | Spring 2025 | Lecture 6: Kernels, Triton", "Stanford Online", "1:20:22", "Lecture", "", { s: "cs336", n: 6 }],
+        ["l1RJcDjzK8M", "Stanford CS336 Language Modeling from Scratch | Spring 2025 | Lecture 7: Parallelism 1", "Stanford Online", "1:24:42", "Lecture", "", { s: "cs336", n: 7 }]
+      ]),
+      spark: rows([
+        ["yyJ-hdISgnw", "Coding Adventure: Software Rasterizer", "Sebastian Lague", "50:09", "Graphics", "What GPUs were built for, done by hand."],
+        ["Qz0KTGYJtUk", "Coding Adventure: Ray Tracing", "Sebastian Lague", "37:58", "Graphics", ""],
+        ["UZDiGooFs54", "The moment we stopped understanding AI [AlexNet]", "Welch Labs", "17:38", "History", "The GPU moment that started modern deep learning."],
+        ["OFS90-FX6pg", "The 35 Year History of ChatGPT", "Art of the Problem", "26:55", "History", ""]
+      ])
+    },
+    math: {
+      label: "Math",
+      match: ["math", "linear algebra", "probability", "calculus", "optimization", "statistics"],
+      learn: rows([
+        ["fNk_zzaMoSs", "Vectors | Chapter 1, Essence of linear algebra", "3Blue1Brown", "9:52", "Visual", "The first chapter of the best visual linear algebra series.", { s: "eola", n: 1 }],
+        ["k7RM-ot2NWY", "Linear combinations, span, and basis vectors | Chapter 2, Essence of linear algebra", "3Blue1Brown", "9:59", "Visual", "", { s: "eola", n: 2 }],
+        ["kYB8IZa5AuE", "Linear transformations and matrices | Chapter 3, Essence of linear algebra", "3Blue1Brown", "10:59", "Visual", "", { s: "eola", n: 3 }],
+        ["Ip3X9LOh2dk", "The determinant | Chapter 6, Essence of linear algebra", "3Blue1Brown", "10:03", "Visual", "", { s: "eola", n: 6 }],
+        ["uQhTuRlWMxw", "Inverse matrices, column space and null space | Chapter 7, Essence of linear algebra", "3Blue1Brown", "12:09", "Visual", "", { s: "eola", n: 7 }],
+        ["PFDu9oVAE-g", "Eigenvectors and eigenvalues | Chapter 14, Essence of linear algebra", "3Blue1Brown", "17:16", "Visual", "", { s: "eola", n: 14 }],
+        ["WUvTyaaNkzM", "The essence of calculus", "3Blue1Brown", "", "Visual", ""],
+        ["HZGCoVF3YvM", "Bayes theorem, the geometry of changing beliefs", "3Blue1Brown", "15:11", "Visual", ""],
+        ["J7DzL2_Na80", "1. The Geometry of Linear Equations", "MIT OpenCourseWare", "39:49", "Lecture", "Lecture 1 of Gilbert Strang's classic 18.06."],
+        ["ggWYkes-n6E", "The Big Picture of Linear Algebra", "MIT OpenCourseWare", "15:57", "Overview", ""],
+        ["vSczTbgc8Rc", "SVD Visualized, Singular Value Decomposition explained | SEE Matrix , Chapter 3 #SoME2", "Visual Kernel", "16:28", "Visual", ""],
+        ["nbBvuuNVfco", "Singular Value Decomposition (SVD): Mathematical Overview", "Steve Brunton", "12:51", "Lecture", ""],
+        ["mBcLRGuAFUk", "Singular Value Decomposition (the SVD)", "MIT OpenCourseWare", "14:11", "Lecture", ""],
+        ["kV1ru-Inzl4", "Stanford EE364A Convex Optimization I Stephen Boyd I 2023 I Lecture 1", "Stanford Online", "1:18:27", "Lecture", "The foundation under most training algorithms.", { s: "ee364a", n: 1 }],
+        ["2H4_7izio9Y", "Stanford EE364A Convex Optimization I Stephen Boyd I 2023 I Lecture 2", "Stanford Online", "1:20:23", "Lecture", "", { s: "ee364a", n: 2 }],
+        ["AM6BY4btj-M", "What Is Mathematical Optimization?", "Visually Explained", "11:35", "Intuition", ""],
+        ["9WXVgQFFsDI", "Convexity 101 [Optimization Bootcamp]", "Steve Brunton", "14:58", "Intuition", ""],
+        ["SxGYPqCgJWM", "Intuitively Understanding the KL Divergence", "Adian Liusie", "5:13", "Intuition", "The quantity inside the diffusion ELBO."],
+        ["ErfnhcEV1O8", "A Short Introduction to Entropy, Cross-Entropy and KL-Divergence", "Aurélien Géron", "10:41", "Intuition", ""],
+        ["tXE23653JrU", "Fantastic KL Divergence and How to (Actually) Compute It", "Jia-Bin Huang", "11:46", "Concept", ""],
+        ["KHVR587oW8I", "The Key Equation Behind Probability", "Artem Kirsanov", "26:24", "Visual", ""],
+        ["pYxNSUDSFH4", "In Statistics, Probability is not Likelihood.", "StatQuest with Josh Starmer", "5:01", "Quick intro", ""],
+        ["qg7V43qhOUE", "Probabilistic ML - 01 - Probabilities", "Tübingen Machine Learning", "1:15:57", "Lecture", ""],
+        ["XCEpIBqKogo", "Bayesian Inference: Overview", "Steve Brunton", "30:16", "Lecture", ""],
+        ["HxQ94L8n0vU", "Variational Inference | Evidence Lower Bound (ELBO) | Intuition & Visualization", "Machine Learning & Simulation", "25:06", "Visual", "The ELBO, which diffusion training builds on."],
+        ["qJeaCHQ1k2w", "Variational Autoencoders | Generative AI Animated", "Deepia", "20:09", "Visual", ""],
+        ["iwEzwTTalbg", "Variational Autoencoder - Model, ELBO, loss function and maths explained easily!", "Umar Jamil", "27:12", "Math", ""],
+        ["ErJp91YBXbo", "Itô integrals: an Intuitive Introduction | Stochastic Calculus ep.1", "Math with Ming", "17:55", "Intuition", "The language of diffusion SDEs."],
+        ["5cruqmIF6l0", "Lecture 24: Stochastic Calculus", "MIT OpenCourseWare", "1:22:50", "Lecture", ""],
+        ["qdbkvD4N-us", "21. Stochastic Differential Equations", "MIT OpenCourseWare", "56:05", "Lecture", ""],
+        ["88ONbF_b3VE", "Wasserstein Distance & Optimal Transport — Fully Explained", "The Synthetic Mind", "22:15", "Concept", "The idea under many flow methods."],
+        ["GMC7uOPAa_Y", "Crash Course on Optimal Transport", "Simons Institute for the Theory of Computing", "1:02:00", "Lecture", ""],
+        ["k1CeOJdQQrc", "Marco Cuturi - A primer on Optimal Transport Theory and Algorithms", "ML in PL", "", "Lecture", ""],
+        ["ScX2aBFyrVU", "Information Theory, Lecture 1: Defining Entropy and Information - Oxford Mathematics 3rd Yr Lecture", "Oxford Mathematics", "53:46", "Lecture", ""],
+        ["l6DKRf-fAAM", "Reinventing Entropy | Compression is Intelligence Part 1", "3Blue1Brown", "32:20", "Visual", "New from 3Blue1Brown."],
+        ["b0HvwszmqcQ", "Stanford CS229: Machine Learning | Summer 2019 | Lecture 2 - Matrix Calculus and Probabili…", "Stanford Online", "1:52:54", "Lecture", ""],
+        ["e73033jZTCI", "Derivative of a Matrix : Data Science Basics", "ritvikmath", "13:43", "Concept", ""]
+      ]),
+      spark: rows([
+        ["spUNpyF58BY", "But what is the Fourier Transform? A visual introduction.", "3Blue1Brown", "", "Visual", "One idea across signals, images and positional encodings."],
+        ["cUzklzVXJwo", "How Imaginary Numbers Were Invented", "Veritasium", "23:29", "History", ""],
+        ["KZeIEiBrT_w", "The Strange Math That Predicts (Almost) Anything", "Veritasium", "32:32", "Probability", "Markov chains, which diffusion is built on."],
+        ["baf_iPT7lqI", "Intro to Kolmogorov Complexity", "Dr. Trefor Bazett", "21:40", "Big idea", "Compression as a definition of understanding."],
+        ["lUUte2o2Sn8", "Gil Strang's Final 18.06 Linear Algebra Lecture", "MIT OpenCourseWare", "1:05:09", "Story", "A legendary teacher's last lecture."]
+      ])
+    }
+  };
+
+  var WILD = rows([
+    ["6kiBYjvyojQ", "Lenia - Artificial Life from Algorithms", "Birdbrain", "13:15", "Artificial life", "Continuous cellular automata that look alive."],
+    ["2g-CrQfYNtE", "Artificial Life", "Emergent Garden", "35:05", "Artificial life", ""],
+    ["P_fHJIYENdI", "AlphaFold - The Most Useful Thing AI Has Ever Done", "Veritasium", "24:52", "Science", ""],
+    ["d95J8yzvjbQ", "The Thinking Game | Full documentary | Tribeca Film Festival official selection", "Google DeepMind", "1:24:08", "Documentary", "For a slow evening, not a study block."],
+    ["NrO20Jb-hy0", "The Misconception that Almost Stopped AI [How Models Learn Part 1]", "Welch Labs", "22:57", "History", ""],
+    ["094y1Z2wpJg", "The Simplest Math Problem No One Can Solve - Collatz Conjecture", "Veritasium", "22:09", "Math", ""]
+  ]);
+
+  var MUSIC = {
+    lofi: { label: "Lofi", items: rows([
+      ["lTRiuFIWV54", "1 A.M Study Session [lofi hip hop]", "Lofi Girl", "1:01:14", "Lofi"],
+      ["CFGLoQIhmow", "lofi hip hop mix - beats to relax/study to (Part 1)", "Lofi Girl", "2:50:41", "Lofi"],
+      ["n61ULEU7CO0", "Best of lofi hip hop 2021 [beats to relax/study to]", "Lofi Girl", "6:10:58", "Lofi"],
+      ["9M4jZuqdw04", "In the Zone [lofi focus beats / work mix]", "Chillhop Music", "2:00:35", "Lofi"],
+      ["gwDoRPcPxtc", "Chill Study Beats 2 • Instrumental & Jazz Hip Hop Music [2016]", "Chillhop Music", "2:00:49", "Lofi"],
+      ["8iU8LPEa4o0", "Chill Study Beats 4 • jazz & lofi hiphop Mix [2017]", "Chillhop Music", "2:01:15", "Lofi"],
+    ]) },
+    classical: { label: "Classical & piano", items: rows([
+      ["IVpuTD-2SEo", "Chopin: Complete Nocturnes (Luke Faulkner)", "HALIDONMUSIC", "1:54:27", "Classical"],
+      ["BMuknRb7woc", "Classical Music for Studying & Brain Power | Mozart, Vivaldi, Tchaikovsky...", "HALIDONMUSIC", "1:35:56", "Classical"],
+      ["yBet3jC7Kss", "Bach - Classical Music for Relaxation", "HALIDONMUSIC", "3:05:33", "Classical"],
+      ["mIYzp5rcTvU", "Classical Music for Reading - Mozart, Chopin, Debussy, Tchaikovsky...", "HALIDONMUSIC", "2:27:53", "Classical"],
+      ["oiGmGFxsJi8", "Calm Piano Music for Studying, Reading, Relaxation", "HALIDONMUSIC", "2:45:58", "Piano"],
+      ["IV8LO-T66ys", "Soft Piano - Calm Classical Pieces | Debussy, Chopin, Beethoven...", "Essential Classics", "2:14:00", "Piano"],
+      ["cYPJaHT5f3E", "Peaceful Day [calm piano]", "Lofi Girl", "1:28:30", "Piano"]
+    ]) },
+    jazz: { label: "Jazz & game OST", items: rows([
+      ["MYPVQccHhAQ", "4K Cozy Coffee Shop with Smooth Piano Jazz Music for Relaxing, Studying and Working", "Relaxing Jazz Piano", "3:35:23", "Jazz"],
+      ["ZbyxjGE885I", "Jazz at the Library - 1 Hour Jazz Music, Library Ambience", "Chill Crossing Hour", "1:05:06", "Jazz"],
+      ["nv_2rz5BFDA", "Just Thinking...Retro Jazz", "Pause,maybe?", "2:54:01", "Jazz"],
+      ["HGl75kurxok", "Piano Ghibli Collection 1", "Vangakuz", "1:33:16", "Ghibli piano"],
+      ["bHFKkCcUjW0", "1 hour of Studio Ghibli | Relaxing Piano Music (relax, study, sleep)", "Vagabond", "59:15", "Ghibli piano"],
+      ["knoUHYLoE3c", "Relaxing Video Game Music | 8 hr mix | Best songs from Final Fantasy, Zelda, Skyrim, Halo, & more", "Gaming / Vibes / Audio", "8:12:09", "Game OST"],
+      ["yA41iunMG6A", "Coding Stupor ~ video game music to help you focus", "Oakleaf Oasis", "1:48:24", "Game OST"],
+    ]) },
+    ambient: { label: "Ambient & focus noise", items: rows([
+      ["sjkrrmBnpGE", "Ambient Study Music To Concentrate - 4 Hours of Music for Studying, Concentration and Memory", "Quiet Quest - Study Music", "3:57:52", "Ambient"],
+      ["4GnVDPD01as", "4 Hours of Ambient Study Music To Concentrate - Improve your Focus and Concentration", "Quiet Quest - Study Music", "3:44:55", "Ambient"],
+      ["Dvwaq1rwioQ", "CITADEL Mountain Outpost | Relaxing Sci-Fi Ambience for Focus & Sleep 4K", "Ambient Outpost", "2:00:01", "Ambient"],
+      ["Jvgx5HHJ0qw", "Rooftop Study Room with Rain Sounds - Ambience for Studying, Relaxing", "Cosmic Resort", "3:00:01", "Rain"],
+      ["6bPN0JyGfA4", "Cozy Reading Nook Ambience - Rain on Window & Thunder Sounds", "Cozy Rain", "8:07:18", "Rain"],
+      ["U5kH5VE31Rc", "Stop Mind Wandering | Smoothed Brown Noise | ADHD High Focus Support", "Jason Lewis - Mind Amend", "3:00:00", "Brown noise"],
+      ["H1HtZ8GExBQ", "Cozy Focus - 10 HOURS of Smoothed Brown Noise | ADHD Focus & Study Sounds", "ADHD Focus Club", "10:00:01", "Brown noise"],
+      ["5jZvtNHLJZc", "3 HOUR STUDY WITH ME / Rainy Day In The Forest / Pomodoro 50-10", "Sora's Treehouse Study", "2:51:14", "Study with me"]
+    ]) }
+  };
+
+  // Thumbnails load straight from YouTube's image server.
+  function thumbUrl(id, big) { return "https://i.ytimg.com/vi/" + id + "/" + (big ? "hqdefault" : "mqdefault") + ".jpg"; }
+
+  var DEFAULT = {
+    interests: [
+      { name: "ML / AI systems", on: true },
+      { name: "Math", on: true },
+      { name: "Diffusion & flow matching", on: true },
+      { name: "World models", on: true }
+    ],
+    moods: ["lofi", "classical", "jazz", "ambient"],
+    saved: [], hidden: [], watched: [], topics: {}, chans: {}, last: null, goal: ""
+  };
+
+  // ---------- State ----------
+  function clone(o) { return JSON.parse(JSON.stringify(o)); }
+  function strs(a) { return Array.isArray(a) ? a.filter(function (x) { return typeof x === "string"; }) : []; }
+  function load() {
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return clone(DEFAULT);
+      var s = JSON.parse(raw);
+      return {
+        interests: Array.isArray(s.interests) ? s.interests.filter(function (i) { return i && typeof i.name === "string" && i.name.trim(); }).map(function (i) { return { name: i.name, on: i.on !== false }; }) : clone(DEFAULT.interests),
+        moods: strs(s.moods).filter(function (m) { return MUSIC[m]; }),
+        saved: Array.isArray(s.saved) ? s.saved.filter(function (c) { return c && c.t && (c.id || c.list || c.q); }) : [],
+        hidden: strs(s.hidden), watched: strs(s.watched),
+        topics: s.topics && typeof s.topics === "object" ? s.topics : {},
+        last: s.last && typeof s.last === "object" ? s.last : null,
+        day: s.day && typeof s.day === "object" ? s.day : null,
+        chans: s.chans && typeof s.chans === "object" ? s.chans : {},
+        autoplay: s.autoplay !== false, hintSeen: !!s.hintSeen, fileOk: !!s.fileOk,
+        goal: typeof s.goal === "string" ? s.goal : ""
+      };
+    } catch (e) { return clone(DEFAULT); }
+  }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+
+  var state = load();
+  var filter = "all";
+  var claudeCards = [];
+  var feed = [];
+
+  // ---------- Helpers ----------
+  function h(tag, attrs, kids) {
+    var el = document.createElement(tag);
+    if (attrs) Object.keys(attrs).forEach(function (k) {
+      var v = attrs[k];
+      if (v == null || v === false) return;
+      if (k === "text") el.textContent = v;
+      else el.setAttribute(k, v === true ? "" : v);
+    });
+    (kids || []).forEach(function (c) { if (c) el.appendChild(typeof c === "string" ? document.createTextNode(c) : c); });
+    return el;
+  }
+  function hash(s) { var x = 0; for (var i = 0; i < s.length; i++) x = (x * 31 + s.charCodeAt(i)) | 0; return Math.abs(x); }
+  function hue(s) { return hash(s) % 360; }
+  function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+  function keyOf(c) { return c.list && !c.pos ? "p:" + c.list : c.id ? "v:" + c.id : "s:" + String(c.q).toLowerCase().trim(); }
+  function catFor(name) {
+    var n = name.toLowerCase();
+    var keys = Object.keys(CAT);
+    for (var i = 0; i < keys.length; i++) {
+      var m = CAT[keys[i]].match;
+      for (var j = 0; j < m.length; j++) if (n.indexOf(m[j]) !== -1) return CAT[keys[i]];
+    }
+    return null;
+  }
+  function plainName(name) { return name.replace(/&/g, "and").replace(/[\/]/g, " ").replace(/\s+/g, " ").trim(); }
+  function clip(s, n) { s = String(s == null ? "" : s).replace(/\s+/g, " ").trim(); return s.length > n ? s.slice(0, n - 1) + "…" : s; }
+  function shortName(n) { if (!n) return ""; var s = n.split(/[\/&,]/)[0].trim(); return s.length > 22 ? s.slice(0, 21) + "…" : s; }
+  function isHidden(c) { return state.hidden.indexOf(keyOf(c)) !== -1; }
+  function isWatched(c) { return state.watched.indexOf(keyOf(c)) !== -1; }
+  function isSaved(c) { var k = keyOf(c); return state.saved.some(function (s) { return keyOf(s) === k; }); }
+  function withKind(c, kind, interest) { var o = {}; for (var k in c) o[k] = c[k]; o.kind = kind; o.interest = interest; return o; }
+
+  // Unwatched first (shuffled), then watched (shuffled).
+  function freshFirst(list) {
+    var a = shuffle(list.filter(function (c) { return !isWatched(c); }));
+    var b = shuffle(list.filter(function (c) { return isWatched(c); }));
+    return a.concat(b);
+  }
+
+  // ---------- Live YouTube search (uses your own free API key) ----------
+  var LKEY = "studytube.live.v1", KKEY = "studytube.ytkey";
+  var API = "https://www.googleapis.com/youtube/v3/";
+  var GOAL_TAG = "Today's goal";
+  var SUBTOPICS = {
+    diffusion: ["diffusion models", "flow matching", "score matching", "rectified flow", "consistency models", "diffusion transformers", "classifier-free guidance", "latent diffusion", "video diffusion models", "stochastic differential equations generative models", "discrete diffusion", "diffusion language models", "normalizing flows", "stochastic interpolants", "diffusion distillation"],
+    world: ["world models", "JEPA self-supervised learning", "DreamerV3", "model-based reinforcement learning", "video world models", "Genie world model", "MuZero planning", "predictive coding", "embodied AI", "robot foundation models", "learned simulators", "latent dynamics models", "spatial intelligence", "physics-informed world models"],
+    mlsys: ["GPU architecture", "CUDA programming", "Triton kernels", "FlashAttention", "KV cache", "LLM inference optimization", "speculative decoding", "distributed training", "FSDP ZeRO", "tensor parallelism", "mixture of experts systems", "quantization LLM", "deep learning compilers", "LLM serving vLLM", "GPU memory hierarchy", "collective communication NCCL"],
+    math: ["linear algebra", "probability theory", "convex optimization", "information theory", "stochastic calculus", "optimal transport", "variational inference", "measure theory", "matrix calculus", "Bayesian statistics", "differential equations", "high-dimensional probability", "Markov chains", "Fourier analysis"]
+  };
+  var ANGLES = [
+    { a: "Intuition", q: "explained intuition" }, { a: "Lecture", q: "lecture" }, { a: "Build it", q: "from scratch code" },
+    { a: "Paper", q: "paper explained" }, { a: "Visual", q: "visualized animation" }, { a: "Talk", q: "talk" },
+    { a: "Deep dive", q: "deep dive" }, { a: "Beginner", q: "for beginners" }, { a: "Latest", q: "", fresh: true }, { a: "Course", q: "course" }
+  ];
+  var SPARK_Q = ["artificial life simulation", "neuroscience of memory", "history of artificial intelligence", "physics simulation explained", "emergence complex systems", "mathematics visualized", "how computers work from scratch", "history of information theory", "cellular automata", "chaos theory explained", "evolution simulation", "how the brain learns", "history of mathematics", "computer graphics explained", "thermodynamics and information"];
+  var MUSIC_Q = { lofi: ["lofi study mix", "chillhop focus mix"], classical: ["classical music for studying", "calm piano for studying"], jazz: ["jazz for studying", "video game music for studying", "studio ghibli piano"], ambient: ["ambient music for focus", "rain sounds for studying", "brown noise focus"] };
+
+  var CATIDS = new Set();
+  Object.keys(CAT).forEach(function (k) { CAT[k].learn.concat(CAT[k].spark).forEach(function (c) { CATIDS.add(c.id); }); });
+  WILD.forEach(function (c) { CATIDS.add(c.id); });
+  Object.keys(MUSIC).forEach(function (m) { MUSIC[m].items.forEach(function (c) { CATIDS.add(c.id); }); });
+
+  function loadLive() {
+    try {
+      var s = JSON.parse(localStorage.getItem(LKEY) || "null");
+      if (s && Array.isArray(s.items)) return { items: s.items, used: s.used || {}, recentQ: s.recentQ || [], last: s.last || 0, plNext: s.plNext || null };
+    } catch (e) {}
+    return { items: [], used: {}, recentQ: [], last: 0, plNext: null };
+  }
+  function saveLive() {
+    try { localStorage.setItem(LKEY, JSON.stringify(live)); }
+    catch (e) { live.items = live.items.slice(-400); try { localStorage.setItem(LKEY, JSON.stringify(live)); } catch (e2) {} }
+  }
+  var live = loadLive();
+  var fetching = false;
+  function getKey() { try { return localStorage.getItem(KKEY) || ""; } catch (e) { return ""; } }
+  function setKey(k) { try { if (k) localStorage.setItem(KKEY, k); else localStorage.removeItem(KKEY); } catch (e) {} }
+  // YouTube's free quota (10,000 units) resets at midnight Pacific time.
+  function quotaDay() { return new Date(Date.now() - 8 * 3600e3).toISOString().slice(0, 10); }
+  function addUnits(n) { var d = quotaDay(); if (live.used.d !== d) live.used = { d: d, n: 0 }; live.used.n += n; }
+  function unitsToday() { return live.used.d === quotaDay() ? live.used.n : 0; }
+
+  function topicKeyFor(name) {
+    var n = name.toLowerCase();
+    for (var k in CAT) { var m = CAT[k].match; for (var j = 0; j < m.length; j++) if (n.indexOf(m[j]) !== -1) return k; }
+    return null;
+  }
+  function pickQuery(subs) {
+    var q, ang;
+    for (var tries = 0; tries < 15; tries++) {
+      var sub = subs[Math.floor(Math.random() * subs.length)];
+      ang = ANGLES[Math.floor(Math.random() * ANGLES.length)];
+      q = (sub + " " + ang.q).trim();
+      if (live.recentQ.indexOf(q) === -1) break;
+    }
+    return { q: q, a: ang.a, fresh: !!ang.fresh };
+  }
+
+  function ApiError(reason, msg) { this.reason = reason; this.msg = msg || ""; }
+  function api(path, params) {
+    params.key = getKey();
+    return fetch(API + path + "?" + new URLSearchParams(params).toString(), { credentials: "omit" })
+      .catch(function () { throw new ApiError("network"); })
+      .then(function (r) {
+        return r.json().catch(function () { return {}; }).then(function (j) {
+          if (!r.ok) {
+            var er = j.error || {};
+            var reason = (er.errors && er.errors[0] && er.errors[0].reason) || er.status || String(r.status);
+            if (/API key not valid/i.test(er.message || "")) reason = "keyInvalid";
+            throw new ApiError(reason, er.message);
+          }
+          return j;
+        });
+      });
+  }
+  function errorText(e) {
+    var r = e && e.reason;
+    if (r === "network") return "Couldn't reach YouTube from this page. Check your internet connection. If it keeps happening, open StudyTube with the \"Open StudyTube\" launcher in the same folder instead of double-clicking the file.";
+    if (r === "keyInvalid") return "YouTube says this API key isn't valid. Check that you copied the whole key.";
+    if (r === "quotaExceeded" || r === "dailyLimitExceeded" || r === "rateLimitExceeded") return "Today's free YouTube quota is used up. You'll keep getting picks from videos already found; new searches work again after midnight Pacific time.";
+    if (r === "accessNotConfigured" || r === "SERVICE_DISABLED" || /has not been used|is disabled/i.test(e.msg)) return "The YouTube Data API v3 isn't turned on for this key's project yet. Enable it in Google Cloud (step 2), wait a minute, then try again.";
+    if (r === "ipRefererBlocked" || r === "forbidden" || /referer|referrer/i.test(e.msg)) return "This key has a website restriction that blocks this page. In Google Cloud, set the key's application restriction to None (or allow localhost if you use the launcher).";
+    return "YouTube returned an error (" + (r || "unknown") + "). Your saved picks still work.";
+  }
+
+  function isoDur(s) { var m = /^P(?:(\d+)D)?T?(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/.exec(s || ""); return m ? (+m[1] || 0) * 86400 + (+m[2] || 0) * 3600 + (+m[3] || 0) * 60 + (+m[4] || 0) : 0; }
+  function fmtDur(sec) { var h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60), s = sec % 60, p = function (x) { return (x < 10 ? "0" : "") + x; }; return h ? h + ":" + p(m) + ":" + p(s) : m + ":" + p(s); }
+  function fmtViews(n) { n = +n || 0; return n >= 1e6 ? (n / 1e6).toFixed(1).replace(/\.0$/, "") + "M views" : n >= 1e3 ? Math.round(n / 1e3) + "K views" : n + " views"; }
+  function toItem(it, extra) {
+    var sn = it.snippet || {}, sec = isoDur(it.contentDetails && it.contentDetails.duration), views = +(it.statistics && it.statistics.viewCount) || 0;
+    var o = { id: it.id, t: sn.title || "", by: sn.channelTitle || "", ch: sn.channelId || "", d: fmtDur(sec), sec: sec, v: views, pub: (sn.publishedAt || "").slice(0, 10), live: 1, at: Date.now() };
+    for (var k in extra) o[k] = extra[k];
+    return o;
+  }
+
+  function searchOnce(job) {
+    var p = { part: "snippet", type: "video", maxResults: "25", q: job.q, safeSearch: "moderate", relevanceLanguage: "en", videoDuration: job.music ? "long" : (Math.random() < 0.5 ? "medium" : "long") };
+    if (job.fresh) { p.order = "date"; p.publishedAfter = new Date(Date.now() - 180 * 864e5).toISOString(); }
+    return api("search", p).then(function (s) {
+      addUnits(100);
+      var ids = (s.items || []).map(function (it) { return it.id && it.id.videoId; }).filter(Boolean);
+      if (!ids.length) return 0;
+      return api("videos", { part: "snippet,contentDetails,statistics", id: ids.join(",") }).then(function (v) {
+        addUnits(1);
+        var have = new Set(live.items.map(function (x) { return x.id; })), added = 0;
+        (v.items || []).forEach(function (it) {
+          var sn = it.snippet || {}, sec = isoDur(it.contentDetails && it.contentDetails.duration), views = +(it.statistics && it.statistics.viewCount) || 0;
+          if (sn.liveBroadcastContent && sn.liveBroadcastContent !== "none") return;
+          if (job.music ? sec < 1200 : (sec < 240 || sec > 4 * 3600)) return;
+          if (/#shorts/i.test(sn.title || "")) return;
+          if (!job.fresh && views < 2000) return;
+          if (have.has(it.id) || CATIDS.has(it.id)) return;
+          have.add(it.id); added++;
+          live.items.push(toItem(it, { kind: job.kind, interest: job.interest, mood: job.mood || null, a: job.a, q: job.q,
+            w: "Found on YouTube for “" + job.q + "” · " + fmtViews(views) + (sn.publishedAt ? " · " + sn.publishedAt.slice(0, 4) : "") }));
+        });
+        live.recentQ.unshift(job.q); live.recentQ = live.recentQ.slice(0, 80);
+        if (live.items.length > 900) live.items = live.items.slice(-900);
+        return added;
+      });
+    });
+  }
+
+  function unwatchedLive(interest) { return live.items.filter(function (x) { return x.kind === "learn" && x.interest === interest && !isWatched(x) && !isHidden(x); }).length; }
+
+  // One search per active topic, plus your goal, one spark and (sometimes) music: about 400-600 units.
+  function fetchMore(opts) {
+    opts = opts || {};
+    if (!getKey() || fetching) return Promise.resolve(0);
+    var act = state.interests.filter(function (i) { return i.on; });
+    if (!act.length) return Promise.resolve(0);
+    var jobs = [];
+    act.forEach(function (i) {
+      if (opts.onlyLow && unwatchedLive(i.name) >= 12) return;
+      var k = topicKeyFor(i.name), pq = pickQuery(k ? SUBTOPICS[k] : [plainName(i.name)]);
+      jobs.push({ q: pq.q, a: pq.a, fresh: pq.fresh, kind: "learn", interest: i.name });
+    });
+    if (state.goal.trim() && !opts.onlyLow) jobs.push({ q: clip(state.goal, 100), a: "For today", kind: "learn", interest: GOAL_TAG });
+    if (opts.onlyLow && !jobs.length) return Promise.resolve(0);
+    if (!opts.onlyLow || Math.random() < 0.5) jobs.push({ q: SPARK_Q[Math.floor(Math.random() * SPARK_Q.length)], a: "New idea", kind: "spark", interest: null });
+    if (!opts.onlyLow && Math.random() < 0.5) {
+      var moods = state.moods.length ? state.moods : Object.keys(MUSIC_Q), m = moods[Math.floor(Math.random() * moods.length)];
+      jobs.push({ q: MUSIC_Q[m][Math.floor(Math.random() * MUSIC_Q[m].length)], a: MUSIC[m].label, kind: "music", mood: m, music: true, interest: null });
+    }
+    if (!jobs.length) return Promise.resolve(0);
+    if (unitsToday() + jobs.length * 101 > 10000) { liveMsg(errorText({ reason: "quotaExceeded" }), true); return Promise.resolve(0); }
+    fetching = true; liveMsg("Searching YouTube for new videos…");
+    var total = 0, firstErr = null;
+    return jobs.reduce(function (p, job) {
+      return p.then(function () {
+        if (firstErr && (firstErr.reason === "keyInvalid" || firstErr.reason === "quotaExceeded" || firstErr.reason === "network")) return;
+        return searchOnce(job).then(function (n) { total += n; }, function (e) { if (!firstErr) firstErr = e; });
+      });
+    }, Promise.resolve()).then(function () {
+      fetching = false; live.last = Date.now(); saveLive();
+      if (firstErr && !total) liveMsg(errorText(firstErr), true);
+      else liveMsg(total ? "Added " + total + " new videos from YouTube." : "No new videos this time. Try again later.");
+      buildFeed();
+      return total;
+    });
+  }
+
+  // ---------- Next video in a playlist ----------
+  function words(t) { return (t || "").toLowerCase().split(/[^a-z0-9]+/).filter(function (w) { return w.length > 2; }); }
+  function overlap(a, b) { var B = new Set(words(b)); return words(a).filter(function (w) { return B.has(w); }).length; }
+
+  // Walk a playlist (up to 200 items) and return {next, plTitle} for the item after videoId.
+  function nextInList(listId, videoId) {
+    var items = [], page = 0;
+    function step(token) {
+      var p = { part: "snippet,contentDetails", playlistId: listId, maxResults: "50" };
+      if (token) p.pageToken = token;
+      return api("playlistItems", p).then(function (r) {
+        addUnits(1); page++;
+        items = items.concat(r.items || []);
+        var idx = items.findIndex(function (x) { return x.contentDetails && x.contentDetails.videoId === videoId; });
+        if (idx !== -1 && idx + 1 < items.length) return finish(idx);
+        if (r.nextPageToken && page < 4) return step(r.nextPageToken);
+        return idx === -1 ? null : finish(idx);
+      });
+    }
+    function finish(idx) {
+      for (var j = idx + 1; j < items.length; j++) {
+        var sn = items[j].snippet || {};
+        if (sn.title === "Private video" || sn.title === "Deleted video") continue;
+        return { id: items[j].contentDetails.videoId, list: listId, pos: j + 1, count: items.length };
+      }
+      return null;
+    }
+    return step(null);
+  }
+  function firstUnwatchedInList(listId) {
+    return api("playlistItems", { part: "snippet,contentDetails", playlistId: listId, maxResults: "50" }).then(function (r) {
+      addUnits(1);
+      var it = (r.items || []).find(function (x) { var sn = x.snippet || {}; return sn.title !== "Private video" && sn.title !== "Deleted video" && !isWatched({ id: x.contentDetails.videoId }); });
+      return it ? { id: it.contentDetails.videoId, list: listId, pos: (it.snippet.position || 0) + 1 } : null;
+    });
+  }
+  function listTitle(listId) {
+    return api("playlists", { part: "snippet", id: listId }).then(function (r) { addUnits(1); var p = (r.items || [])[0]; return p ? p.snippet.title : "this playlist"; });
+  }
+  function setPlaylistNext(found, plTitle, fromTitle) {
+    if (!found) return Promise.resolve(false);
+    return api("videos", { part: "snippet,contentDetails,statistics", id: found.id }).then(function (v) {
+      addUnits(1);
+      var it = (v.items || [])[0]; if (!it) return false;
+      live.plNext = toItem(it, { kind: "learn", interest: null, list: found.list, plTitle: plTitle, pos: found.pos, a: "Playlist",
+        w: "Next in “" + plTitle + "”" + (fromTitle ? ", after “" + clip(fromTitle, 60) + "”" : "") + "." });
+      saveLive(); buildFeed();
+      return true;
+    });
+  }
+
+  // After you open a video: look through that channel's playlists for one that contains it.
+  function findPlaylistFor(c) {
+    if (!getKey() || !c.id || c.kind === "music" || unitsToday() > 9800) return;
+    var chP = c.ch ? Promise.resolve(c.ch) : api("videos", { part: "snippet", id: c.id }).then(function (v) { addUnits(1); var it = (v.items || [])[0]; return it && it.snippet.channelId; });
+    chP.then(function (ch) {
+      if (!ch) return null;
+      return api("playlists", { part: "snippet,contentDetails", channelId: ch, maxResults: "50" }).then(function (r) {
+        addUnits(1);
+        var lists = (r.items || []).filter(function (p) { return (p.contentDetails && p.contentDetails.itemCount) > 1; })
+          .map(function (p) { return { id: p.id, title: p.snippet.title, score: overlap(p.snippet.title, c.t) }; })
+          .sort(function (a, b) { return b.score - a.score; }).slice(0, 4);
+        var i = 0;
+        function tryNext() {
+          if (i >= lists.length) return null;
+          var L = lists[i++];
+          return nextInList(L.id, c.id).then(function (f) { return f ? setPlaylistNext(f, L.title, c.t) : tryNext(); });
+        }
+        return tryNext();
+      });
+    }).catch(function () {}).then(saveLive);
+  }
+
+  // "Watching something else?" box: accept a video link, a playlist link, or both.
+  function parseYouTube(text) {
+    var s = String(text || "").trim(), v = null, list = null;
+    var m = /[?&]v=([A-Za-z0-9_-]{11})/.exec(s) || /youtu\.be\/([A-Za-z0-9_-]{11})/.exec(s) || /\/(?:shorts|live|embed)\/([A-Za-z0-9_-]{11})/.exec(s);
+    if (m) v = m[1];
+    var l = /[?&]list=([A-Za-z0-9_-]{2,})/.exec(s); if (l) list = l[1];
+    if (!v && !list && /^[A-Za-z0-9_-]{11}$/.test(s)) v = s;
+    return { v: v, list: list };
+  }
+  function handlePaste(text) {
+    var p = parseYouTube(text);
+    if (!p.v && !p.list) { liveMsg("That doesn't look like a YouTube video or playlist link.", true); return; }
+    if (!getKey()) { liveMsg("Add your YouTube API key first (below) so StudyTube can look up the playlist.", true); openLive(); return; }
+    liveMsg("Looking up the playlist…");
+    var work;
+    if (p.list && p.v) {
+      markWatchedId(p.v);
+      work = Promise.all([nextInList(p.list, p.v), listTitle(p.list)]).then(function (r) { return r[0] ? setPlaylistNext(r[0], r[1]) : false; });
+    } else if (p.list) {
+      work = Promise.all([firstUnwatchedInList(p.list), listTitle(p.list)]).then(function (r) { return r[0] ? setPlaylistNext(r[0], r[1]) : false; });
+    } else {
+      markWatchedId(p.v);
+      work = api("videos", { part: "snippet", id: p.v }).then(function (v) {
+        addUnits(1);
+        var it = (v.items || [])[0]; if (!it) return false;
+        findPlaylistFor({ id: p.v, ch: it.snippet.channelId, t: it.snippet.title, kind: "learn" });
+        return "searching";
+      });
+    }
+    work.then(function (ok) {
+      if (ok === true) { liveMsg("Lined up the next video in that playlist."); window.scrollTo({ top: 0, behavior: "smooth" }); }
+      else if (ok === "searching") liveMsg("Checking that channel's playlists. If the video is in one, the next part will appear at the top in a moment.");
+      else liveMsg("Couldn't find a next video in a playlist for that link.", true);
+    }, function (e) { liveMsg(errorText(e), true); });
+  }
+  function markWatchedId(id) { var k = "v:" + id; if (state.watched.indexOf(k) === -1) { state.watched.push(k); save(); } }
+
+  // ---------- Live panel UI ----------
+  function liveMsg(text, isErr) {
+    var el = document.getElementById("liveMsg"); if (!el) return;
+    el.textContent = text || ""; el.classList.toggle("err", !!isErr);
+    renderLive();
+  }
+  function openLive() { var d = document.getElementById("livePanel"); if (d) d.open = true; }
+  function renderLive() {
+    var on = !!getKey();
+    document.getElementById("liveState").textContent = on
+      ? "On · " + live.items.length + " videos found so far · about " + Math.max(0, Math.floor((10000 - unitsToday()) / 101)) + " searches left today"
+      : "Off · add a free key to search all of YouTube";
+    document.getElementById("liveState").classList.toggle("on", on);
+    document.getElementById("keyForm").hidden = on;
+    document.getElementById("liveActions").hidden = !on;
+    document.getElementById("fetchTop").hidden = !on;
+    document.getElementById("fetchNow").disabled = fetching;
+    document.getElementById("fetchTop").disabled = fetching;
+  }
+
+  // ---------- Watch on this page (YouTube's embedded player) ----------
+  // YouTube's player needs the page to be served from a web address, so it works when StudyTube
+  // is opened with the "Open StudyTube" launcher (http://localhost) and not from a plain file.
+  var canEmbed = location.protocol === "http:" || location.protocol === "https:";
+  var yt = { player: null, ready: false, loading: false, current: null, started: false, prevView: "feed", timer: null, queue: [] };
+
+  function showView(name) {
+    document.getElementById("feedView").hidden = name !== "feed";
+    document.getElementById("searchView").hidden = name !== "search";
+    document.getElementById("playerView").hidden = name !== "player";
+  }
+  function currentView() {
+    if (!document.getElementById("playerView").hidden) return "player";
+    if (!document.getElementById("searchView").hidden) return "search";
+    return "feed";
+  }
+  function loadYTApi(cb) {
+    if (window.YT && window.YT.Player) return cb();
+    var prev = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = function () { if (prev) prev(); cb(); };
+    if (!yt.loading) {
+      yt.loading = true;
+      var sc = document.createElement("script");
+      sc.src = "https://www.youtube.com/iframe_api";
+      sc.onerror = function () { playerNote("Couldn't load YouTube's player. Check your internet connection, or open the video on YouTube.", true); };
+      document.head.appendChild(sc);
+    }
+  }
+  function playerNote(text, isErr) {
+    var el = document.getElementById("playerNote");
+    el.textContent = text || ""; el.classList.toggle("err", !!isErr);
+  }
+  function setPlayerInfo(c) {
+    document.getElementById("pTitle").textContent = c.t;
+    document.getElementById("pBy").textContent = [c.by, c.d, c.v ? fmtViews(c.v) : ""].filter(Boolean).join(" · ");
+    var why = document.getElementById("pWhy");
+    why.textContent = c.plTitle ? "Part " + (c.pos || "") + " of “" + c.plTitle + "”" : (c.w || "");
+    var open = document.getElementById("pOpen"); open.href = urlOf(c);
+    var sv = document.getElementById("pSave"); sv.textContent = isSaved(c) ? "Saved" : "Save"; sv.setAttribute("aria-pressed", isSaved(c) ? "true" : "false");
+    document.title = c.t + " – StudyTube";
+  }
+
+  function playInPage(c) {
+    if (!canEmbed || !c || !c.id) return false;
+    if (currentView() !== "player") yt.prevView = currentView();
+    clearEndCard();
+    yt.current = c; yt.started = false;
+    showView("player"); setPlayerInfo(c); playerNote("");
+    window.scrollTo({ top: 0 });
+    loadYTApi(function () {
+      if (!yt.player) {
+        yt.player = new YT.Player("ytplayer", {
+          videoId: c.id,
+          playerVars: { autoplay: 1, rel: 0, playsinline: 1, modestbranding: 1, origin: location.origin },
+          events: {
+            onReady: function () { yt.ready = true; },
+            onStateChange: onPlayerState,
+            onError: onPlayerError
+          }
+        });
+      } else if (yt.ready) {
+        yt.player.loadVideoById(c.id);
+      } else {
+        setTimeout(function () { if (yt.player && yt.player.loadVideoById) yt.player.loadVideoById(c.id); }, 800);
+      }
+    });
+    renderPlayerQueue();
+    return true;
+  }
+  function onPlayerState(e) {
+    if (e.data === 1 && !yt.started && yt.current) {          // playing
+      yt.started = true;
+      markWatched(yt.current);
+      pendingAdvance = false;                                  // we handle "what's next" right here
+    }
+    if (e.data === 0) showEndCard();                           // ended
+  }
+  function onPlayerError(e) {
+    var c = yt.current;
+    var msg = (e.data === 101 || e.data === 150 || e.data === 153)
+      ? "This video's owner doesn't allow it to play on other sites. Use “Open on YouTube”, or skip to the next one."
+      : e.data === 100 ? "This video is no longer available on YouTube. Skip to the next one."
+      : "YouTube couldn't play this video here. Use “Open on YouTube”, or skip to the next one.";
+    playerNote(msg, true);
+    if (c) markWatched(c);
+  }
+
+  // What plays after the current video: the next playlist part if there is one, otherwise your feed's top pick.
+  function computeNext() {
+    var cur = yt.current, curKey = cur ? keyOf(cur) : "";
+    buildFeed();   // refreshes view.hero / view.queue with everything we know (including playlist lookups)
+    var list = [view.hero].concat(view.queue).filter(function (c) { return c && c.id && keyOf(c) !== curKey && !isWatched(c); });
+    var seen = new Set();
+    yt.queue = list.filter(function (c) { var k = keyOf(c); if (seen.has(k)) return false; seen.add(k); return true; }).slice(0, 4);
+    return yt.queue[0] || null;
+  }
+  function renderPlayerQueue() {
+    var root = document.getElementById("playerQueue"); root.textContent = "";
+    // give the playlist lookup a moment to finish before showing what's next
+    setTimeout(function () {
+      if (currentView() !== "player") return;
+      computeNext();
+      root.textContent = "";
+      yt.queue.slice(0, 3).forEach(function (c) { root.appendChild(cardEl(c, "mini")); });
+      document.getElementById("playerQueueWrap").hidden = !yt.queue.length;
+    }, 1500);
+  }
+  function clearEndCard() {
+    clearInterval(yt.timer); yt.timer = null;
+    document.getElementById("endCard").hidden = true;
+  }
+  function showEndCard() {
+    var next = computeNext();
+    var card = document.getElementById("endCard");
+    if (!next) { document.getElementById("endTitle").textContent = "That's everything for now. Try “Find new videos” or a search."; document.getElementById("endPlay").hidden = true; document.getElementById("endCount").textContent = ""; card.hidden = false; return; }
+    document.getElementById("endPlay").hidden = false;
+    document.getElementById("endTitle").textContent = next.t;
+    card.hidden = false;
+    if (state.autoplay === false) { document.getElementById("endCount").textContent = "Autoplay is off."; return; }
+    var n = 8;
+    var tick = function () { document.getElementById("endCount").textContent = "Playing in " + n + "s"; };
+    tick();
+    yt.timer = setInterval(function () { n--; if (n <= 0) { clearEndCard(); playInPage(next); } else tick(); }, 1000);
+  }
+  function askHowToWatch(c) {
+    var dlg = document.getElementById("howDlg");
+    var a = document.getElementById("howYT");
+    a.href = urlOf(c);
+    a.onclick = function () { markWatched(c); dlg.hidden = true; };
+    dlg.hidden = false;
+    document.getElementById("howClose").focus();
+  }
+  function closePlayer() {
+    clearEndCard();
+    if (yt.player && yt.player.pauseVideo) { try { yt.player.pauseVideo(); } catch (e) {} }
+    document.title = "StudyTube";
+    showView(yt.prevView === "search" ? "search" : "feed");
+    buildFeed();
+    if (yt.prevView === "search") renderSearch();
+  }
+
+  // ---------- Search box ----------
+  var srch = { q: "", token: null, items: [], busy: false };
+  function allKnown() {
+    var out = [], seen = new Set();
+    function add(c, kind, interest) { var o = withKind(c, kind, interest); var k = keyOf(o); if (!seen.has(k)) { seen.add(k); out.push(o); } }
+    Object.keys(CAT).forEach(function (k) { CAT[k].learn.forEach(function (c) { add(c, "learn", CAT[k].label); }); CAT[k].spark.forEach(function (c) { add(c, "spark", CAT[k].label); }); });
+    WILD.forEach(function (c) { add(c, "spark", null); });
+    Object.keys(MUSIC).forEach(function (m) { MUSIC[m].items.forEach(function (c) { add(c, "music", null); }); });
+    live.items.forEach(function (c) { add(c, c.kind || "learn", c.interest || null); });
+    return out;
+  }
+  function localMatches(q) {
+    var ws = q.toLowerCase().split(/[^a-z0-9]+/).filter(function (w) { return w.length > 1; });
+    if (!ws.length) return [];
+    var need = Math.max(1, Math.ceil(ws.length * 0.6));
+    return allKnown().map(function (c) {
+      var hay = (c.t + " " + (c.by || "")).toLowerCase(), n = 0;
+      ws.forEach(function (w) { if (hay.indexOf(w) !== -1) n++; });
+      return { c: c, n: n };
+    }).filter(function (x) { return x.n >= need && !isHidden(x.c); })
+      .sort(function (a, b) { return b.n - a.n || (isWatched(a.c) ? 1 : 0) - (isWatched(b.c) ? 1 : 0); })
+      .map(function (x) { return x.c; });
+  }
+  function showSearch(on) { showView(on ? "search" : "feed"); }
+  function searchMsg(t, err) { var el = document.getElementById("searchMsg"); el.textContent = t || ""; el.classList.toggle("err", !!err); }
+  function renderSearch() {
+    var root = document.getElementById("searchResults"); root.textContent = "";
+    srch.items.filter(function (c) { return !isHidden(c); }).forEach(function (c) { root.appendChild(cardEl(c, "mini")); });
+    document.getElementById("searchMoreRow").hidden = !(srch.token && getKey());
+    document.getElementById("searchMore").disabled = srch.busy;
+  }
+  function addResults(list) {
+    var have = new Set(srch.items.map(keyOf));
+    list.forEach(function (c) { var k = keyOf(c); if (!have.has(k)) { have.add(k); srch.items.push(c); } });
+  }
+  function runSearch(q, more) {
+    q = clip(q, 120);
+    if (!q) return;
+    if (!more) {
+      srch = { q: q, token: null, items: [], busy: false, local: localMatches(q).slice(0, 6) };
+      document.getElementById("searchTitle").textContent = "Results for “" + q + "”";
+      if (!getKey()) addResults(srch.local);
+      showSearch(true); window.scrollTo({ top: 0 });
+    }
+    if (!getKey()) {
+      renderSearch();
+      var root = document.getElementById("searchResults");
+      root.appendChild(cardEl({ kind: "search", interest: null, a: "Search", t: "See all YouTube results for “" + q + "”", q: q }, "mini"));
+      searchMsg(srch.items.length
+        ? "Showing matches from your saved list. To get YouTube results right here, add a free API key under Live YouTube search."
+        : "To get YouTube results right here, add a free API key under Live YouTube search. Until then, the card below opens the results on YouTube.");
+      return;
+    }
+    srch.busy = true; searchMsg("Searching YouTube…"); renderSearch();
+    var p = { part: "snippet", type: "video", maxResults: "25", q: q, safeSearch: "moderate", relevanceLanguage: "en" };
+    if (more && srch.token) p.pageToken = srch.token;
+    api("search", p).then(function (s) {
+      addUnits(100);
+      srch.token = s.nextPageToken || null;
+      var ids = (s.items || []).map(function (it) { return it.id && it.id.videoId; }).filter(Boolean);
+      if (!ids.length) return [];
+      return api("videos", { part: "snippet,contentDetails,statistics", id: ids.join(",") }).then(function (v) {
+        addUnits(1);
+        var byId = {}; (v.items || []).forEach(function (it) { byId[it.id] = it; });
+        return ids.map(function (id) { return byId[id]; }).filter(function (it) {
+          if (!it) return false;
+          var sn = it.snippet || {}, sec = isoDur(it.contentDetails && it.contentDetails.duration);
+          if (sn.liveBroadcastContent === "upcoming") return false;
+          if (sn.liveBroadcastContent !== "live" && sec <= 60) return false;   // skip Shorts
+          return !/#shorts/i.test(sn.title || "");
+        }).map(function (it) {
+          var sn = it.snippet || {};
+          var o = toItem(it, { kind: "learn", interest: null, a: sn.liveBroadcastContent === "live" ? "Live now" : "", q: q });
+          o.w = fmtViews(o.v) + (o.pub ? " · " + o.pub.slice(0, 4) : "");
+          return o;
+        });
+      });
+    }).then(function (list) {
+      srch.busy = false; saveLive();
+      addResults(list);
+      if (!more) addResults(srch.local);   // your saved-list matches go after the YouTube results
+      searchMsg(srch.items.length ? "" : "No videos found. Try different words.");
+      renderSearch(); renderLive();
+    }, function (e) {
+      srch.busy = false;
+      searchMsg(errorText(e), true);
+      renderSearch();
+      var root = document.getElementById("searchResults");
+      root.appendChild(cardEl({ kind: "search", interest: null, a: "Search", t: "See all YouTube results for “" + q + "”", q: q }, "mini"));
+    });
+  }
+
+  // ---------- Recommendation ("Up next", but calm) ----------
+  function activeInterests() { return state.interests.filter(function (i) { return i.on && (filter === "all" || i.name === filter); }); }
+  var skipped = {};          // session-only: videos you passed on with "Something else"
+  var pendingAdvance = false; // set when you open a video; on return the next pick moves up
+
+  function goalWords() {
+    return state.goal.toLowerCase().split(/[^a-z0-9]+/).filter(function (w) { return w.length > 3; });
+  }
+  function goalScore(c, words) {
+    if (!words.length) return 0;
+    var hay = (c.t + " " + (c.w || "") + " " + (c.q || "")).toLowerCase();
+    var s = 0; words.forEach(function (w) { if (hay.indexOf(w) !== -1) s++; });
+    return Math.min(s, 3);
+  }
+  function isNextInSeries(o) {
+    var last = state.last;
+    if (!last || !last.s || o.s !== last.s || !(o.n > last.n) || o.list) return false;
+    var best = null;
+    Object.keys(CAT).forEach(function (k) { CAT[k].learn.forEach(function (c) { if (c.s === last.s && !c.list && c.n > last.n && !isWatched(c) && (best === null || c.n < best)) best = c.n; }); });
+    return o.n === best;
+  }
+  function topicWeight(name) { var n = state.topics[name] || 0; return 1 + Math.min(n, 8) * 0.2; }
+
+  function rankLearn(act) {
+    var words = goalWords(), last = state.last, pool = [], seen = new Set();
+    var scoreLive = function (o, interest) {
+      var k = keyOf(o);
+      if (seen.has(k) || isHidden(o)) return; seen.add(k);
+      var score = topicWeight(interest) + Math.random() * 1.1 + 0.3;          // a little extra for variety
+      if (o.pub && Date.now() - Date.parse(o.pub) < 150 * 864e5) score += 0.4; // recent upload
+      score += Math.min(Math.log10((o.v || 0) + 10) / 12, 0.5);               // light popularity signal
+      score -= Math.min((state.chans[o.by] || 0) * 0.35, 1.4);                // channels you've watched a lot step back
+      var g = goalScore(o, words); if (g) { score += 1.2 * g; o.forGoal = true; }
+      if (skipped[k]) score -= 3;
+      if (isWatched(o)) score -= 10;
+      o._score = score; pool.push(o);
+    };
+    if (state.goal.trim() && filter === "all") live.items.forEach(function (x) {
+      if (x.interest === GOAL_TAG && x.q === clip(state.goal, 100)) { var o = withKind(x, "learn", GOAL_TAG); o.forGoal = true; scoreLive(o, GOAL_TAG); if (o._score != null) o._score += 1.5; }
+    });
+    act.forEach(function (i) {
+      var liveFor = live.items.filter(function (x) { return x.kind === "learn" && x.interest === i.name; });
+      liveFor.forEach(function (x) { scoreLive(withKind(x, "learn", i.name), i.name); });
+      var cat = catFor(i.name);
+      if (cat) {
+        cat.learn.forEach(function (c) {
+          var o = withKind(c, "learn", i.name), k = keyOf(o);
+          if (seen.has(k) || isHidden(o)) return; seen.add(k);
+          var score = topicWeight(i.name) + Math.random() * 0.9;
+          if (isNextInSeries(o)) score += 6;   // next part of a series you started
+          if (last && last.interest === i.name) score += 0.5;                         // stay on the same thread
+          var g = goalScore(o, words); if (g) { score += 1.5 * g; o.forGoal = true; }
+          if (skipped[k]) score -= 3;
+          if (isWatched(o)) score -= 10;
+          o._score = score; pool.push(o);
+        });
+      } else if (!liveFor.length) {
+        var b = plainName(i.name);
+        [{ t: b + ": lectures and explainers", q: b + " explained lecture", w: "No videos found for this topic yet. Add a YouTube API key (Live YouTube search, on the right) to fill it with real videos; until then this opens YouTube results." },
+         { t: "Build " + b + " from scratch", q: b + " from scratch tutorial", w: "Coding walkthroughs on YouTube." }].forEach(function (x) {
+          var o = { kind: "search", interest: i.name, a: "Search", t: x.t, q: x.q, w: x.w };
+          if (isHidden(o)) return;
+          o._score = 0.6 + Math.random() * 0.5 - (skipped[keyOf(o)] ? 3 : 0); pool.push(o);
+        });
+      }
+    });
+    pool.sort(function (x, y) { return y._score - x._score; });
+    return pool;
+  }
+
+  // Keep the short queue varied: at most two from the same topic.
+  // ...and never two from the same channel on screen at once.
+  function diversify(list, n, hero) {
+    var out = [], per = {}, chans = {}, rest = [];
+    if (hero && hero.by) chans[hero.by] = 1;
+    list.forEach(function (c) {
+      var t = c.interest || "", ch = c.by || "";
+      if (out.length < n && (per[t] || 0) < 2 && (!ch || !chans[ch])) { out.push(c); per[t] = (per[t] || 0) + 1; if (ch) chans[ch] = 1; } else rest.push(c);
+    });
+    while (out.length < n && rest.length) out.push(rest.shift());
+    return out;
+  }
+
+  var view = { hero: null, queue: [], spark: null, music: null };
+
+  function buildFeed() {
+    var act = activeInterests();
+    var ranked = rankLearn(act);
+    var seen = new Set();
+    var ordered = claudeCards.concat(ranked).filter(function (c) { var k = keyOf(c); if (seen.has(k) || isHidden(c)) return false; seen.add(k); return true; });
+    var pn = live.plNext;
+    if (pn && !isWatched(pn) && !isHidden(pn) && filter === "all") {
+      ordered = [withKind(pn, "learn", pn.interest)].concat(ordered.filter(function (c) { return keyOf(c) !== keyOf(pn); }));
+    }
+    view.hero = ordered[0] || null;
+    view.queue = diversify(ordered.slice(1), 3, view.hero);
+
+    // One spark: near your topics most of the time, a wildcard now and then.
+    var near = [];
+    act.forEach(function (i) { var cat = catFor(i.name); if (cat) cat.spark.forEach(function (c) { near.push(withKind(c, "spark", i.name)); }); });
+    var wild = WILD.map(function (c) { return withKind(c, "spark", null); })
+      .concat(live.items.filter(function (x) { return x.kind === "spark"; }).map(function (x) { return withKind(x, "spark", null); }));
+    var claudeSpark = claudeCards.filter(function (c) { return c.kind === "spark"; })[0];
+    var pickFrom = function (arr) { return freshFirst(arr.filter(function (c) { return !isHidden(c) && !seen.has(keyOf(c)); }))[0]; };
+    view.spark = claudeSpark || (Math.random() < 0.7 ? pickFrom(near) || pickFrom(wild) : pickFrom(wild) || pickFrom(near)) || null;
+
+    // Music only sometimes (about half the time), as one quiet line.
+    var claudeMusic = claudeCards.filter(function (c) { return c.kind === "music"; })[0];
+    view.music = claudeMusic || (Math.random() < 0.5 ? randomMusic() : null);
+    render();
+  }
+
+  function randomMusic() {
+    var moods = state.moods.length ? state.moods : Object.keys(MUSIC);
+    var m = moods[Math.floor(Math.random() * moods.length)];
+    var liveM = live.items.filter(function (x) { return x.kind === "music" && x.mood === m; });
+    var it = freshFirst(MUSIC[m].items.concat(liveM))[0];
+    return withKind(it, "music", null);
+  }
+
+  // ---------- Rendering ----------
+  function linkTo(c, attrs, kids) {
+    attrs.href = urlOf(c); attrs.target = "_blank"; attrs.rel = "noopener";
+    var a = h("a", attrs, kids);
+    a.addEventListener("click", function (e) {
+      var plain = !(e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button === 1);
+      if (plain && canEmbed && c.id && c.kind !== "search") { e.preventDefault(); playInPage(c); return; }
+      if (plain && !canEmbed && c.id && c.kind !== "search" && !state.fileOk) { e.preventDefault(); askHowToWatch(c); return; }
+      markWatched(c);
+    });
+    return a;
+  }
+
+  function cardEl(c, variant) {
+    var kindLabel = c.kind === "learn" ? "Learn" : c.kind === "spark" ? "Spark" : c.kind === "music" ? "Study music" : "Search";
+    var img = c.id ? thumbUrl(c.id, variant === "hero") : null;
+    var thumbKids;
+    if (img) {
+      var im = h("img", { src: img, alt: "", loading: "lazy", decoding: "async", referrerpolicy: "no-referrer" });
+      im.addEventListener("error", function () { im.remove(); });
+      thumbKids = [im, h("span", { class: "play", "aria-hidden": "true" })];
+      if (c.list) thumbKids.push(h("span", { class: "badge", text: "Playlist" }));
+      else if (c.s && c.n) thumbKids.push(h("span", { class: "badge", text: "Part " + c.n }));
+      if (isWatched(c)) thumbKids.push(h("span", { class: "seen", text: "Watched" }));
+      if (c.d) thumbKids.push(h("span", { class: "dur", text: c.d }));
+    } else {
+      thumbKids = [h("span", { class: "angle", text: c.a || "" }), h("span", { class: "play", "aria-hidden": "true" }),
+        h("span", { class: "big", text: c.kind === "spark" ? "What if…" : shortName(c.interest) })];
+    }
+    var from = c.forGoal ? "fits your goal" : c.kind === "spark" ? (c.interest ? "near " + c.interest : "wildcard") : c.interest;
+    if (variant === "hero" && isNextInSeries(c)) from = "next in the series you started";
+    if (c.plTitle) from = "next in your playlist" + (c.pos ? " \u00b7 part " + c.pos : "");
+
+    var saveBtn = h("button", { class: "act", type: "button", "aria-pressed": isSaved(c) ? "true" : "false", text: isSaved(c) ? "Saved" : "Save" });
+    saveBtn.addEventListener("click", function () { toggleSave(c); });
+    var hideBtn = h("button", { class: "act", type: "button", title: "Not for me: never show this again", text: "Hide" });
+    hideBtn.addEventListener("click", function () { hideCard(c); });
+    var actions;
+    if (variant === "hero") {
+      var skipBtn = h("button", { class: "act", type: "button", text: "Something else" });
+      skipBtn.addEventListener("click", function () { skipped[keyOf(c)] = true; claudeCards = claudeCards.filter(function (x) { return keyOf(x) !== keyOf(c); }); buildFeed(); });
+      actions = [linkTo(c, { class: "act go", text: c.kind === "search" ? "Search YouTube" : c.pos ? "Watch next part" : c.list ? "Open playlist" : "Watch now" }), skipBtn, saveBtn, hideBtn,
+        (c.id || c.list) ? h("a", { class: "alt", href: SEARCH(c.q), target: "_blank", rel: "noopener", text: "Find similar" }) : null];
+    } else {
+      actions = [saveBtn, hideBtn];
+    }
+
+    return h("article", { class: "card " + c.kind + (variant === "hero" ? " hero" : " mini"), style: "--h:" + hue(c.interest || c.t) }, [
+      linkTo(c, { class: "thumb", "aria-label": "Watch " + c.t + " on YouTube" }, thumbKids),
+      h("div", { class: "body" }, [
+        h("div", { class: "kind" }, [h("span", { class: "pill", text: c.a && c.kind !== "search" ? c.a : kindLabel }), c.byClaude ? h("span", { class: "pill", text: "Claude pick" }) : null, from ? h("span", { class: "from", text: from }) : null]),
+        h("h3", null, [linkTo(c, { text: c.t })]),
+        c.by ? h("p", { class: "by", text: c.by }) : null,
+        c.w ? h("p", { class: "why", text: c.w }) : null,
+        variant === "mini" && c.live && c.v ? h("p", { class: "meta", text: fmtViews(c.v) + (c.pub ? " \u00b7 " + c.pub.slice(0, 4) : "") }) : null
+      ]),
+      h("div", { class: "actions" }, actions)
+    ]);
+  }
+
+  function render() {
+    var hero = document.getElementById("hero"), queue = document.getElementById("queue"), sparks = document.getElementById("sparks"), musicSlot = document.getElementById("musicSlot");
+    hero.textContent = ""; queue.textContent = ""; sparks.textContent = ""; musicSlot.textContent = "";
+    if (view.hero) hero.appendChild(cardEl(view.hero, "hero"));
+    view.queue.forEach(function (c) { queue.appendChild(cardEl(c, "mini")); });
+    document.getElementById("queueWrap").hidden = !view.queue.length;
+    if (view.spark && !isHidden(view.spark)) sparks.appendChild(cardEl(view.spark, "mini"));
+    document.getElementById("sparkWrap").hidden = !sparks.childNodes.length;
+    if (view.music && !isHidden(view.music)) {
+      musicSlot.appendChild(h("div", { class: "musicline" }, [
+        view.music.id ? linkTo(view.music, { "aria-hidden": "true", tabindex: "-1" }, [(function () { var mi = h("img", { src: thumbUrl(view.music.id), alt: "", referrerpolicy: "no-referrer" }); mi.addEventListener("error", function () { mi.remove(); }); return mi; })()]) : null,
+        h("span", { class: "label", text: "Music for this session" }),
+        linkTo(view.music, { text: view.music.t }),
+        view.music.d ? h("span", { class: "label", text: view.music.d }) : null
+      ]));
+    }
+    var today = new Date().toDateString();
+    var n = state.day && state.day.d === today ? state.day.n : 0;
+    document.getElementById("streak").textContent = n ? n + (n === 1 ? " video" : " videos") + " opened today" : "";
+    var st = document.getElementById("status");
+    if (!state.interests.some(function (i) { return i.on; })) setStatus("All topics are paused. Tap a topic above to turn it back on, or add a new one.");
+    else if (!view.hero) setStatus("Nothing left to show for this filter. Refresh, or bring back hidden videos.");
+    else if (!st.dataset.sticky) setStatus("");
+    renderSaved();
+  }
+  function setStatus(msg, isErr, sticky) {
+    var st = document.getElementById("status");
+    st.textContent = msg; st.classList.toggle("err", !!isErr);
+    if (sticky) st.dataset.sticky = "1"; else delete st.dataset.sticky;
+  }
+
+  function renderChips() {
+    var root = document.getElementById("chips");
+    root.textContent = "";
+    state.interests.forEach(function (i, idx) {
+      var toggle = h("button", { type: "button", "aria-pressed": i.on ? "true" : "false", title: i.on ? "Pause this topic" : "Turn this topic back on" }, [h("span", { class: "dot", "aria-hidden": "true" }), h("span", { class: "name", text: i.name })]);
+      toggle.addEventListener("click", function () { i.on = !i.on; save(); renderChips(); buildFeed(); });
+      var x = h("button", { type: "button", class: "x", "aria-label": "Remove " + i.name, text: "×" });
+      x.addEventListener("click", function () {
+        state.interests.splice(idx, 1);
+        if (filter === i.name) filter = "all";
+        save(); renderChips(); buildFeed();
+      });
+      root.appendChild(h("span", { class: "chip", "data-on": String(i.on), style: "--h:" + hue(i.name) }, [toggle, x]));
+    });
+    var input = h("input", { id: "addTopic", placeholder: "+ Add a topic", maxlength: "60", "aria-label": "Add a topic you want to learn" });
+    var form = h("form", { class: "addform" }, [input]);
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var v = clip(input.value, 60);
+      if (!v) return;
+      if (!state.interests.some(function (i) { return i.name.toLowerCase() === v.toLowerCase(); })) state.interests.push({ name: v, on: true });
+      save(); renderChips(); buildFeed();
+      var again = document.getElementById("addTopic"); if (again) again.focus();
+    });
+    root.appendChild(form);
+    renderFilter();
+  }
+
+  function renderFilter() {
+    var sel = document.getElementById("filter");
+    sel.textContent = "";
+    sel.appendChild(h("option", { value: "all", text: "All active topics" }));
+    state.interests.filter(function (i) { return i.on; }).forEach(function (i) { sel.appendChild(h("option", { value: i.name, text: "Only: " + i.name })); });
+    if (filter !== "all" && !state.interests.some(function (i) { return i.on && i.name === filter; })) filter = "all";
+    sel.value = filter;
+  }
+
+  function renderMoods() {
+    var root = document.getElementById("moods");
+    root.textContent = "";
+    Object.keys(MUSIC).forEach(function (k) {
+      var on = state.moods.indexOf(k) !== -1;
+      var b = h("button", { class: "mood", type: "button", "aria-pressed": on ? "true" : "false", text: MUSIC[k].label });
+      b.addEventListener("click", function () {
+        var i = state.moods.indexOf(k);
+        if (i === -1) state.moods.push(k); else state.moods.splice(i, 1);
+        save(); renderMoods();
+      });
+      root.appendChild(b);
+    });
+    var list = document.getElementById("musicList");
+    list.textContent = "";
+    var moods = state.moods.length ? state.moods : Object.keys(MUSIC);
+    moods.forEach(function (k) {
+      MUSIC[k].items.forEach(function (it) {
+        list.appendChild(h("li", null, [h("a", { href: urlOf(it), target: "_blank", rel: "noopener", text: it.t }), h("span", { class: "label", text: it.live ? "Live" : MUSIC[k].label.split(" ")[0] })]));
+      });
+    });
+  }
+
+  function renderSaved() {
+    var list = document.getElementById("savedList");
+    list.textContent = "";
+    state.saved.forEach(function (c) {
+      var rm = h("button", { class: "rm", type: "button", text: "Remove", "aria-label": "Remove " + c.t + " from saved" });
+      rm.addEventListener("click", function () { toggleSave(c); });
+      list.appendChild(h("li", null, [h("a", { href: urlOf(c), target: "_blank", rel: "noopener", text: c.t }), rm]));
+    });
+    document.getElementById("savedEmpty").hidden = state.saved.length > 0;
+  }
+
+  function toggleSave(c) {
+    var k = keyOf(c), idx = -1;
+    state.saved.forEach(function (s, i) { if (keyOf(s) === k) idx = i; });
+    if (idx === -1) state.saved.unshift({ id: c.id || null, list: c.list || null, q: c.q, t: c.t });
+    else state.saved.splice(idx, 1);
+    save(); render();
+    if (!document.getElementById("searchView").hidden) renderSearch();
+  }
+  function hideCard(c) {
+    var k = keyOf(c);
+    if (state.hidden.indexOf(k) === -1) state.hidden.push(k);
+    claudeCards = claudeCards.filter(function (x) { return keyOf(x) !== k; });
+    save(); buildFeed();
+    if (!document.getElementById("searchView").hidden) renderSearch();
+  }
+  function markWatched(c) {
+    var k = keyOf(c);
+    var today = new Date().toDateString();
+    state.day = state.day && state.day.d === today ? { d: today, n: state.day.n + 1 } : { d: today, n: 1 };
+    if (c.interest && c.kind !== "music") state.topics[c.interest] = (state.topics[c.interest] || 0) + 1;
+    if (c.kind === "learn") state.last = { s: c.s || null, n: c.n || null, interest: c.interest || null };
+    if (c.by && c.kind !== "music") state.chans[c.by] = (state.chans[c.by] || 0) + 1;
+    if (live.plNext && live.plNext.id === c.id) { live.plNext = null; saveLive(); }
+    if (c.id && c.kind !== "music" && c.kind !== "search") findPlaylistFor(c);
+    if (c.kind !== "search" && state.watched.indexOf(k) === -1) {
+      state.watched.push(k);
+      if (state.watched.length > 400) state.watched = state.watched.slice(-400);
+    }
+    if (c.kind !== "music") {
+      claudeCards = claudeCards.filter(function (x) { return keyOf(x) !== k; });
+      pendingAdvance = true;
+    }
+    save();
+  }
+
+  // ---------- Wire up ----------
+  var goal = document.getElementById("goal");
+  goal.value = state.goal;
+  var goalTimer = null;
+  goal.addEventListener("input", function () {
+    state.goal = goal.value; save();
+    clearTimeout(goalTimer); goalTimer = setTimeout(buildFeed, 600);
+  });
+  document.getElementById("goalForm").addEventListener("submit", function (e) { e.preventDefault(); clearTimeout(goalTimer); buildFeed(); });
+  document.getElementById("filter").addEventListener("change", function (e) { filter = e.target.value; claudeCards = []; setStatus(""); buildFeed(); });
+  document.getElementById("shuffle").addEventListener("click", function () { claudeCards = []; setStatus(""); buildFeed(); });
+  document.getElementById("resetHidden").addEventListener("click", function () { state.hidden = []; save(); setStatus("Hidden videos are back in the mix.", false, true); buildFeed(); });
+
+  document.getElementById("keyForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var k = document.getElementById("ytKey").value.trim();
+    if (!k) return;
+    setKey(k); document.getElementById("ytKey").value = "";
+    renderLive(); fetchMore();
+  });
+  document.getElementById("forgetKey").addEventListener("click", function () { setKey(""); liveMsg("Key removed. Videos already found stay in your feed."); });
+  document.getElementById("fetchNow").addEventListener("click", function () { fetchMore(); });
+  document.getElementById("fetchTop").addEventListener("click", function () { fetchMore(); });
+  document.getElementById("searchForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var q = document.getElementById("q").value.trim();
+    var pl = parseYouTube(q);
+    if (pl.v || pl.list) { handlePaste(q); document.getElementById("q").value = ""; showSearch(false); return; }
+    runSearch(q, false);
+  });
+  document.getElementById("searchMore").addEventListener("click", function () { runSearch(srch.q, true); });
+  document.getElementById("backToFeed").addEventListener("click", function () { showSearch(false); document.getElementById("q").value = ""; buildFeed(); });
+  document.addEventListener("keydown", function (e) {
+    if (e.key !== "Escape") return;
+    if (!document.getElementById("howDlg").hidden) { document.getElementById("howDlg").hidden = true; return; }
+    if (currentView() === "player") closePlayer();
+    else if (currentView() === "search") { showSearch(false); buildFeed(); }
+  });
+  document.getElementById("pClose").addEventListener("click", closePlayer);
+  document.getElementById("pNext").addEventListener("click", function () { var n = computeNext(); if (n) playInPage(n); else playerNote("Nothing else lined up. Try \u201cFind new videos\u201d or a search."); });
+  document.getElementById("pSave").addEventListener("click", function () { if (yt.current) { toggleSave(yt.current); setPlayerInfo(yt.current); } });
+  document.getElementById("pOpen").addEventListener("click", function () { if (yt.player && yt.player.pauseVideo) { try { yt.player.pauseVideo(); } catch (e) {} } });
+  document.getElementById("pAuto").checked = state.autoplay !== false;
+  document.getElementById("pAuto").addEventListener("change", function (e) { state.autoplay = e.target.checked; save(); });
+  document.getElementById("endPlay").addEventListener("click", function () { var n = yt.queue[0] || computeNext(); clearEndCard(); if (n) playInPage(n); });
+  document.getElementById("endCancel").addEventListener("click", clearEndCard);
+  document.getElementById("howClose").addEventListener("click", function () { document.getElementById("howDlg").hidden = true; });
+  document.getElementById("howAlways").addEventListener("click", function () { state.fileOk = true; save(); document.getElementById("howDlg").hidden = true; });
+  document.getElementById("hintClose").addEventListener("click", function () { state.hintSeen = true; save(); document.getElementById("embedHint").hidden = true; });
+  document.getElementById("embedHint").hidden = canEmbed || !!state.hintSeen;
+  document.getElementById("pasteForm").addEventListener("submit", function (e) { e.preventDefault(); handlePaste(document.getElementById("pasteLink").value); document.getElementById("pasteLink").value = ""; });
+
+  // When you come back from YouTube, the next pick moves up on its own.
+  function maybeAdvance() {
+    if (!pendingAdvance || document.visibilityState === "hidden" || currentView() === "player") return;
+    pendingAdvance = false;
+    setStatus("Welcome back. Here's what's next.", false, true);
+    buildFeed();
+    fetchMore({ onlyLow: true });
+  }
+  document.addEventListener("visibilitychange", maybeAdvance);
+  window.addEventListener("focus", maybeAdvance);
+
+  renderChips();
+  renderMoods();
+  buildFeed();
+  renderLive();
+  if (!getKey()) { if (!live.items.length) openLive(); }
+  else if (Date.now() - live.last > 12 * 3600e3) fetchMore();
+  else fetchMore({ onlyLow: true });
+
+})();
+</script>
+
+</body>
+</html>
