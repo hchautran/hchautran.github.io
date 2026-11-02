@@ -204,7 +204,27 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
 .hint { display: flex; gap: 12px; align-items: flex-start; justify-content: space-between; background: var(--accent-soft); border-radius: 12px; padding: 12px 14px; font-size: 14px; }
 .hint p { margin: 0; }
 .hint .linkbtn { flex: none; }
-.pllist { display: grid; gap: 6px; }
+.pllist { display: grid; gap: 6px; max-height: 440px; overflow-y: auto; overscroll-behavior: contain; padding-right: 4px; position: relative; }
+.plrow.now { border-color: var(--accent); background: var(--accent-soft); }
+.plrow.now .plpart { font-weight: 600; }
+.plrow.seen { opacity: .62; }
+.plhead { align-items: baseline; }
+/* Focus mode on wide screens: playlist beside the player, like YouTube */
+@media (min-width: 1100px) {
+  body.focus main .wrap { max-width: 1440px; }
+  body.focus #playerView { grid-template-columns: minmax(0, 1fr) 380px; column-gap: 24px; align-items: start; }
+  body.focus #playerView > .focusbar { grid-column: 1 / -1; }
+  body.focus #playerView > .playerbox, body.focus #playerView > .pinfo, body.focus #playerView > #playerQueueWrap { grid-column: 1; }
+  body.focus #playerView > #plWrap { grid-column: 2; grid-row: 2 / span 3; position: sticky; top: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px; }
+  body.focus #plWrap .pllist { max-height: calc(100vh - 120px); }
+  body.focus #plWrap .plrow { grid-template-columns: 112px minmax(0, 1fr); gap: 4px 10px; border: 0; }
+  body.focus #plWrap .plrow img { width: 112px; height: 63px; grid-row: span 2; }
+  body.focus #plWrap .plpart, body.focus #plWrap .pltitle { grid-column: 2; }
+  body.focus #plWrap .pltitle { font-size: 13.5px; }
+  body.focus #plWrap .pldur { display: none; }
+  body.focus #plWrap .sec-h { flex-direction: column; align-items: flex-start; gap: 2px; margin-bottom: 8px; }
+  body.focus #plWrap .sec-h h2 { font-size: 16px; }
+}
 .plrow { display: grid; grid-template-columns: 120px auto minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 6px; border-radius: 10px; text-decoration: none; background: var(--surface); border: 1px solid var(--line); }
 .plrow:hover { border-color: var(--accent); }
 .plrow img { width: 120px; height: 68px; object-fit: cover; border-radius: 6px; display: block; background: #000; grid-column: 1; }
@@ -244,6 +264,8 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
 .paper .why { margin: 0; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .paper .actions { padding: 4px 0 0; }
 .paper.done { opacity: .7; }
+.paper .worth { margin: 0; font-size: 13px; color: var(--ink); }
+.paperNone { margin: 0; }
 .newsitem { display: grid !important; gap: 2px; justify-content: stretch !important; }
 .newsitem > a { font-size: 14px; font-weight: 500; }
 .newsitem .label { text-transform: none; letter-spacing: 0; font-family: var(--body); font-size: 12px; }
@@ -367,7 +389,7 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
         </div>
       </div>
       <div id="plWrap" hidden>
-        <div class="sec-h"><h2 id="plTitle">Next in this playlist</h2></div>
+        <div class="sec-h plhead"><h2 id="plTitle">Playlist</h2><span class="label" id="plMeta"></span></div>
         <div class="pllist" id="plList"></div>
       </div>
       <div id="playerQueueWrap" hidden>
@@ -1090,45 +1112,43 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
   }
 
   // After you open a video: look through that channel's playlists for one that contains it.
-  // Find the playlist a video belongs to and the videos that come after it (up to 8).
-  function nextNInList(listId, videoId, n) {
-    var items = [], page = 0;
+  // Read a whole playlist (up to 200 videos) and where the given video sits in it.
+  function allInList(listId, videoId) {
+    var raw = [], page = 0;
     function step(token) {
       var p = { part: "snippet,contentDetails", playlistId: listId, maxResults: "50" };
       if (token) p.pageToken = token;
       return api("playlistItems", p).then(function (r) {
         addUnits(1); page++;
-        items = items.concat(r.items || []);
-        var idx = items.findIndex(function (x) { return x.contentDetails && x.contentDetails.videoId === videoId; });
-        if (idx !== -1 && (items.length - idx > n || !r.nextPageToken)) return done(idx);
-        if (r.nextPageToken && page < 6) return step(r.nextPageToken);
-        return idx === -1 ? null : done(idx);
+        raw = raw.concat(r.items || []);
+        if (r.nextPageToken && page < 4) return step(r.nextPageToken);
+        var refs = [];
+        raw.forEach(function (x, j) {
+          var sn = x.snippet || {};
+          if (sn.title === "Private video" || sn.title === "Deleted video" || !x.contentDetails) return;
+          refs.push({ id: x.contentDetails.videoId, pos: j + 1 });
+        });
+        var idx = refs.findIndex(function (r2) { return r2.id === videoId; });
+        return { refs: refs, idx: idx, more: !!r.nextPageToken };
       });
-    }
-    function done(idx) {
-      var out = [];
-      for (var j = idx + 1; j < items.length && out.length < n; j++) {
-        var sn = items[j].snippet || {};
-        if (sn.title === "Private video" || sn.title === "Deleted video") continue;
-        out.push({ id: items[j].contentDetails.videoId, pos: j + 1 });
-      }
-      return { pos: idx + 1, next: out };
     }
     return step(null);
   }
   function detailsFor(refs, listId, plTitle) {
-    if (!refs.length) return Promise.resolve([]);
-    return api("videos", { part: "snippet,contentDetails,statistics", id: refs.map(function (r) { return r.id; }).join(",") }).then(function (v) {
-      addUnits(1);
-      var byId = {}; (v.items || []).forEach(function (it) { byId[it.id] = it; });
+    var chunks = [];
+    for (var i = 0; i < refs.length; i += 50) chunks.push(refs.slice(i, i + 50));
+    return Promise.all(chunks.map(function (ch) {
+      return api("videos", { part: "snippet,contentDetails,statistics", id: ch.map(function (r) { return r.id; }).join(",") }).then(function (v) { addUnits(1); return v.items || []; });
+    })).then(function (lists) {
+      var byId = {}; [].concat.apply([], lists).forEach(function (it) { byId[it.id] = it; });
       return refs.filter(function (r) { return byId[r.id]; }).map(function (r) {
         return toItem(byId[r.id], { kind: "learn", interest: null, list: listId, plTitle: plTitle, pos: r.pos, a: "Playlist", w: "Part " + r.pos + " of “" + plTitle + "”." });
       });
     });
   }
   function playlistFor(c) {
-    if (c.list && c.pos && c.plTitle) {
-      return nextNInList(c.list, c.id, 8).then(function (f) { return f ? { list: c.list, title: c.plTitle, pos: f.pos, next: f.next } : null; });
+    if (c.list && c.plTitle) {
+      return allInList(c.list, c.id).then(function (f) { return f && f.idx !== -1 ? { list: c.list, title: c.plTitle, refs: f.refs, more: f.more } : null; });
     }
     var chP = c.ch ? Promise.resolve(c.ch) : api("videos", { part: "snippet", id: c.id }).then(function (v) { addUnits(1); var it = (v.items || [])[0]; return it && it.snippet.channelId; });
     return chP.then(function (ch) {
@@ -1142,23 +1162,29 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
         function tryNext() {
           if (i >= lists.length) return null;
           var L = lists[i++];
-          return nextNInList(L.id, c.id, 8).then(function (f) { return f ? { list: L.id, title: L.title, pos: f.pos, next: f.next } : tryNext(); });
+          return allInList(L.id, c.id).then(function (f) { return f && f.idx !== -1 ? { list: L.id, title: L.title, refs: f.refs, more: f.more } : tryNext(); });
         }
         return tryNext();
       });
     });
   }
-  // After you open a video: line up the rest of its playlist (in the player and at the top of your feed).
+  // After you open a video: load its whole playlist (shown beside the player; the next part also tops your feed).
   function findPlaylistFor(c) {
     if (!getKey() || !c.id || c.kind === "music" || unitsToday() > 9800) return;
+    if (yt.playlist && yt.playlist.source === "youtube" && plIndex(yt.playlist, c.id) !== -1) {   // already loaded
+      var pl0 = yt.playlist, i0 = plIndex(pl0, c.id);
+      live.plNext = pl0.all[i0 + 1] || null; saveLive(); buildFeed();
+      return;
+    }
     playlistFor(c).then(function (pl) {
       if (!pl) return;
-      return detailsFor(pl.next, pl.list, pl.title).then(function (items) {
-        live.plNext = items[0] || null;
+      return detailsFor(pl.refs, pl.list, pl.title).then(function (all) {
+        var idx = all.findIndex(function (x) { return x.id === c.id; });
+        live.plNext = idx !== -1 ? (all[idx + 1] || null) : null;
         saveLive();
         if (yt.current && yt.current.id === c.id) {
-          yt.playlist = { title: pl.title, list: pl.list, pos: pl.pos, items: items, source: "youtube" };
-          yt.current.plTitle = yt.current.plTitle || pl.title; yt.current.pos = yt.current.pos || pl.pos;
+          yt.playlist = { title: pl.title, list: pl.list, all: all, more: pl.more, source: "youtube" };
+          if (idx !== -1) { yt.current.plTitle = pl.title; yt.current.pos = all[idx].pos; yt.current.list = pl.list; }
           setPlayerInfo(yt.current); renderPlaylistRow();
         }
         buildFeed();
@@ -1267,51 +1293,55 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
   }
 
   var SERIES = { "6s184": "MIT 6.S184: Flow Matching and Diffusion Models (2026)", cme296: "Stanford CME296: Diffusion & Large Vision Models", cs336: "Stanford CS336: Language Modeling from Scratch", gpumode: "GPU MODE lectures", eola: "Essence of linear algebra (3Blue1Brown)", ee364a: "Stanford EE364A: Convex Optimization" };
+  function plIndex(pl, id) { return pl ? pl.all.findIndex(function (x) { return x.id === id; }) : -1; }
   function seriesPlaylist(c) {
     if (!c.s || c.list) return null;
     var all = [];
-    Object.keys(CAT).forEach(function (k) { CAT[k].learn.forEach(function (x) { if (x.s === c.s && !x.list) all.push(withKind(x, "learn", CAT[k].label)); }); });
+    Object.keys(CAT).forEach(function (k) { CAT[k].learn.forEach(function (x) { if (x.s === c.s && !x.list) { var o = withKind(x, "learn", CAT[k].label); o.pos = x.n; all.push(o); } }); });
     all.sort(function (a, b) { return a.n - b.n; });
-    var items = all.filter(function (x) { return x.n > c.n; });
-    return { title: SERIES[c.s] || "this series", pos: c.n, items: items, source: "series" };
+    return { title: SERIES[c.s] || "this series", all: all, source: "series" };
   }
-  // Keep the playlist we're already in when you move to its next video.
-  function carryPlaylist(c) {
-    var pl = yt.playlist;
-    if (!pl) return null;
-    var i = pl.items.findIndex(function (x) { return x.id === c.id; });
-    if (i === -1) return null;
-    return { title: pl.title, list: pl.list, pos: c.pos || c.n, items: pl.items.slice(i + 1), source: pl.source };
+  // Keep the playlist we're already in when you move around inside it.
+  function carryPlaylist(c) { return plIndex(yt.playlist, c.id) !== -1 ? yt.playlist : null; }
+  function nextInPlaylist() {
+    var pl = yt.playlist, i = yt.current ? plIndex(pl, yt.current.id) : -1;
+    if (!pl || i === -1) return [];
+    return pl.all.slice(i + 1).filter(function (x) { return x.id && !isHidden(x); });
   }
   function renderPlaylistRow() {
     var wrap = document.getElementById("plWrap"), root = document.getElementById("plList");
     root.textContent = "";
     var pl = yt.playlist;
-    var items = pl ? pl.items.filter(function (x) { return !isHidden(x); }) : [];
     wrap.hidden = !pl;
     if (!pl) return;
-    document.getElementById("plTitle").textContent = "Next in “" + pl.title + "”";
-    if (!items.length) { root.appendChild(h("p", { class: "note", text: "This is the last video in the playlist." })); return; }
-    items.slice(0, 6).forEach(function (x) {
-      var row = linkTo(x, { class: "plrow" }, [
+    var cur = yt.current ? plIndex(pl, yt.current.id) : -1;
+    document.getElementById("plTitle").textContent = pl.title;
+    document.getElementById("plMeta").textContent = (cur !== -1 ? "Part " + (pl.all[cur].pos || cur + 1) + " of " : "") + pl.all.length + " videos" + (pl.more ? " (first 200 shown)" : "");
+    var curRow = null;
+    pl.all.forEach(function (x, i) {
+      if (isHidden(x)) return;
+      var isCur = i === cur, seen = !isCur && isWatched(x);
+      var row = linkTo(x, { class: "plrow" + (isCur ? " now" : "") + (seen ? " seen" : ""), "aria-current": isCur ? "true" : null }, [
         x.id ? (function () { var im = h("img", { src: thumbUrl(x.id), alt: "", loading: "lazy", referrerpolicy: "no-referrer" }); im.addEventListener("error", function () { im.remove(); }); return im; })() : null,
-        h("span", { class: "plpart", text: "Part " + (x.pos || x.n || "") }),
+        h("span", { class: "plpart", text: isCur ? "Now playing" : (seen ? "✓ " : "") + "Part " + (x.pos || x.n || i + 1) }),
         h("span", { class: "pltitle", text: x.t }),
         h("span", { class: "pldur", text: x.d || "" })
       ]);
+      if (isCur) curRow = row;
       root.appendChild(row);
     });
-    if (items.length > 6) root.appendChild(h("p", { class: "note", text: "+ " + (items.length - 6) + " more in this playlist" }));
+    // Scroll the list (not the page) so the current video sits near the top.
+    if (curRow) requestAnimationFrame(function () { root.scrollTop = Math.max(0, curRow.offsetTop - Math.round(root.clientHeight / 4)); });
   }
 
   function playInPage(c, auto) {
     if (!canEmbed || !c || !c.id) return false;
-    var inPl = yt.playlist && yt.playlist.items.some(function (x) { return x.id === c.id; });
+    var inPl = plIndex(yt.playlist, c.id) !== -1;
     yt.autoChain = auto ? (inPl ? (yt.autoChain || 0) : (yt.autoChain || 0) + 1) : 0;
     if (currentView() !== "player") yt.prevView = currentView();
     clearEndCard();
     yt.playlist = carryPlaylist(c) || seriesPlaylist(c);
-    if (yt.playlist && !c.plTitle) { c.plTitle = yt.playlist.title; c.pos = c.pos || c.n; }
+    if (yt.playlist) { var pi = plIndex(yt.playlist, c.id); if (pi !== -1) { c.plTitle = yt.playlist.title; c.pos = yt.playlist.all[pi].pos || c.n; if (yt.playlist.list) c.list = yt.playlist.list; } }
     yt.current = c; yt.started = false;
     showView("player"); setPlayerInfo(c); playerNote("");
     document.getElementById("pNote").value = noteFor(c);
@@ -1362,7 +1392,7 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
   function computeNext() {
     var cur = yt.current, curKey = cur ? keyOf(cur) : "";
     buildFeed();   // refreshes view.hero / view.queue with everything we know (including playlist lookups)
-    var plItems = yt.playlist ? yt.playlist.items.filter(function (c) { return c.id && keyOf(c) !== curKey && !isHidden(c); }) : [];
+    var plItems = nextInPlaylist();
     var feedItems = [view.hero].concat(view.queue).filter(function (c) { return c && c.id && keyOf(c) !== curKey && !isWatched(c); });
     var list = plItems.slice(0, 1).concat(feedItems);
     var seen = new Set();
@@ -1376,8 +1406,8 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
       if (currentView() !== "player") return;
       computeNext();
       root.textContent = "";
-      var plKeys = new Set(yt.playlist ? yt.playlist.items.map(keyOf) : []);
-      yt.queue.filter(function (c) { return !plKeys.has(keyOf(c)); }).slice(0, 3).forEach(function (c) { root.appendChild(cardEl(c, "mini")); });
+      var plKeys = new Set(yt.playlist ? yt.playlist.all.map(function (x) { return x.id; }) : []);
+      yt.queue.filter(function (c) { return !plKeys.has(c.id); }).slice(0, 3).forEach(function (c) { root.appendChild(cardEl(c, "mini")); });
       document.getElementById("playerQueueTitle").textContent = yt.playlist ? "Other picks" : "Up next";
       document.getElementById("playerQueueWrap").hidden = !yt.queue.length;
     }, 1500);
@@ -1562,24 +1592,28 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
   // from outside the playlist, StudyTube checks in before playing more.
   function needsCheckIn(next) {
     if (!next) return false;
-    var inPlaylist = yt.playlist && yt.playlist.items.some(function (x) { return x.id === next.id; });
+    var inPlaylist = plIndex(yt.playlist, next.id) !== -1;
     return !inPlaylist && yt.autoChain >= 2;
   }
 
   // ---------- Paper of the day + AI news (free sources, no key needed) ----------
-  var PKEY = "studytube.paper.v1", NKEY = "studytube.news.v1";
+  var PKEY = "studytube.paper.v2", NKEY = "studytube.news.v1";
   var PAPER_Q = {
     diffusion: ["diffusion models", "flow matching", "diffusion transformer"],
     world: ["world models", "world model video", "model-based reinforcement learning"],
     mlsys: ["LLM inference", "efficient training", "kv cache", "attention kernel"],
     math: ["optimization theory", "optimal transport", "stochastic differential equations"]
   };
+  // Whole-word phrases that clearly mark a paper as being about each topic.
   var TOPIC_WORDS = {
-    diffusion: ["diffusion", "flow matching", "rectified flow", "score-based", "denois", "consistency model", "generative"],
-    world: ["world model", "jepa", "model-based", "embodied", "video prediction", "dreamer", "simulat"],
-    mlsys: ["inference", "kv cache", "attention", "serving", "quantiz", "sparsity", "throughput", "latency", "gpu", "kernel", "parallel", "efficient", "llm", "training", "speculative", "memory"],
-    math: ["theory", "optimal transport", "convergence", "stochastic", "optimization", "bound", "theorem"]
+    diffusion: ["diffusion model", "diffusion models", "flow matching", "rectified flow", "score-based", "score matching", "denoising diffusion", "consistency model", "consistency models", "latent diffusion", "diffusion transformer", "diffusion transformers", "dit", "text-to-image", "text-to-video", "image generation", "video generation", "video diffusion", "flow-based generative", "stochastic interpolant", "stochastic interpolants", "diffusion language model", "discrete diffusion"],
+    world: ["world model", "world models", "jepa", "model-based reinforcement learning", "model-based rl", "video prediction", "dreamer", "embodied", "world simulator", "world simulation", "vision-language-action", "vla", "action model", "action models", "interactive video generation", "physical dynamics", "robot learning", "robotics"],
+    mlsys: ["inference", "kv cache", "kv-cache", "serving", "quantization", "quantized", "sparse attention", "throughput", "latency", "gpu", "gpus", "kernel", "kernels", "speculative decoding", "parallelism", "distributed training", "pipeline parallel", "tensor parallel", "mixture of experts", "mixture-of-experts", "moe", "model compression", "pruning", "efficient attention", "linear attention", "flashattention", "memory footprint", "hardware", "accelerator", "compiler", "low-bit", "fp8", "fp4"],
+    math: ["theorem", "convergence", "optimal transport", "stochastic differential", "sde", "sdes", "provably", "theoretical", "theory", "generalization bound", "sample complexity", "convex", "variational inference", "information-theoretic", "information theory", "statistical learning", "high-dimensional"]
   };
+  function phraseRe(list) { return list.map(function (w) { return new RegExp("(^|[^a-z0-9])" + w.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") + "($|[^a-z0-9])", "i"); }); }
+  var TOPIC_RE = {}; Object.keys(TOPIC_WORDS).forEach(function (k) { TOPIC_RE[k] = phraseRe(TOPIC_WORDS[k]); });
+
   function readJSON(k) { try { return JSON.parse(localStorage.getItem(k) || "null"); } catch (e) { return null; } }
   function writeJSON(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
   function getJSON(url) { return fetch(url, { credentials: "omit" }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }); }
@@ -1587,60 +1621,98 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
   function paperTopics() {
     return state.interests.filter(function (i) { return i.on; }).map(function (i) {
       var k = topicKeyFor(i.name);
-      return { name: i.name, queries: k ? PAPER_Q[k] : [plainName(i.name)], words: k ? TOPIC_WORDS[k] : plainName(i.name).toLowerCase().split(" ") };
+      return { name: i.name, queries: k ? PAPER_Q[k] : [plainName(i.name)], re: k ? TOPIC_RE[k] : phraseRe([plainName(i.name).toLowerCase()]) };
     });
   }
   function fromHF(x, topic) {
     var p = x.paper || {};
     return { id: p.id, t: x.title || p.title || "", sum: p.ai_summary || "", abs: (p.summary || x.summary || "").replace(/\s+/g, " "), up: +p.upvotes || 0,
       pub: (p.publishedAt || x.publishedAt || "").slice(0, 10), thumb: x.thumbnail || "", stars: +p.githubStars || 0, gh: p.githubRepo || "", org: (p.organization && p.organization.fullname) || "", topic: topic || null,
-      kw: (p.ai_keywords || []).join(" ").toLowerCase() };
+      kw: (p.ai_keywords || []).join(" ").toLowerCase(), cm: +x.numComments || 0, proj: p.projectPage || "" };
   }
+  // A paper is about a topic if its title names it, or Hugging Face's keywords name it twice.
   function matchTopic(pp, topics) {
-    var hay = (pp.t + " " + pp.kw + " " + pp.sum).toLowerCase(), best = null, bestN = 0;
-    topics.forEach(function (tp) { var n = tp.words.filter(function (w) { return w && hay.indexOf(w) !== -1; }).length; if (n > bestN) { bestN = n; best = tp.name; } });
-    return { topic: best, n: bestN };
+    var best = null, bestT = 0, bestK = 0;
+    topics.forEach(function (tp) {
+      var t = tp.re.filter(function (r) { return r.test(pp.t); }).length;
+      var k = tp.re.filter(function (r) { return r.test(pp.kw); }).length;
+      if (t * 10 + k > bestT * 10 + bestK) { bestT = t; bestK = k; best = tp.name; }
+    });
+    return { topic: best, ok: bestT >= 1 || bestK >= 2, n: bestT + bestK, head: bestT };
   }
+  // Paper of the day: one paper that is clearly worth your time.
+  //  1. Pool: each day's top papers on Hugging Face for the last 21 days, plus searches for your topics.
+  //  2. On topic: the title or keywords must mention one of your active topics.
+  //  3. Well received: in the top quarter of the pool by upvotes (and at least 25 upvotes).
+  //  4. Backed by something else too: public code, active discussion, or top 10% upvotes.
+  var POOL_DAYS = 21;
+  function isoDay(d) { return new Date(Date.now() - d * 864e5).toISOString().slice(0, 10); }
   function pickPaper(force) {
     var today = new Date().toDateString(), cached = readJSON(PKEY) || { seen: [] };
-    if (!force && cached.d === today && cached.paper) { renderPaper(cached.paper, cached); return; }
+    if (!force && cached.d === today && "paper" in cached) { renderPaper(cached.paper, cached); return; }
     var topics = paperTopics();
     if (!topics.length) { renderPaper(null); return; }
-    var reqs = [getJSON("https://huggingface.co/api/daily_papers?limit=100").then(function (arr) { return arr.map(function (x) { return fromHF(x, null); }); }).catch(function () { return []; })];
+    var reqs = [];
+    for (var d = 0; d < POOL_DAYS; d++) {
+      reqs.push(getJSON("https://huggingface.co/api/daily_papers?date=" + isoDay(d)).then(function (arr) { return (arr || []).map(function (x) { return fromHF(x, null); }); }).catch(function () { return []; }));
+    }
+    reqs.push(getJSON("https://huggingface.co/api/daily_papers?limit=100").then(function (arr) { return arr.map(function (x) { return fromHF(x, null); }); }).catch(function () { return []; }));
     topics.forEach(function (tp) {
       tp.queries.slice(0, 2).forEach(function (q) {
         reqs.push(getJSON("https://huggingface.co/api/papers/search?q=" + encodeURIComponent(q)).then(function (arr) { return arr.map(function (x) { return fromHF(x, tp.name); }); }).catch(function () { return []; }));
       });
     });
     Promise.all(reqs).then(function (lists) {
-      var seen = new Set(cached.seen || []), byId = {};
+      var byId = {};
       [].concat.apply([], lists).forEach(function (pp) {
-        if (!pp.id || !pp.t || seen.has(pp.id)) return;
+        if (!pp.id || !pp.t) return;
         var age = (Date.now() - Date.parse(pp.pub)) / 864e5;
-        if (!(age >= 0 && age <= 60)) return;
-        var m = matchTopic(pp, topics);
-        // Only papers about your topics: a topic search result must mention the topic at least once;
-        // a general daily paper must match a topic on two or more words.
-        if (pp.topic ? m.n < 1 : m.n < 2) return;
-        var topic = pp.topic || m.topic;
-        var score = (pp.up + 1) * Math.exp(-age / 20) * (1 + 0.4 * m.n);
-        if (!byId[pp.id] || byId[pp.id].score < score) { pp.topic = topic; pp.score = score; byId[pp.id] = pp; }
+        if (!(age >= -1 && age <= POOL_DAYS + 3)) return;
+        if (!byId[pp.id] || (pp.topic && !byId[pp.id].topic)) byId[pp.id] = pp;
+        else byId[pp.id].up = Math.max(byId[pp.id].up, pp.up);
       });
-      var list = Object.keys(byId).map(function (k) { return byId[k]; }).sort(function (a, b) { return b.score - a.score; });
-      // Rotate topics day by day, as long as that topic has a reasonably popular new paper.
+      var pool = Object.keys(byId).map(function (k) { return byId[k]; });
+      if (!pool.length) { renderPaper(null); return; }
+      var ups = pool.map(function (x) { return x.up; }).sort(function (a, b) { return b - a; });
+      var q = function (f) { return ups[Math.min(ups.length - 1, Math.floor(f * ups.length))]; };
+      var p75 = Math.max(25, q(0.25)), p90 = Math.max(40, q(0.10));
+      var seen = new Set(cached.seen || []);
+      var good = [];
+      pool.forEach(function (pp) {
+        if (seen.has(pp.id)) return;
+        var m = matchTopic(pp, topics);
+        if (!m.ok) return;                                          // clearly about one of your topics
+        if (pp.up < p75) return;                                    // well received
+        var why = [];
+        if (pp.up >= p90) why.push("top 10% of the last 3 weeks");
+        if (pp.gh) why.push("code is public" + (pp.stars >= 50 ? " (" + (pp.stars >= 1000 ? (pp.stars / 1000).toFixed(1) + "k" : pp.stars) + " stars)" : ""));
+        if (pp.cm >= 3) why.push(pp.cm + " comments");
+        if (!why.length) return;                                    // needs at least one more signal
+        if (pp.org) why.push("from " + pp.org);
+        var age = Math.max(0, (Date.now() - Date.parse(pp.pub)) / 864e5);
+        pp.topic = m.topic;
+        pp.why = why;
+        pp.score = pp.up * (1 + 0.15 * why.length) * (1 + 0.2 * Math.min(m.n, 3)) * Math.exp(-age / 30);
+        good.push(pp);
+      });
+      good.sort(function (a, b) { return b.score - a.score; });
       var turn = topics[Math.floor(Date.now() / 864e5) % topics.length].name;
-      var best = list[0] || null, mine = list.filter(function (x) { return x.topic === turn; })[0];
-      var paper = mine && best && mine.score >= 0.25 * best.score ? mine : best;
+      var best = good[0] || null, mine = good.filter(function (x) { return x.topic === turn; })[0];
+      var paper = mine && best && mine.score >= 0.5 * best.score ? mine : best;
       var seenArr = (cached.seen || []).slice(-300);
       if (paper) seenArr.push(paper.id);
-      var rec = { d: today, paper: paper, seen: seenArr, read: false };
+      var rec = { d: today, paper: paper, seen: seenArr, read: false, poolSize: pool.length };
       writeJSON(PKEY, rec);
       renderPaper(paper, rec);
     }).catch(function () { renderPaper(null); });
   }
   function renderPaper(pp, rec) {
     var slot = document.getElementById("paperSlot"); slot.textContent = "";
-    if (!pp) { slot.hidden = true; return; }
+    if (!pp) {
+      slot.hidden = !(rec && rec.poolSize);
+      if (rec && rec.poolSize) slot.appendChild(h("p", { class: "note paperNone", text: "No paper about your topics cleared the bar today, so there's no Paper of the day. Better nothing than a weak one." }));
+      return;
+    }
     slot.hidden = false;
     var days = Math.floor((Date.now() - Date.parse(pp.pub)) / 864e5);
     var when = days <= 0 ? "today" : days === 1 ? "yesterday" : days + " days ago";
@@ -1654,6 +1726,7 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
       h("div", { class: "kind" }, [h("span", { class: "pill", text: "Paper of the day" }), h("span", { class: "from", text: pp.topic + " · " + when + " · ▲ " + pp.up + " upvotes" + (pp.org ? " · " + pp.org : "") })]),
       h("h3", null, [h("a", { href: "https://huggingface.co/papers/" + pp.id, target: "_blank", rel: "noopener", text: pp.t })]),
       summary ? h("p", { class: "why", text: summary }) : null,
+      pp.why && pp.why.length ? h("p", { class: "worth", text: "Why it's worth reading: " + pp.why.join(" · ") + "." }) : null,
       h("div", { class: "actions" }, [
         h("a", { class: "act go", href: "https://arxiv.org/abs/" + pp.id, target: "_blank", rel: "noopener", text: "Read on arXiv" }),
         h("a", { class: "act", href: "https://huggingface.co/papers/" + pp.id, target: "_blank", rel: "noopener", text: "Discussion" }),
