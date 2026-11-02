@@ -31,6 +31,7 @@ lastmod: 2026-04-02
       <a href="https://github.com/hchautran" target="_blank"><img src="./github.png" style="width:14px;height:14px;vertical-align:middle;">GitHub</a>
       <a href="https://scholar.google.com/citations?user=FZH2vcEAAAAJ&hl=en" target="_blank"><img src="./scholar.png" style="width:14px;height:14px;vertical-align:middle;">Scholar</a>
       <a href="./CV_Chau_Tran.pdf" target="_blank">📄 My Resume</a>
+      <a href="/static/studytube.html" target="_blank" title="My calm YouTube study feed">▶️ StudyTube</a>
     </div>
 </div>
 

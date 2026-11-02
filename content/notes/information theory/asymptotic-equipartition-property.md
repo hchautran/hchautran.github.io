@@ -2,7 +2,7 @@
 title: 3. Asymptotic Equipartition Property
 description: How the law of large numbers creates typical sets, why entropy determines compression rates, and how high-probability sets acquire an exponential size.
 date: 2026-09-08
-lastmod: 2026-09-08
+lastmod: 2026-10-10
 draft: false
 tags:
   - information-theory
@@ -11,12 +11,16 @@ tags:
   - notes
 ---
 
-Entropy measures the average surprise of one observation. **What does it tell us about a long sequence of observations?** The asymptotic equipartition property (AEP) gives the bridge: for an independent source, the surprise per symbol concentrates near entropy. A relatively small collection of sequences then carries almost all the probability, which makes compression possible.
+Entropy measures the average surprise of one observation. **What does it tell us about a long sequence of observations?** Suppose a coin lands heads 90% of the time. The all-heads sequence is the most likely individual outcome, yet a long run usually contains some tails. To understand what we will actually observe, we need to consider whole collections of sequences and their combined probability.
 
-This note follows Chapter 3 of Cover and Thomas, *Elements of Information Theory*. It continues [[entropy-relative-entropy-mutual-information|Entropy and Mutual Information]] and [[information-inequalities-data-processing-fano|Inequalities and Their Consequences]]. The explanations and worked calculations below are written for these notes.
+The **asymptotic equipartition property (AEP)** explains what happens when we draw many independent observations from the same distribution. For a long sequence of $n$ observations, the total surprise $-\log p(X^n)$ is usually close to $nH(X)$. Equivalently, the probability of the sequence we observe is usually around $2^{-nH(X)}$.
+
+These sequences form the **typical set**, which contains almost all the probability. Roughly speaking, if each sequence contributes probability $2^{-nH(X)}$, we need about $2^{nH(X)}$ of them for their probabilities to add up to one. To encode a typical sequence, we can send its index in this set. Choosing among about $2^{nH(X)}$ indices takes about $\log(2^{nH(X)})=nH(X)$ bits. The bounds below make these approximations precise.
+
+We will derive the AEP, count typical sequences, and use that count to explain compression and the size of high-probability sets.
 
 > [!note] Assumptions and notation
-> Let $X_1,X_2,\ldots$ be independent and identically distributed (i.i.d.) with PMF $p(x)$ on a finite alphabet $\mathcal{X}$. Write $X^n=(X_1,\ldots,X_n)$ for the random block and $x^n$ for a realization. All logarithms are base 2, so entropy and surprise are measured in bits. We restrict attention to symbols with positive probability.
+> Let $X_1,X_2,\ldots$ be independent and identically distributed (i.i.d.) with PMF $p(x)$ on a finite alphabet $\mathcal{X}$. Write $X^n=(X_1,\ldots,X_n)$ for the random block and $x^n$ for a realization. All logarithms are base 2, so $\log$ means $\log_2$ and entropy and surprise are measured in bits. We restrict attention to symbols with positive probability.
 
 ---
 
@@ -31,58 +35,155 @@ $$
 Taking a negative logarithm turns this product into a sum:
 
 $$
--\frac1n\log_2 p(X^n)
-=\frac1n\sum_{i=1}^n\bigl[-\log_2 p(X_i)\bigr].
+-\frac1n\log p(X^n)
+=\frac1n\sum_{i=1}^n\bigl[-\log p(X_i)\bigr].
 $$
 
 The expression on the left is random: we first draw a sequence, then evaluate the probability assigned to that sequence. On the right, we average the surprise of its individual symbols.
 
-Define $Z_i=-\log_2p(X_i)$. The $Z_i$ are i.i.d., with
+Define $Z_i=-\log p(X_i)$. The $Z_i$ are i.i.d., with
 
 $$
 \mathbb{E}[Z_i]
-=-\sum_xp(x)\log_2p(x)
+=-\sum_xp(x)\log p(x)
 =H(X).
 $$
 
 The weak law of large numbers therefore gives the **asymptotic equipartition property**:
 
 $$
-\boxed{-\frac1n\log_2p(X^n)\xrightarrow{\Pr}H(X).}
+\boxed{-\frac1n\log p(X^n)\xrightarrow{\Pr}H(X).}
 $$
 
 Explicitly, for every fixed $\epsilon>0$,
 
 $$
-\Pr\left(\left|-\frac1n\log_2p(X^n)-H(X)\right|>\epsilon\right)
+\Pr\left(\left|-\frac1n\log p(X^n)-H(X)\right|>\epsilon\right)
 \longrightarrow0.
 $$
 
-The proof is short because the main idea is the change of variables: apply the law of large numbers to **surprise**, rather than to the source symbols themselves. This is Theorem 3.1.1 in the book.
+The proof is short because the main idea is the change of variables: apply the law of large numbers to **surprise**, rather than to the source symbols themselves.
 
-> [!note]- A finite-block bound
-> Let $V=\operatorname{Var}[-\log_2p(X)]$, which is finite under our finite-alphabet assumption. Independence gives
+The name now has a precise meaning: **asymptotic** refers to long blocks, and **equipartition** refers to the nearly equal surprise per symbol of blocks that carry most of the probability. It does not make every possible block equally likely.
+
+> [!example]- Problem 1: AEP-like limit
+> **Problem.** Let $X_1,X_2,\ldots$ be i.i.d. drawn according to probability mass function $p(x)$. Does the following sequence converge in probability as $n\to\infty$? If so, what does it converge to?
 >
 > $$
-> \operatorname{Var}\left(\frac1n\sum_{i=1}^n Z_i\right)=\frac{V}{n}.
+> \bigl(p(X_1,X_2,\ldots,X_n)\bigr)^{1/n}.
 > $$
 >
-> Chebyshev's inequality then yields
+> **Hint.** You may use the Continuous Mapping Theorem in this and subsequent problems.
+>
+> **Solution.**
+>
+> The AEP gives $-\frac1n\log p(X^n)\xrightarrow{\Pr}H(X)$. Apply the continuous function $z\mapsto2^{-z}$:
 >
 > $$
-> \Pr\left(\left|-\frac1n\log_2p(X^n)-H(X)\right|>\epsilon\right)
-> \leq\frac{V}{n\epsilon^2}.
+> p(X^n)^{1/n}=2^{\frac1n\log p(X^n)}\xrightarrow{\Pr}2^{-H(X)}.
 > $$
 >
-> This bound can be loose, but it makes the tradeoff explicit: a narrower tolerance generally requires a longer block.
+> This is convergence of the probability's $n$th root; the probability of a whole block generally becomes small as its length increases.
+
+> [!example]- Problem 2: Repeated cake cuts
+> **Problem.** A cake is sliced roughly in half, the largest piece being chosen each time and the other pieces discarded. Assume that a random cut creates pieces of proportions
+>
+> $$
+> P=\begin{cases}
+> (2/3,1/3),&\text{with probability }1/4,\\
+> (2/5,3/5),&\text{with probability }3/4.
+> \end{cases}
+> $$
+>
+> For example, the first cut and choice of the largest piece may result in a piece of size $3/5$. Cutting and choosing from this piece might reduce its size to $(3/5)(2/3)$ at time 2, and so on. Roughly how large is the piece of cake after $n$ cuts?
+>
+> **Solution.**
+>
+> Assume successive cuts are independent, and let $R_i$ be the fraction retained at cut $i$: $2/3$ with probability $1/4$ and $3/5$ with probability $3/4$. If the starting size is one, $C_n=\prod_{i=1}^nR_i$. Taking logarithms lets us use the law of large numbers:
+>
+> $$
+> \frac1n\log C_n\xrightarrow{\Pr}\frac14\log\frac23+\frac34\log\frac35.
+> $$
+>
+> Thus $C_n^{1/n}\xrightarrow{\Pr}(2/3)^{1/4}(3/5)^{3/4}\approx0.6160$. The typical size decays like $(0.6160)^n$ on the logarithmic scale. This does not claim that $C_n/(0.6160)^n$ converges to one.
+
+> [!example]- Problem 3: Geometric mean of a product
+> **Problem.** Let
+>
+> $$
+> X=\begin{cases}
+> 1,&\text{with probability }1/2,\\
+> 2,&\text{with probability }1/4,\\
+> 3,&\text{with probability }1/4.
+> \end{cases}
+> $$
+>
+> Suppose $X_1,X_2,\ldots$ are drawn i.i.d. according to this distribution. Find the limiting behavior in probability of the product
+>
+> $$
+> (X_1X_2\cdots X_n)^{1/n}.
+> $$
+>
+> **Solution.**
+>
+> Average the logarithms, then exponentiate:
+>
+> $$
+> \frac1n\log(X_1\cdots X_n)\xrightarrow{\Pr}\mathbb{E}[\log X]=\frac14\log2+\frac14\log3.
+> $$
+>
+> Therefore $(X_1\cdots X_n)^{1/n}\xrightarrow{\Pr}6^{1/4}\approx1.5651$. The geometric mean appears because the quantity being averaged is $\log X$, rather than $X$.
+
+> [!example]- Problem 4: AEP with two probability models
+> **Problem.** Let $X_1,X_2,\ldots$ be independent and identically distributed random variables drawn according to the probability mass function $p(x)$, where $x\in\{1,2,\ldots,m\}$. Thus
+>
+> $$
+> p(x_1,x_2,\ldots,x_n)=\prod_{i=1}^np(x_i).
+> $$
+>
+> We know that $-\frac1n\log p(X_1,X_2,\ldots,X_n)\to H(X)$ in probability. Let
+>
+> $$
+> q(x_1,x_2,\ldots,x_n)=\prod_{i=1}^nq(x_i),
+> $$
+>
+> where $q$ is another probability mass function on $\{1,2,\ldots,m\}$.
+>
+> **(a)** Evaluate the limit in probability of $-\frac1n\log q(X_1,X_2,\ldots,X_n)$, where $X_1,X_2,\ldots$ are i.i.d. $\sim p(x)$.
+>
+> **(b)** Evaluate the limit in probability of the log-likelihood ratio
+>
+> $$
+> \frac1n\log\frac{q(X_1,\ldots,X_n)}{p(X_1,\ldots,X_n)},
+> $$
+>
+> when $X_1,X_2,\ldots$ are i.i.d. $\sim p(x)$.
+>
+> **Solution.**
+>
+> If $q(x)>0$ whenever $p(x)>0$, the law of large numbers gives
+>
+> $$
+> -\frac1n\log q(X^n)\xrightarrow{\Pr}-\sum_xp(x)\log q(x)=H(X)+D(p\Vert q).
+> $$
+>
+> Subtracting the AEP limit for $p$ gives
+>
+> $$
+> \frac1n\log\frac{q(X^n)}{p(X^n)}\xrightarrow{\Pr}-D(p\Vert q).
+> $$
+>
+> Here $D(p\Vert q)=\sum_xp(x)\log[p(x)/q(x)]$. The true distribution $p$ determines the averaging weights. See [[entropy-relative-entropy-mutual-information#32-coding-interpretation-the-cost-of-the-wrong-model|the coding interpretation of relative entropy]].
+>
+> If $p(x)>0$ but $q(x)=0$ for some symbol, a long block contains such a symbol with probability tending to one. The limits are then $+\infty$ and $-\infty$, respectively, in the extended sense.
 
 ## 2. The Typical Set
 
-For $\epsilon>0$, define the **weakly typical set**
+For $\epsilon>0$, define the **typical set**
 
 $$
-A_\epsilon^{(n)}
-=\left\{x^n:\left|-\frac1n\log_2p(x^n)-H(X)\right|\leq\epsilon\right\}.
+A^{(n)}_\epsilon
+=\left\{x^n:\left|-\frac1n\log p(x^n)-H(X)\right|\leq\epsilon\right\}.
 $$
 
 Equivalently, a sequence is typical when
@@ -91,7 +192,7 @@ $$
 \boxed{2^{-n(H(X)+\epsilon)}\leq p(x^n)\leq2^{-n(H(X)-\epsilon)}.}
 $$
 
-The AEP says $\Pr(X^n\in A_\epsilon^{(n)})\to1$. It does **not** say that most sequences are typical when we count every possible sequence equally. Probability mass and the number of sequences are different quantities.
+The AEP says $\Pr(X^n\in A^{(n)}_\epsilon)\to1$. It does **not** say that most sequences are typical when we count every possible sequence equally. Probability mass and the number of sequences are different quantities.
 
 ### 2.1 Why typical sequences are “almost equiprobable”
 
@@ -101,16 +202,16 @@ $$
 p(x^n)\approx2^{-nH(X)}.
 $$
 
-Here the approximation is on the **exponential scale**. For fixed $\epsilon$, the ratio between the largest and smallest allowed probabilities can be as large as $2^{2n\epsilon}$. AEP does not assert that these probability ratios approach one, or that the conditional distribution on the typical set becomes uniform.
+The probability bounds specify what this approximation means: the normalized surprise of every typical sequence lies between $H(X)-\epsilon$ and $H(X)+\epsilon$.
 
 ### 2.2 How many typical sequences are there?
 
-Fix an error tolerance $0<\delta<1$. For sufficiently large $n$, AEP gives $\Pr(A_\epsilon^{(n)})\geq1-\delta$. Combining this with the probability bounds gives
+For sufficiently large $n$, the AEP gives $\Pr(A^{(n)}_\epsilon)>1-\epsilon$. Combining this with the probability bounds gives
 
 $$
 \boxed{
-(1-\delta)2^{n(H(X)-\epsilon)}
-\leq\lvert A_\epsilon^{(n)}\rvert
+(1-\epsilon)2^{n(H(X)-\epsilon)}
+\leq\lvert A^{(n)}_\epsilon\rvert
 \leq2^{n(H(X)+\epsilon)}.
 }
 $$
@@ -119,90 +220,94 @@ $$
 > Each typical sequence has probability at least $2^{-n(H(X)+\epsilon)}$. Thus
 >
 > $$
-> 1\geq\sum_{x^n\in A_\epsilon^{(n)}}p(x^n)
-> \geq\lvert A_\epsilon^{(n)}\rvert2^{-n(H(X)+\epsilon)},
+> 1\geq\sum_{x^n\in A^{(n)}_\epsilon}p(x^n)
+> \geq\lvert A^{(n)}_\epsilon\rvert2^{-n(H(X)+\epsilon)},
 > $$
 >
 > proving the upper bound. For the lower bound, use the upper probability bound for each sequence:
 >
 > $$
-> 1-\delta\leq\sum_{x^n\in A_\epsilon^{(n)}}p(x^n)
-> \leq\lvert A_\epsilon^{(n)}\rvert2^{-n(H(X)-\epsilon)}.
+> 1-\epsilon\leq\sum_{x^n\in A^{(n)}_\epsilon}p(x^n)
+> \leq\lvert A^{(n)}_\epsilon\rvert2^{-n(H(X)-\epsilon)}.
 > $$
 
-These are the properties in Theorem 3.1.2, with separate symbols for the surprise tolerance $\epsilon$ and the missing probability $\delta$.
+The upper bound holds for every $n$; the lower bound requires sufficiently large $n$.
 
-There are $\lvert\mathcal{X}\rvert^n$ possible blocks, but approximately $2^{nH(X)}$ relevant ones at exponential resolution. In fact,
+The typical set has probability close to one, its sequences have probabilities close to $2^{-nH(X)}$ on the exponential scale, and its size is bounded by exponents near $nH(X)$. These three properties make it useful for coding.
 
-$$
-\frac{\lvert A_\epsilon^{(n)}\rvert}{\lvert\mathcal{X}\rvert^n}
-\leq2^{-n(\log_2\lvert\mathcal{X}\rvert-H(X)-\epsilon)}.
-$$
-
-For a nonuniform source and $\epsilon<\log_2\lvert\mathcal{X}\rvert-H(X)$, this fraction vanishes even while the typical set's probability tends to one.
+> [!example]- Problem 5: Counting a high-probability set
+> **Problem.** A discrete memoryless source emits a sequence of statistically independent binary digits with probabilities $p(1)=0.005$ and $p(0)=0.995$. The digits are taken 100 at a time, and a binary codeword is provided for every sequence of 100 digits containing three or fewer ones.
+>
+> **(a)** Assuming that all codewords are the same length, find the minimum length required to provide codewords for all sequences with three or fewer ones.
+>
+> **(b)** Calculate the probability of observing a source sequence for which no codeword has been assigned.
+>
+>
+> **Solution.**
+>
+> A block with exactly $k$ ones can place those ones in $\binom{100}{k}$ positions. Thus the selected set $S=\{x^{100}:\text{at most three ones}\}$ has size
+>
+> $$
+> |S|=\sum_{k=0}^3\binom{100}{k}=1+100+4950+161700=166751.
+> $$
+>
+> For part (a), distinct labels of length $l$ require $2^l\geq|S|$. Hence $l=\lceil\log166751\rceil=18$ bits.
+>
+> For part (b), the number of ones is $K\sim\operatorname{Binomial}(100,0.005)$, so
+>
+> $$
+> \Pr(K>3)=1-\sum_{k=0}^3\binom{100}{k}(0.005)^k(0.995)^{100-k}\approx0.00167327.
+> $$
+>
+> This illustrates the difference between cardinality and probability: 166751 blocks out of $2^{100}$ possibilities carry about 99.833% of the probability. $S$ is a high-probability set defined by a count cutoff, rather than the two-sided typicality criterion.
 
 ## 3. A Biased-Coin Example
 
-Let $X_i\sim\operatorname{Bernoulli}(t)$ with $t=0.9$. A particular block containing $k$ ones has probability
+Consider a Bernoulli source. Let $X_i\sim\operatorname{Bernoulli}(p)$ and write $q=1-p$. A particular block containing $k$ ones has probability
 
 $$
-p(x^n)=0.9^k0.1^{n-k},
+p(x^n)=p^kq^{n-k}.
 $$
 
-and entropy per symbol
+Its probability depends on the number of ones, not their positions. With high probability, the proportion of ones is close to $p$. The normalized surprise is then close to the binary entropy
 
 $$
-H(X)=H(0.9)=-0.9\log_2(0.9)-0.1\log_2(0.1)
-\approx0.4690\text{ bits}.
+H(p)=-p\log p-q\log q,
 $$
 
-Writing $r=k/n$, we obtain an exact identity:
+and these typical sequences have probabilities near $2^{-nH(p)}$.
 
-$$
--\frac1n\log_2p(x^n)-H(t)
-=(r-t)\log_2\frac{1-t}{t}.
-$$
+Now take $p=0.9$. The typical sequences have a proportion of ones close to 0.9. The most likely individual sequence, however, is the all-ones sequence. It falls outside a sufficiently narrow typical band.
 
-Thus, for $t=0.9$, weak typicality is equivalent to
+This distinction matters: the most likely individual outcome need not belong to the collection of outcomes that carries most of the probability. We will use this distinction to compare typical sets with the smallest high-probability sets.
 
-$$
-\left|\frac{k}{n}-0.9\right|
-\leq\frac{\epsilon}{\log_2 9}.
-$$
-
-For $n=100$ and $\epsilon=0.1$, this means **87 through 93 ones**. Summing the binomial probabilities gives
-
-$$
-\Pr(A_{0.1}^{(100)})
-=\sum_{k=87}^{93}\binom{100}{k}0.9^k0.1^{100-k}
-\approx0.75897.
-$$
-
-Even a block of 100 symbols does not make this particular typical set overwhelmingly likely. AEP is a limit theorem; finite-block coverage depends on the source and the tolerance.
-
-### 3.1 The most likely sequence can be atypical
-
-The most likely individual block is the all-ones sequence. Its normalized surprise is
-
-$$
--\frac1n\log_2(0.9^n)=-\log_2(0.9)\approx0.1520,
-$$
-
-which remains far from $H(0.9)\approx0.4690$. It is atypical whenever $\epsilon<0.3170$, regardless of $n$.
-
-At $n=100$, the contrast is:
-
-| Quantity | Value |
-| --- | --- |
-| Probability of the single all-ones block | $0.9^{100}\approx2.656\times10^{-5}$ |
-| Probability of one particular block with 90 ones | $0.9^{90}0.1^{10}\approx7.618\times10^{-15}$ |
-| Number of blocks with exactly 90 ones | $\binom{100}{90}=17{,}310{,}309{,}456{,}440$ |
-| Total probability of all blocks with exactly 90 ones | $\binom{100}{90}0.9^{90}0.1^{10}\approx0.13187$ |
-
-One all-ones block is much more probable than one block with 90 ones. But the enormous number of blocks with 90 ones makes their combined probability much larger.
-
-> [!note] The fair-coin boundary case
-> If $t=1/2$, every length-$n$ sequence has probability $2^{-n}$ and normalized surprise exactly 1. Every sequence is weakly typical, including all zeros. Weak typicality constrains average surprise; it does not generally require each symbol's empirical frequency to be close to its true probability. That stronger requirement belongs to frequency-based, or strong, typicality.
+> [!example]- Problem 5: Probability of a biased-coin count range
+> **Problem.** A discrete memoryless source emits a sequence of statistically independent binary digits with probabilities $p(1)=0.005$ and $p(0)=0.995$. The digits are taken 100 at a time, and a binary codeword is provided for every sequence of 100 digits containing three or fewer ones.
+>
+> **(a)** Assuming that all codewords are the same length, find the minimum length required to provide codewords for all sequences with three or fewer ones.
+>
+> **(b)** Calculate the probability of observing a source sequence for which no codeword has been assigned.
+>
+>
+> **Solution.**
+>
+> For a particular block with $k$ ones,
+>
+> $$
+> p(x^{100})=(0.005)^k(0.995)^{100-k}.
+> $$
+>
+> There are $\binom{100}{k}$ such blocks. To find the total probability of a count, multiply the probability of one block by the number of blocks with that count.
+>
+> For part (a), $\sum_{k=0}^3\binom{100}{k}=166751$, so the minimum length is $\lceil\log166751\rceil=18$ bits.
+>
+> For part (b), add the probabilities of all excluded counts:
+>
+> $$
+> \Pr(K>3)=\sum_{k=4}^{100}\binom{100}{k}(0.005)^k(0.995)^{100-k}\approx0.00167327.
+> $$
+>
+> Here $K$ is binomial with parameters 100 and 0.005. The selected count range has probability about 0.99832673. This calculation shows why the probability of one sequence and the probability of a whole collection must be distinguished.
 
 ## 4. Why AEP Enables Compression
 
@@ -214,97 +319,128 @@ $$
 
 bits. This is the operational meaning of the typical-set size bound.
 
-### 4.1 Fixed-length coding with a small error probability
-
-Choose a rate $R>H(X)$ and select $0<\epsilon<R-H(X)$. For sufficiently large $n$, $\lfloor nR\rfloor$ bits provide enough distinct indices for every typical sequence. Decode those indices correctly and allow an error on atypical inputs. Then
-
-$$
-P_e^{(n)}\leq\Pr(X^n\notin A_\epsilon^{(n)})\longrightarrow0.
-$$
-
-This scheme compresses below the raw alphabet rate while allowing a vanishing probability of reconstruction error. It does not represent every possible block without error.
-
-### 4.2 Lossless coding with variable length
-
-Section 3.2 of the book gives a construction that also handles atypical sequences. Use a leading flag bit to distinguish two cases:
+To encode every possible block, we need to handle both typical and atypical sequences. Use a leading flag bit to distinguish two cases:
 
 | Input block | Encoding |
 | --- | --- |
 | Typical | `0` followed by its fixed-width typical-set index |
-| Atypical | `1` followed by a fixed-width index among all $\lvert\mathcal{X}\rvert^n$ blocks |
+| Atypical | `1` followed by a fixed-width index in the atypical set |
 
-The decoder reads the flag, then knows how many bits to read. The resulting block code is prefix-free and reconstructs every block exactly.
+The decoder reads the flag, then knows how many bits to read. The mapping is one-to-one and reconstructs every block exactly.
 
-Let $\delta_n=\Pr(X^n\notin A_\epsilon^{(n)})$. Allowing for the flag and rounding, typical codewords have length at most $n(H(X)+\epsilon)+2$; atypical codewords have length at most $n\log_2\lvert\mathcal{X}\rvert+2$. Consequently,
+Allowing for the flag and rounding, typical codewords have length at most $n(H(X)+\epsilon)+2$. Atypical codewords have length at most $n\log\lvert\mathcal{X}\rvert+2$, because there are no more than $\lvert\mathcal{X}\rvert^n$ atypical blocks.
+
+For sufficiently large $n$, $\Pr(X^n\notin A^{(n)}_\epsilon)\leq\epsilon$. Splitting the expected codeword length between the two sets gives
 
 $$
 \begin{aligned}
-\frac{\mathbb{E}[\ell(X^n)]}{n}
-&\leq(1-\delta_n)(H(X)+\epsilon)
-+\delta_n\log_2\lvert\mathcal{X}\rvert+\frac2n\\
-&\leq H(X)+\epsilon
-+\delta_n\log_2\lvert\mathcal{X}\rvert+\frac2n.
+\mathbb{E}[l(X^n)]
+&\leq\Pr(A^{(n)}_\epsilon)\bigl[n(H(X)+\epsilon)+2\bigr]\\
+&\quad+\Pr((A^{(n)}_\epsilon)^c)\bigl[n\log\lvert\mathcal{X}\rvert+2\bigr]\\
+&\leq n(H(X)+\epsilon)+\epsilon n\log\lvert\mathcal{X}\rvert+2.
 \end{aligned}
 $$
 
-First choose $\epsilon$ small, then choose $n$ large. The expected rate can be made arbitrarily close to $H(X)$ from above, as in Theorem 3.2.1.
+Thus
 
-The construction proves existence. Enumerating an exponentially large typical set is generally impractical; an efficient implementation needs a more structured coding algorithm.
+$$
+\frac{\mathbb{E}[l(X^n)]}{n}
+\leq H(X)+\epsilon+\epsilon\log\lvert\mathcal{X}\rvert+\frac2n.
+$$
+
+First choose $\epsilon$ small, then choose $n$ large. The terms beyond $H(X)$ can be made arbitrarily small. Consequently, for any positive rate tolerance, sufficiently long i.i.d. blocks have a one-to-one binary code whose expected bits per symbol are at most entropy plus that tolerance.
+
+The essential idea is that typical sequences receive short descriptions of approximately $nH(X)$ bits. Atypical sequences may receive longer descriptions, but their small total probability keeps their contribution to the average small.
+
+> [!example]- Problem 5: Encoding blocks with at most three ones
+> **Problem.** A discrete memoryless source emits a sequence of statistically independent binary digits with probabilities $p(1)=0.005$ and $p(0)=0.995$. The digits are taken 100 at a time, and a binary codeword is provided for every sequence of 100 digits containing three or fewer ones.
+>
+> **(a)** Assuming that all codewords are the same length, find the minimum length required to provide codewords for all sequences with three or fewer ones.
+>
+> **(b)** Calculate the probability of observing a source sequence for which no codeword has been assigned.
+>
+> **Solution.**
+>
+> There are
+>
+> $$
+> M=\sum_{k=0}^3\binom{100}{k}=1+100+4950+161700=166751
+> $$
+>
+> eligible blocks. Distinct fixed-length binary labels require $2^l\geq M$, so $l=\lceil\log M\rceil=18$ bits.
+>
+> If $K$ counts ones, then $K\sim\operatorname{Binomial}(100,0.005)$. The probability of having no assigned codeword is
+>
+> $$
+> \Pr(K>3)=1-\sum_{k=0}^3\binom{100}{k}(0.005)^k(0.995)^{100-k}\approx0.00167327.
+> $$
+>
+> Thus the selected set covers about 99.833% of the probability. It is a high-probability set selected by a count cutoff; it is not defined by the two-sided typical-set criterion. Unlike the flag construction, this code leaves some blocks unencoded.
 
 ## 5. Could a Much Smaller Set Carry the Same Probability?
 
-The typical set is one way to capture most of the probability, but it need not be the smallest such set. Section 3.3 asks whether a better choice could change the exponential size.
+The typical set is one way to capture most of the probability, but it need not be the smallest such set. Could a better choice change the exponential size?
 
-Fix $0<\delta<1$ and let $B_n$ be any set with $\Pr(X^n\in B_n)\geq1-\delta$. Write $\eta_n=\Pr(X^n\notin A_\epsilon^{(n)})$, which tends to zero. The intersection obeys
-
-$$
-\Pr(X^n\in B_n\cap A_\epsilon^{(n)})\geq1-\delta-\eta_n.
-$$
-
-Every sequence in that intersection has probability at most $2^{-n(H(X)-\epsilon)}$, so
+Let $B^{(n)}_\delta$ be a smallest set of blocks satisfying
 
 $$
-\boxed{\lvert B_n\rvert\geq(1-\delta-\eta_n)2^{n(H(X)-\epsilon)}}
+\Pr(X^n\in B^{(n)}_\delta)\geq1-\delta.
 $$
 
-for sufficiently large $n$ that the prefactor is positive.
-
-Let $M_n(\delta)$ be the minimum cardinality of a set having probability at least $1-\delta$. The intersection bound gives a lower bound, while the typical set supplies an upper bound. Since $\epsilon>0$ can be arbitrarily small,
+The lower bound is as follows: for $0<\delta<1/2$ and any $\delta'>0$, a set with probability greater than $1-\delta$ satisfies
 
 $$
-\boxed{\lim_{n\to\infty}\frac1n\log_2 M_n(\delta)=H(X).}
+\boxed{\frac1n\log\lvert B^{(n)}_\delta\rvert>H(X)-\delta'}
 $$
 
-Thus $M_n(\delta)=2^{nH(X)+o(n)}$: entropy determines the exponential number of sequences required to capture any fixed probability strictly between zero and one.
+for sufficiently large $n$. To see why, note that the typical set has probability approaching one. Any set with probability greater than $1-\delta$ must therefore share substantial probability with it. Each sequence in that intersection has probability at most $2^{-n(H(X)-\epsilon)}$, so carrying that shared probability requires exponentially many sequences.
 
-For the biased coin, a smallest high-probability set can be formed by taking individual sequences in decreasing probability order, starting with all ones. The typical set instead selects a band of normalized surprise. They can differ in membership and still have the same limiting exponent when the typicality tolerance is taken sufficiently small.
-
-### 5.1 A compression converse
-
-A fixed-length code with at most $2^{nR}$ messages can correctly reconstruct at most $2^{nR}$ distinct blocks. Call their set $C_n$. Splitting it into typical and atypical parts gives
+The typical set has size between exponents near $nH(X)$, and a smallest high-probability set cannot have a substantially smaller exponent. We express this using **equality to first order in the exponent**:
 
 $$
-\begin{aligned}
-\Pr(X^n\in C_n)
-&\leq\eta_n+\lvert C_n\rvert2^{-n(H(X)-\epsilon)}\\
-&\leq\eta_n+2^{-n(H(X)-\epsilon-R)}.
-\end{aligned}
+a_n\doteq b_n
+\quad\Longleftrightarrow\quad
+\lim_{n\to\infty}\frac1n\log\frac{a_n}{b_n}=0.
 $$
 
-If $R<H(X)$, choose $0<\epsilon<H(X)-R$. Both terms tend to zero. The probability of correct reconstruction then vanishes, so the error probability tends to one. This is the fixed-length strong converse for the source considered here, derived from the same typical-set bounds.
+For a fixed $0<\delta<1/2$, the smallest-set result is
 
-## 6. What the Limit Does—and Does Not—Promise
+$$
+\boxed{\lvert B^{(n)}_\delta\rvert\doteq2^{nH(X)}.}
+$$
 
-The order of limits matters. AEP gives high probability for each **fixed** $\epsilon>0$ as $n$ grows. It does not guarantee high probability for an arbitrarily fast shrinking $\epsilon_n$. The Chebyshev bound gives one sufficient condition: $n\epsilon_n^2\to\infty$ when $V$ is finite.
+The two sets can nevertheless differ in membership. For the Bernoulli source with parameter 0.9, a smallest high-probability set is obtained by taking the most probable individual sequences first, including all ones. The typical set instead selects sequences whose proportion of ones is close to 0.9. Their different selection rules still lead to the same leading entropy exponent as the typicality tolerance is made small.
 
-Similarly, for fixed $\epsilon$, the cardinality bounds place the typical set's normalized log-size between approximately $H(X)-\epsilon$ and $H(X)+\epsilon$. To conclude an exact exponent $H(X)$ for a sequence of typical sets, the tolerance must shrink in a way that preserves high probability.
+Entropy therefore connects three quantities: the surprise per symbol of a long random block, the exponential size of a high-probability set, and the average number of bits needed to describe a block.
 
-Our proof uses independence to factor block probabilities and identical distributions to apply the law of large numbers. Dependent sources require additional assumptions and a more general theorem; the i.i.d. proof cannot simply be reused unchanged.
+> [!example]- Problem 5: Selecting the most probable blocks
+> **Problem.** A discrete memoryless source emits a sequence of statistically independent binary digits with probabilities $p(1)=0.005$ and $p(0)=0.995$. The digits are taken 100 at a time, and a binary codeword is provided for every sequence of 100 digits containing three or fewer ones.
+>
+> **(a)** Assuming that all codewords are the same length, find the minimum length required to provide codewords for all sequences with three or fewer ones.
+>
+> **(b)** Calculate the probability of observing a source sequence for which no codeword has been assigned.
+>
+>
+> **Solution.**
+>
+> For part (a), the selected set $S$ has $\sum_{k=0}^3\binom{100}{k}=166751$ blocks, requiring $\lceil\log166751\rceil=18$ bits per label.
+>
+> For part (b), its missing probability is
+>
+> $$
+> \delta=1-\sum_{k=0}^3\binom{100}{k}(0.005)^k(0.995)^{100-k}\approx0.00167327,
+> $$
+>
+> so $\Pr(S)=1-\delta\approx0.99832673$.
+>
+> The probability of an individual block decreases with its number of ones: increasing that count by one multiplies its probability by $0.005/0.995<1$. Thus $S$ contains the most probable individual blocks, down to the cutoff of three ones.
+>
+> This makes $S$ a smallest-cardinality set for this exact coverage target. Any set with fewer than $|S|$ elements has total probability at most that of the $|S|-1$ most probable blocks, which is strictly below $\Pr(S)$. This is a finite-block illustration of selecting a smallest high-probability set; the asymptotic result above describes its leading size as block length grows with a fixed probability target.
 
-The useful connection is now concrete: **entropy controls the surprise of a long random block, the size of sets that capture its probability, and the number of bits needed to describe it.**
+## 6. Takeaways
 
----
-
-## Reference
-
-Thomas M. Cover and Joy A. Thomas. *Elements of Information Theory*, 2nd ed. Wiley, 2006. Chapter 3, “Asymptotic Equipartition Property,” especially Sections 3.1–3.3 and Theorems 3.1.1–3.3.1. Reference consulted: the supplied EPUB, ISBN 9781118585771. The biased-coin discussion develops the chapter's Bernoulli example; the finite-block values above are calculated directly.
+- **Average surprise becomes predictable.** For i.i.d. symbols, $-\frac1n\log p(X^n)$ converges in probability to $H(X)$.
+- **Typicality concerns total probability.** The typical set carries almost all the probability, even though a particular typical sequence can be very unlikely. The most likely individual sequence need not be typical.
+- **Entropy controls the number of descriptions.** Typical-set size is bounded by exponents near $nH(X)$, so a typical block needs about $nH(X)$ bits to identify.
+- **Compression guarantees matter.** The flag construction recovers every block exactly and approaches entropy in expected bits per symbol. Problem 5 instead uses fixed-length labels for a selected set and leaves a small probability of unencoded blocks.
+- **For products, take logarithms first.** Problems 1–4 turn multiplicative quantities into averages, apply the law of large numbers, and transform back when needed.

@@ -2,7 +2,7 @@
 title: 1. Entropy and Mutual Information
 description: A first-principles introduction to entropy, conditional entropy, KL divergence, mutual information, and their chain rules.
 date: 2026-08-30
-lastmod: 2026-09-01
+lastmod: 2026-10-10
 draft: false
 tags:
   - information-theory
@@ -404,6 +404,8 @@ KL divergence is the extra average description length caused by using $q$ instea
 > $$
 >
 > because the expectation is now taken under $q$. The two directions describe different modeling mistakes.
+
+Related exercise: [[asymptotic-equipartition-property#1-from-average-surprise-to-the-aep|Problem 4: AEP with two PMFs]] has a collapsible derivation of the long-block mismatch limits.
 
 ### 3.3 Conditional relative entropy
 

@@ -11,25 +11,18 @@ tags:
   - notes
 ---
 
-Imagine an autonomous car approaching a busy intersection at night. Its roof-mounted LiDAR catches a cluster of reflections and identifies a pedestrian: 12 meters forward, 1 meter to the left. A moment later, the motion planner must decide whether that person is entering the car's path. But there is a hidden problem. The LiDAR described the pedestrian relative to the **sensor**, while the planner reasons relative to the **vehicle**, and the navigation system tracks both of them on a **world map**.
-
-At a fixed instant, the pedestrian has not moved; only the coordinate description has changed. To connect what the sensor sees with where the vehicle believes it is, we need to carry the measurement through a chain of coordinate frames. One link comes from calibration, which tells us how the LiDAR is mounted on the car. Another comes from localization, which tells us where the car is in the world. If either link is inverted or composed in the wrong order, a pedestrian on the sidewalk can appear in the road.
+A car's LiDAR detects a pedestrian in **sensor coordinates**, but planning and navigation need **vehicle** and **world coordinates**. Rigid transforms connect these descriptions: calibration locates the sensor on the car, and localization places the car in the world. The pedestrian stays the same; only its coordinates change.
 
 ![An autonomous car using roof-mounted LiDAR to detect a pedestrian at a nighttime intersection, with coordinate frames attached to the sensor, vehicle, and world map](transforms.webp)
-_The same pedestrian detection must travel from the LiDAR frame, through the vehicle frame, and into the world frame before the motion planner can use it._
+_The sensor, vehicle, and world each provide a reference frame for the detection._
 
-This is why poses and transforms sit at the foundation of machine perception. We will build the geometry from first principles: how a pose relates two frames, how a rigid transform rotates and translates coordinates, how transforms compose, and how rotation representations affect interpolation and random sampling.
-
-These notes follow Shenlong Wang's _CS 498, Lecture 2: Poses, Coordinates, Transforms and Rotations_.[^lecture] We use **column vectors, right-handed frames, and radians unless degrees are explicitly marked**. The lecture's diagrams are reproduced selectively below, with slide numbers in their captions.
-
-> [!note] The one sentence to remember
-> A **pose** tells us where one coordinate frame is located and how it is rotated relative to another frame. A **transform** uses that position and rotation to convert a point's coordinates from one frame into the other.
+We will build this frame-to-frame mapping, learn to invert and compose it, then explore rotation representations and random sampling. Throughout, we use **column vectors, right-handed frames, and radians unless degrees are explicitly marked**.
 
 ---
 
-## 0. The Vector Operations We Need
+## 0. Prerequisites
 
-A vector has components, a length, and a direction. A matrix represents a linear transformation of those components. Two operations explain most of the geometry in this note.
+We will use matrices to transform vector components, and two vector operations to describe geometric relationships.
 
 The **dot product** measures alignment:
 
@@ -39,7 +32,7 @@ $$
 =\|\mathbf a\|\|\mathbf b\|\cos\theta.
 $$
 
-For nonzero vectors, the dot product is zero when they are perpendicular, positive when they point generally the same way, and negative when they point generally opposite ways.
+For nonzero vectors, its sign distinguishes acute from obtuse angles; perpendicular vectors have a dot product of zero.
 
 The **cross product** in three dimensions gives a vector perpendicular to both inputs:
 
@@ -50,7 +43,7 @@ $$
 \mathbf a\times\mathbf b=-(\mathbf b\times\mathbf a).
 $$
 
-Its magnitude is the area of the parallelogram spanned by the inputs, and its direction follows the right-hand rule. These formulas answer the prerequisite questions on slide 4:
+Its magnitude is the area of the parallelogram spanned by the inputs, and its direction follows the right-hand rule. The main special cases are:
 
 | Relationship between nonzero vectors | Dot product                   | Cross product                                                 |
 | ------------------------------------ | ----------------------------- | ------------------------------------------------------------- |
@@ -64,14 +57,14 @@ A right-handed orthonormal frame satisfies $\mathbf e_x\times\mathbf e_y=\mathbf
 
 ## 1. Coordinate Frames and Poses
 
-A coordinate frame consists of an origin and an ordered set of perpendicular axes. The same physical point has different coordinates in different frames. For example, a pedestrian may be at $(12,1,0)$ in a LiDAR frame but at $(37,-8,0)$ in a world frame. Neither vector is the pedestrian's absolute identity; each is a description relative to a chosen origin and basis.
+A **coordinate frame** consists of an origin and an ordered set of perpendicular unit axes. A pedestrian might have coordinates $(12,1,0)$ in a LiDAR frame and $(37,-8,0)$ in a world frame: each vector measures displacement from a different origin along a different set of axes.
 
 A rigid body's **pose** combines:
 
 - **position**: where the body-frame origin is located; and
 - **orientation**: how the body-frame axes are aligned.
 
-"Rigid" means the distances between points on the object remain fixed. Its pose locates the object at one instant; a full dynamical state may also include velocity.
+A **rigid** body keeps the distances between its points fixed. Its pose describes its position and orientation at one instant; a full dynamical state may also include velocity. A transform uses the pose to convert coordinates between frames.
 
 It helps to start in two dimensions. A car's reference point needs two coordinates $(t_x,t_y)$, and its heading needs one angle $\theta$:
 
@@ -81,12 +74,10 @@ $$
 
 These are three **degrees of freedom**, meaning three independently variable quantities. Attaching axes to the car creates its body frame: both the origin and axes move with the car. A point bolted to the car has constant body coordinates even when its world coordinates change.
 
-![The lecture's car with a body frame attached to it, alongside a fixed world frame and the three planar pose parameters](poses-slide-13-body-frame.png)
-_The car carries a local origin and two axes. Its planar pose needs two translations and one orientation angle. Source: Lecture 2, slide 13.[^lecture] The primed axes in this figure are the body axes; our equations use explicit frame labels._
+![A car with an attached body frame, a fixed world frame, and the three planar pose parameters](poses-slide-13-body-frame.png)
+_The primed axes move with the car; the world axes stay fixed._
 
-In three dimensions, a free rigid body has six degrees of freedom: three translations and three rotations. A pose is often represented computationally by a rotation matrix $\mathbf R\in\mathbb R^{3\times3}$ and a translation vector $\mathbf t\in\mathbb R^3$.
-
-For intuition, we can collect the six pose parameters into
+In three dimensions, a free rigid body has six degrees of freedom: three translations and three rotations. Using roll, pitch, and yaw for orientation, we can collect them into
 
 $$
 \mathbf x
@@ -96,32 +87,24 @@ t_x & t_y & t_z & \alpha & \beta & \gamma
 \end{bmatrix}^{T},
 $$
 
-where $(t_x,t_y,t_z)$ locate the body-frame origin and $(\alpha,\beta,\gamma)$ denote roll, pitch, and yaw under a chosen Euler-angle convention.
+where $(\alpha,\beta,\gamma)$ denote roll, pitch, and yaw under the convention developed in Section 6. For computation, we will first represent orientation with a rotation matrix $\mathbf R$ and position with a translation vector $\mathbf t$.
 
 ![A simple sketch separating the three translational and three rotational degrees of freedom](pose-six-dof.svg)
-_Figure 1: Translation locates the body-frame origin; roll, pitch, and yaw describe its orientation relative to the fixed world frame._
+_Three translational and three rotational degrees of freedom._
 
-### 1.1 A notation that prevents frame bugs
+### 1.1 Notation
 
-Before writing an equation, we need a way to say **which frame a quantity belongs to**. A left superscript names the frame in which coordinates are expressed. Thus,
-
-$$
-{}^{B}\mathbf p
-$$
-
-means “the coordinates of physical point $\mathbf p$ measured in frame $B$.” The point itself is not changing; the superscript only identifies the coordinate system used to describe it.
-
-For a transform, we need both a source and a destination:
+We will attach frame labels to each quantity. The left superscript in ${}^{B}\mathbf p$ identifies the frame in which the point's coordinates are expressed. A transform needs both a source and a destination:
 
 $$
-{}^{A}\mathbf T_{B}.
+{}^{A}\mathbf T_B:\quad B\longrightarrow A.
 $$
 
-The superscript $A$ is the destination and the subscript $B$ is the source, so ${}^{A}\mathbf T_B$ means “map coordinates from frame $B$ into frame $A$.” We will construct this transform below and introduce its homogeneous matrix form in Section 3.
+Read ${}^{A}\mathbf T_B$ as "map coordinates from frame $B$ into frame $A$." Rotation and translation use the same labels: ${}^{A}\mathbf R_B$ expresses the $B$ axes in frame $A$, while ${}^{A}\mathbf t_B$ locates the $B$ origin in frame $A$. Section 3 combines them into the matrix $\mathbf T$.
 
 ### 1.2 Building the transformation step by step
 
-Consider a body frame $B$ placed somewhere inside the world frame $W$. We know a point through its body-frame coordinates ${}^{B}\mathbf p$, and we want its world-frame coordinates ${}^{W}\mathbf p$.
+Given a point in body coordinates ${}^{B}\mathbf p$, we want to find its world coordinates ${}^{W}\mathbf p$. The construction is a head-to-tail sum of two displacements.
 
 **Step 1: locate the body origin.** The translation
 
@@ -129,15 +112,15 @@ $$
 {}^{W}\mathbf t_B
 $$
 
-is the vector from the world origin to the body origin, expressed using world coordinates. At this stage, we have located frame $B$, but not the point.
+runs from the world origin to the body origin, expressed along the world axes.
 
 ![The translation vector locating the body origin inside the world frame](step-1-translation.svg)
-_Step 1: Translation places the body-frame origin relative to the world-frame origin._
+_The first displacement reaches the body origin._
 
 **Step 2: describe the point relative to the body.** The vector ${}^{B}\mathbf p$ runs from the body origin to the point, but its components are measured along the body axes. Because the body axes are rotated relative to the world axes, we cannot add this vector directly to ${}^{W}\mathbf t_B$.
 
 ![A point represented as a displacement measured along the body-frame axes](step-2-local-point.svg)
-_Step 2: Body-frame coordinates describe the displacement from the body origin to the point._
+_The second displacement is initially measured along the body axes._
 
 **Step 3: rotate the local displacement into the world basis.** The rotation ${}^{W}\mathbf R_B$ converts components measured along the body axes into components measured along the world axes:
 
@@ -146,10 +129,10 @@ $$
 = {}^{W}\mathbf R_B\,{}^{B}\mathbf p.
 $$
 
-Here, ${}^{W}\mathbf d$ is the same geometric displacement from the body origin to the point, now written in world coordinates. Rotation changes its coordinate components but not its length.
+The displacement ${}^{W}\mathbf d$ now uses the same basis as the translation.
 
 ![The same displacement expressed first in the body basis and then in the world basis](step-3-change-basis.svg)
-_Step 3: Rotation changes the basis used to describe the displacement; it does not move or resize the vector._
+_Re-express the second displacement along the world axes._
 
 **Step 4: add vectors that now share the same basis.** Both ${}^{W}\mathbf t_B$ and ${}^{W}\mathbf d$ are expressed in frame $W$, so they can be added:
 
@@ -162,11 +145,9 @@ $$
 \end{aligned}
 $$
 
-Figure 2 completes the construction by drawing the two world-basis component vectors head to tail. The orange vector reaches the body origin, the red vector continues to the point, and the dashed purple vector is their sum.
-
 ![A point expressed in a rotated body frame and transformed into the world frame](frames-transform.svg)
 
-_Figure 2: A body-frame point becomes a world-frame point by rotating its local displacement into the world basis and adding the body origin's world-frame translation._
+_The orange vector reaches the body origin, the red vector continues to the point, and their dashed purple sum gives its world position._
 
 > [!note] Changing coordinates versus moving a point
 > An **active rotation** moves a vector while its reference axes stay fixed. A **passive change of frame** describes the same geometric vector using different axes. Here, the frame-to-frame equations are coordinate conversions. Reversing the conversion requires the inverse rotation. Always identify the input and output frames before choosing a matrix.
@@ -175,22 +156,14 @@ _Figure 2: A body-frame point becomes a world-frame point by rotating its local 
 
 ## 2. Rigid Transforms
 
-Suppose ${}^{B}\mathbf p$ is a point expressed in a body frame $B$. If the orientation of $B$ relative to world frame $W$ is ${}^{W}\mathbf R_B$ and the body origin is located at ${}^{W}\mathbf t_B$, then
+The construction above gives the **rigid transform**
 
 $$
-\boxed{
-{}^{W}\mathbf p
-= {}^{W}\mathbf R_B\,{}^{B}\mathbf p
-+ {}^{W}\mathbf t_B
-}
+\boxed{{}^{W}\mathbf p
+={}^{W}\mathbf R_B\,{}^{B}\mathbf p+{}^{W}\mathbf t_B.}
 $$
 
-The order matters:
-
-1. ${}^{W}\mathbf R_B$ rewrites the point using the world-frame basis.
-2. ${}^{W}\mathbf t_B$ adds the body origin's world position, so the result is measured from the world origin.
-
-Translation is added after rotation because both terms must already be expressed in the same frame before they can be added.
+To use it, we need to construct the rotation matrix and understand which properties make the mapping rigid.
 
 ### 2.1 Deriving the 2D rotation matrix
 
@@ -220,11 +193,9 @@ $$
 \end{aligned}
 $$
 
-The rotation expresses the body-relative displacement in world axes. The translation then locates that displacement relative to the world origin.
-
 ### 2.2 What makes the transform rigid?
 
-A valid 3D rotation satisfies
+In either two or three dimensions, a proper rotation satisfies
 
 $$
 \mathbf R^T\mathbf R=\mathbf I,
@@ -232,7 +203,7 @@ $$
 \det(\mathbf R)=1.
 $$
 
-Orthogonality means that the columns are mutually perpendicular unit vectors. It gives $\mathbf R^{-1}=\mathbf R^T$. For the planar matrix above, writing $c=\cos\theta$ and $s=\sin\theta$ makes the check explicit:
+The $(i,j)$ entry of $\mathbf R^T\mathbf R$ is the dot product of columns $i$ and $j$. A diagonal entry of $1$ gives unit length; an off-diagonal entry of $0$ gives perpendicularity. Together these properties are called **orthonormality**, and they imply $\mathbf R^{-1}=\mathbf R^T$. For the planar matrix, write $c=\cos\theta$ and $s=\sin\theta$:
 
 $$
 \mathbf R^T\mathbf R
@@ -243,7 +214,7 @@ $$
 \qquad \det\mathbf R=c^2+s^2=1.
 $$
 
-It also preserves distances. For two points $\mathbf a$ and $\mathbf b$,
+Now transform two points by $\mathbf a'=\mathbf R\mathbf a+\mathbf t$ and $\mathbf b'=\mathbf R\mathbf b+\mathbf t$. Their squared distance becomes
 
 $$
 \begin{aligned}
@@ -267,13 +238,30 @@ Since both lengths and dot products remain unchanged, the cosine of the angle be
 Orthogonal matrices can have determinant $+1$ or $-1$. The condition $\det(\mathbf R)=1$ rules out reflections, so handedness is preserved. For example, $\operatorname{diag}(-1,1)$ preserves planar distances but reflects across the $y$-axis; it is not a proper rotation.
 
 ![A square before and after a rigid transformation, with corresponding vertices and coordinate axes](poses-slide-19-rigid-properties.png)
-_The square changes position and orientation while corresponding distances, angles, and handedness remain fixed. Source: Lecture 2, slide 19.[^lecture]_
+_The square changes position and orientation while corresponding distances, angles, and handedness remain fixed._
 
 ---
 
 ## 3. Homogeneous Coordinates
 
-The expression $\mathbf R\mathbf p+\mathbf t$ is affine rather than linear when $\mathbf t\ne\mathbf0$. A linear map sends the origin to the origin; a translation sends it to $\mathbf t$. Homogeneous coordinates absorb the translation into one matrix multiplication by appending an extra coordinate:
+**Homogeneous coordinates combine rotation and translation in one matrix**, allowing us to chain entire transforms by multiplication. The formula $\mathbf R\mathbf p+\mathbf t$ already works, but requires us to track the two operations separately.
+
+The obstacle is that ordinary matrix multiplication cannot express a nonzero translation. Every matrix maps the zero vector to itself, $\mathbf A\mathbf0=\mathbf0$, but translation must move the origin to $\mathbf t$. This is why $\mathbf R\mathbf p+\mathbf t$ is affine rather than linear when $\mathbf t\ne\mathbf0$.
+
+Appending a constant $1$ gives the matrix something to multiply the translation by. For example, translating a 2D point by $(5,2)$ becomes
+
+$$
+\begin{bmatrix}
+1&0&5\\
+0&1&2\\
+0&0&1
+\end{bmatrix}
+\begin{bmatrix}x\\y\\1\end{bmatrix}
+=
+\begin{bmatrix}x+5\\y+2\\1\end{bmatrix}.
+$$
+
+The extra coordinate is not another physical dimension. It allows matrix multiplication to produce a constant offset. Adding rotation to the same construction gives the homogeneous point and transform:
 
 $$
 {}^{W}\hat{\mathbf p}
@@ -299,20 +287,43 @@ $$
 }
 $$
 
+With this representation, a chain of frame conversions becomes a product of matrices. We can precompute that product and apply it to every point in a LiDAR scan; Section 5 works through the sensor-to-world example.
+
 In 2D, the same construction uses a $3\times3$ matrix:
 
 $$
-\begin{bmatrix}p_x^W\\p_y^W\\1\end{bmatrix}
+\begin{bmatrix}{}^W p_x\\{}^W p_y\\1\end{bmatrix}
 =
 \begin{bmatrix}
 \cos\theta&-\sin\theta&t_x\\
 \sin\theta&\cos\theta&t_y\\
 0&0&1
 \end{bmatrix}
-\begin{bmatrix}p_x^B\\p_y^B\\1\end{bmatrix}.
+\begin{bmatrix}{}^B p_x\\{}^B p_y\\1\end{bmatrix}.
 $$
 
-In 3D, the $4\times4$ matrix belongs to the special Euclidean group $SE(3)$. Although it stores 12 nontrivial numbers, it has only six degrees of freedom because the nine entries of $\mathbf R$ are constrained.
+In 3D, the $4\times4$ matrix belongs to the **special Euclidean group $SE(3)$**, the set of all proper 3D rigid transforms. **Euclidean** refers to preserving distances and angles, **special** excludes reflections, and **3** names the spatial dimension:
+
+$$
+SE(3)=\left\{
+\begin{bmatrix}\mathbf R&\mathbf t\\\mathbf0^T&1\end{bmatrix}
+\;\middle|\;
+\mathbf R^T\mathbf R=\mathbf I,\quad
+\det\mathbf R=1,\quad
+\mathbf t\in\mathbb R^3
+\right\}.
+$$
+
+Why call it a **group**? Its elements obey four rules under matrix multiplication:
+
+- **Closure:** composing two rigid transforms gives another rigid transform, so $\mathbf T_1\mathbf T_2\in SE(3)$.
+- **Associativity:** grouping does not change the result: $(\mathbf T_1\mathbf T_2)\mathbf T_3=\mathbf T_1(\mathbf T_2\mathbf T_3)$.
+- **Identity:** $\mathbf I_4$ performs no rotation or translation.
+- **Inverse:** every transform has an undo operation $\mathbf T^{-1}$, which also belongs to $SE(3)$.
+
+Associativity lets us regroup a product, but does **not** let us swap its factors: generally, $\mathbf T_1\mathbf T_2\ne\mathbf T_2\mathbf T_1$.
+
+The matrix has 12 nontrivial entries but only six degrees of freedom: the nine rotation entries are constrained, while the three translation entries are independent. Section 6 examines the rotation-only group $SO(3)$.
 
 ### 3.1 Points and directions are different
 
@@ -351,49 +362,37 @@ $$
 
 ## 4. Inverting a Transform
 
-If
+To convert coordinates in the opposite direction, undo the translation first, then the rotation. Starting from ${}^{A}\mathbf p=\mathbf R\,{}^{B}\mathbf p+\mathbf t$ gives
 
 $$
-{}^{A}\mathbf T_B=
-\begin{bmatrix}
-\mathbf R&\mathbf t\\
-\mathbf0^T&1
-\end{bmatrix},
+{}^{B}\mathbf p
+=\mathbf R^T({}^{A}\mathbf p-\mathbf t)
+=\mathbf R^T\,{}^{A}\mathbf p-\mathbf R^T\mathbf t.
 $$
 
-then the reverse mapping is
+The inverse transform is therefore
 
 $$
 \boxed{
-{}^{B}\mathbf T_A
-=({}^{A}\mathbf T_B)^{-1}
-=
-\begin{bmatrix}
+{}^{B}\mathbf T_A=({}^{A}\mathbf T_B)^{-1}
+=\begin{bmatrix}
 \mathbf R^T&-\mathbf R^T\mathbf t\\
 \mathbf0^T&1
-\end{bmatrix}
+\end{bmatrix}.
 }
 $$
 
-To derive this, start with $\mathbf p^A=\mathbf R\mathbf p^B+\mathbf t$, subtract $\mathbf t$, and multiply by $\mathbf R^T$:
+The inverse translation is $-\mathbf R^T\mathbf t$: negating the displacement reverses it, and multiplying by $\mathbf R^T$ expresses it in the reversed frame. This is why transposing the whole $4\times4$ matrix does not generally give its inverse.
 
-$$
-\mathbf p^B=\mathbf R^T(\mathbf p^A-\mathbf t)
-=\mathbf R^T\mathbf p^A-\mathbf R^T\mathbf t.
-$$
-
-The translation is **not** merely $-\mathbf t$. The vector must also be expressed in the inverse frame, which is why it becomes $-\mathbf R^T\mathbf t$.
-
-We can verify the result directly:
+Multiplication verifies the result:
 
 $$
 \begin{bmatrix}\mathbf R&\mathbf t\\\mathbf0^T&1\end{bmatrix}
 \begin{bmatrix}\mathbf R^T&-\mathbf R^T\mathbf t\\\mathbf0^T&1\end{bmatrix}
-=
-\begin{bmatrix}\mathbf I&\mathbf0\\\mathbf0^T&1\end{bmatrix}.
+=\begin{bmatrix}\mathbf I&\mathbf0\\\mathbf0^T&1\end{bmatrix}.
 $$
 
-For the 2D example in Section 2.1, reversing the transform recovers the original point:
+For the example in Section 2.1, this recovers the original body coordinates:
 
 $$
 {}^{B}\mathbf p
@@ -403,19 +402,14 @@ $$
 =\begin{bmatrix}2\\1\end{bmatrix}.
 $$
 
-Although $\mathbf R^{-1}=\mathbf R^T$, the full transform generally satisfies $\mathbf T^{-1}\ne\mathbf T^T$.
-
-> [!tip] A reliable mental model
-> To undo a transform, first undo the translation and then undo the rotation. Matrix multiplication writes those operations in reverse order, producing $\mathbf R^T(\mathbf p-\mathbf t)$.
-
 ---
 
 ## 5. Composing Coordinate Frames
 
-An autonomous vehicle may contain a LiDAR frame $S$, a vehicle-body frame $B$, and a world frame $W$. Perception returns a pedestrian in the sensor frame, calibration provides the fixed sensor-to-body relationship, and localization estimates the changing body-to-world relationship.
+Return to the LiDAR example. Perception supplies ${}^{S}\mathbf p$, calibration supplies ${}^{B}\mathbf T_S$, and localization supplies ${}^{W}\mathbf T_B$. These two transforms connect the measurement to the world.
 
 ![Sensor, body, and world frames connected by a chain of transforms](transform-chain.svg)
-_Figure 3: A sensor measurement reaches the world by following the available frame chain from right to left._
+_The two frame mappings form one sensor-to-world path._
 
 The desired world coordinate is
 
@@ -435,27 +429,18 @@ $$
 ={}^W\mathbf T_B\,{}^B\mathbf T_S.
 $$
 
-The lecture uses source-first superscripts: its $\mathbf T^{SB}$ is our ${}^{B}\mathbf T_S$. Thus its $\mathbf T^{BW}\mathbf T^{SB}$ is the same body-to-world after sensor-to-body chain. The labels differ; the physical mapping does not.
-
-More explicitly, if the component transforms are $(\mathbf R_{WB},\mathbf t_{WB})$ and $(\mathbf R_{BS},\mathbf t_{BS})$, their composition is
+Expanding the product shows how its rotation and translation combine:
 
 $$
 {}^{W}\mathbf T_S
-= {}^{W}\mathbf T_B{}^{B}\mathbf T_S
-=
-\begin{bmatrix}
-\mathbf R_{WB}\mathbf R_{BS}
-&
-\mathbf R_{WB}\mathbf t_{BS}+\mathbf t_{WB}\\
+=\begin{bmatrix}
+{}^W\mathbf R_B\,{}^B\mathbf R_S
+&{}^W\mathbf R_B\,{}^B\mathbf t_S+{}^W\mathbf t_B\\
 \mathbf0^T&1
 \end{bmatrix}.
 $$
 
-Notice that the inner translation $\mathbf t_{BS}$ must be rotated before the outer translation is added. Transform multiplication is generally noncommutative:
-
-$$
-\mathbf T_1\mathbf T_2\neq\mathbf T_2\mathbf T_1.
-$$
+The sensor offset ${}^{B}\mathbf t_S$ is expressed in body coordinates. Rotate it into world coordinates before adding the body's world position ${}^{W}\mathbf t_B$. Simply adding the two translation vectors would mix bases.
 
 ### 5.1 A numerical 2D example
 
@@ -497,7 +482,7 @@ $$
 The local phrase "three meters ahead" becomes the world location $(10,8)$ because the vehicle's forward axis points along world $+y$.
 
 ![Robot links and an autonomous vehicle with multiple camera and laser coordinate frames](poses-slide-43-sensor-frames.png)
-_Real systems have many frames, but every measurement follows the same composition rule along a connected path. Source: Lecture 2, slide 43.[^lecture]_
+_Real systems have many frames, but every measurement follows the same composition rule along a connected path._
 
 For a rigidly mounted sensor, the calibration transform is usually fixed. Localization changes the body-to-world transform over time. On an articulated robot, joint motion also changes the transforms between links.
 
@@ -505,70 +490,136 @@ For a rigidly mounted sensor, the calibration transform is usually fixed. Locali
 
 ## 6. Rotation Matrices and $SO(3)$
 
-The set of valid 3D rotation matrices is
+So far, a matrix has represented orientation. We will now compare it with Euler angles, axis-angle, and quaternions. Each describes the same geometry but makes different calculations convenient.
+
+We will follow **a positive $90^\circ$ turn about the $z$-axis** through all four representations. Here we use the active interpretation from Section 1.2: vectors rotate about the origin while the reference axes stay fixed.
+
+### 6.1 Understanding what a rotation matrix stores
+
+The column interpretation from Section 2.1 extends directly to 3D: **each column gives the destination of one unit axis**.
+
+Write the standard unit vectors as $\mathbf e_x=(1,0,0)^T$, $\mathbf e_y=(0,1,0)^T$, and $\mathbf e_z=(0,0,1)^T$. Multiplication by each unit vector selects a column:
+
+$$
+\mathbf R=
+\begin{bmatrix}
+\vert&\vert&\vert\\
+\mathbf R\mathbf e_x&\mathbf R\mathbf e_y&\mathbf R\mathbf e_z\\
+\vert&\vert&\vert
+\end{bmatrix}.
+$$
+
+For our $90^\circ$ turn about $z$,
+
+$$
+\mathbf e_x\mapsto\mathbf e_y,\qquad
+\mathbf e_y\mapsto-\mathbf e_x,\qquad
+\mathbf e_z\mapsto\mathbf e_z.
+$$
+
+Putting those destination vectors into columns gives
+
+$$
+\boxed{
+\mathbf R_z(90^\circ)=
+\begin{bmatrix}
+0&-1&0\\
+1&0&0\\
+0&0&1
+\end{bmatrix}.
+}
+$$
+
+There is no need to memorize this particular matrix: following the three axes reconstructs it. To rotate any other vector, express that vector as a combination of the same axes. For example, $(2,1,3)^T$ means $2\mathbf e_x+\mathbf e_y+3\mathbf e_z$, so
+
+$$
+\mathbf R_z(90^\circ)
+\begin{bmatrix}2\\1\\3\end{bmatrix}
+=2\mathbf e_y-\mathbf e_x+3\mathbf e_z
+=\begin{bmatrix}-1\\2\\3\end{bmatrix}.
+$$
+
+The orthonormality and handedness conditions established in Section 2.2 apply to these three columns. The set of all such matrices is called the **special orthogonal group $SO(3)$**:
 
 $$
 SO(3)=\left\{\mathbf R\in\mathbb R^{3\times3}
-\mid \mathbf R^T\mathbf R=\mathbf I,\ \det(\mathbf R)=1\right\}.
+\mid \mathbf R^T\mathbf R=\mathbf I,\ \det\mathbf R=1\right\}.
 $$
 
-The columns of $\mathbf R$ are the source-frame coordinate axes expressed in the destination frame. They are orthonormal and right-handed. "Orthogonal" refers to $\mathbf R^T\mathbf R=\mathbf I$; "special" selects determinant $+1$.
+This is the rotation-only counterpart of $SE(3)$. Its identity is $\mathbf I_3$, its inverse is $\mathbf R^T$, and multiplication composes rotations.
 
-A rotation acts directly on a vector, $\mathbf v'=\mathbf R\mathbf v$. Applying $\mathbf R_1$ first and $\mathbf R_2$ second gives $\mathbf R_2\mathbf R_1\mathbf v$. The order generally matters. Starting from $\mathbf e_x=(1,0,0)^T$:
+Although a matrix stores nine entries, it has only **three independent degrees of freedom**. One way to see this geometrically is to choose its first unit axis $\mathbf r_1$: a direction on a sphere needs two parameters. The second axis $\mathbf r_2$ must be perpendicular to the first, leaving one angle around that first axis. Right-handedness then fixes the third axis as $\mathbf r_3=\mathbf r_1\times\mathbf r_2$.
 
-- Rotate $90^\circ$ about $x$, then $90^\circ$ about $z$: the result is $\mathbf e_y$.
-- Rotate $90^\circ$ about $z$, then $90^\circ$ about $x$: the result is $\mathbf e_z$.
-
-### 6.1 What matrices preserve, and why averaging fails
-
-Length preservation follows immediately:
-
-$$
-\|\mathbf R\mathbf v\|^2
-=\mathbf v^T\mathbf R^T\mathbf R\mathbf v
-=\|\mathbf v\|^2.
-$$
-
-Proper rotations also preserve the cross product:
+Beyond the distance and angle preservation proved earlier, proper 3D rotations also preserve the cross product. Rotating two vectors first gives the same result as rotating their cross product:
 
 $$
 (\mathbf R\mathbf a)\times(\mathbf R\mathbf b)
 =\mathbf R(\mathbf a\times\mathbf b).
 $$
 
-To prove this, take the dot product with $\mathbf R\mathbf c$ for an arbitrary vector $\mathbf c$. The scalar triple product on the left is
+For example, our quarter-turn sends $\mathbf e_x$ to $\mathbf e_y$ and $\mathbf e_y$ to $-\mathbf e_x$. Their new cross product is still $\mathbf e_z$, just as rotating the original cross product $\mathbf e_x\times\mathbf e_y=\mathbf e_z$ leaves it unchanged.
+
+For a general proof, recall that $(\mathbf a\times\mathbf b)\cdot\mathbf c$ is the signed volume spanned by three vectors. A proper rotation preserves this volume because $\det\mathbf R=1$. Therefore, for every $\mathbf c$,
 
 $$
 \begin{aligned}
 \big((\mathbf R\mathbf a)\times(\mathbf R\mathbf b)\big)\cdot\mathbf R\mathbf c
-&=\det(\mathbf R)\,(\mathbf a\times\mathbf b)\cdot\mathbf c\\
-&=(\mathbf a\times\mathbf b)\cdot\mathbf c.
+&=(\mathbf a\times\mathbf b)\cdot\mathbf c\\
+&=\big(\mathbf R(\mathbf a\times\mathbf b)\big)\cdot\mathbf R\mathbf c.
 \end{aligned}
 $$
 
-Dot-product preservation gives the same value for $\mathbf R(\mathbf a\times\mathbf b)\cdot\mathbf R\mathbf c$. Since this holds for every $\mathbf c$, the two vectors are equal.
+The two candidate vectors have the same dot product with every possible direction, so they must be equal.
 
-Matrices make vector rotation and composition easy, but store nine numbers for three degrees of freedom. Arbitrary numerical updates can violate their constraints; a matrix generally needs projection back onto $SO(3)$, not just independent normalization of its columns.
+**Applications also need to calculate new orientations.** Three tasks motivate the choice of representation:
 
-Even averaging two valid rotation matrices can fail. Let
+- **Composition** connects a camera orientation to the world through the robot: ${}^{W}\mathbf R_C={}^W\mathbf R_B\,{}^B\mathbf R_C$. This is the rotation part of the frame chain in Section 5, handled naturally by matrix multiplication.
+- **Interpolation** fills in a smooth motion. If a camera must turn $90^\circ$ left in one second, a constant-speed turn places it at $45^\circ$ halfway through. An animation or controller needs these intermediate orientations.
+- **Optimization** improves an orientation estimate. A robot starts with a guess, compares its predicted camera observations with the actual measurements, and adjusts the guess to reduce the error. Each update must remain a valid rotation.
 
-$$
-\mathbf R_1=\mathbf I,
-\qquad
-\mathbf R_2=\mathbf R_z(\pi)=\operatorname{diag}(-1,-1,1).
-$$
-
-Their average is $\operatorname{diag}(0,0,1)$, which collapses the $x$ and $y$ directions. It is not a rotation. This motivates representations with more convenient interpolation or local updates.
-
-### 6.2 Euler angles and rotation order
-
-Euler angles describe orientation as three sequential elemental rotations. Under the roll-pitch-yaw convention used here,
+The last two tasks require more care than ordinary arithmetic on matrix entries. For example, averaging the matrices for no rotation and a $180^\circ$ turn about $z$ gives
 
 $$
-\boxed{\mathbf R=\mathbf R_z(\gamma)\mathbf R_y(\beta)\mathbf R_x(\alpha),}
+\frac12\left(
+\begin{bmatrix}1&0&0\\0&1&0\\0&0&1\end{bmatrix}
++
+\begin{bmatrix}-1&0&0\\0&-1&0\\0&0&1\end{bmatrix}
+\right)
+=
+\begin{bmatrix}0&0&0\\0&0&0\\0&0&1\end{bmatrix}.
 $$
 
-where $\alpha$, $\beta$, and $\gamma$ are roll, pitch, and yaw. The elemental matrices are
+The average collapses $\mathbf e_x$ to zero rather than giving an intermediate orientation. Arbitrary optimization updates can likewise destroy perpendicularity, which normalizing each column alone cannot restore. Quaternions and rotation vectors provide convenient alternatives for these tasks; applications that only apply or compose rotations can continue using matrices.
+
+### 6.2 Euler angles: describing a turn as three steps
+
+Euler angles describe a rotation through a sequence of simpler turns. For roll, pitch, and yaw, the three parameters are
+
+| Parameter     | Axis | Physical intuition when $x$ is forward, $y$ is left, and $z$ is up |
+| ------------- | ---- | ------------------------------------------------------------------ |
+| Roll $\alpha$ | $x$  | Banking from side to side                                          |
+| Pitch $\beta$ | $y$  | Tilting the nose up or down                                        |
+| Yaw $\gamma$  | $z$  | Turning left or right                                              |
+
+These descriptions identify the type of motion; the right-hand rule determines its sign. Under the convention used here,
+
+$$
+\boxed{\mathbf R=\mathbf R_z(\gamma)\mathbf R_y(\beta)\mathbf R_x(\alpha).}
+$$
+
+Read this equation as a recipe applied to a column vector:
+
+$$
+\begin{aligned}
+\mathbf p_1 &= \mathbf R_x(\alpha)\mathbf p,\\
+\mathbf p_2 &= \mathbf R_y(\beta)\mathbf p_1,\\
+\mathbf p' &= \mathbf R_z(\gamma)\mathbf p_2.
+\end{aligned}
+$$
+
+Substituting the intermediate vectors produces the matrix product above. **The rightmost matrix acts first because it is closest to the input vector.**
+
+Each elemental matrix leaves one coordinate unchanged and performs a 2D rotation in the perpendicular plane:
 
 $$
 \mathbf R_x(\alpha)=
@@ -576,8 +627,10 @@ $$
 1&0&0\\
 0&\cos\alpha&-\sin\alpha\\
 0&\sin\alpha&\cos\alpha
-\end{bmatrix},
+\end{bmatrix}.
 $$
+
+Here the $x$ component stays fixed while the $y,z$ components rotate. Similarly,
 
 $$
 \mathbf R_y(\beta)=
@@ -586,7 +639,9 @@ $$
 0&1&0\\
 -\sin\beta&0&\cos\beta
 \end{bmatrix},
-\qquad
+$$
+
+$$
 \mathbf R_z(\gamma)=
 \begin{bmatrix}
 \cos\gamma&-\sin\gamma&0\\
@@ -595,15 +650,35 @@ $$
 \end{bmatrix}.
 $$
 
-For active rotations about fixed axes, the product applies $x$ first, then $y$, then $z$. These are **extrinsic** rotations. The same product can also describe **intrinsic** rotations about moving body axes, in the reverse sequence: first $z$, then the new $y$, then the new $x$.
+Our running example has $(\alpha,\beta,\gamma)=(0,0,90^\circ)$. The first two matrices are identities, leaving exactly the quarter-turn matrix from Section 6.1.
 
-There are twelve standard three-axis sequences. Six use distinct axes: $XYZ$, $XZY$, $YXZ$, $YZX$, $ZXY$, and $ZYX$. Six repeat the first axis: $XYX$, $XZX$, $YXY$, $YZY$, $ZXZ$, and $ZYZ$. The distinct-axis cases are more precisely called _Tait–Bryan angles_, though Euler angles is often used as an umbrella term.
+To see the effect of order, follow $\mathbf e_x$ through two sequences:
 
-An angle triple is therefore incomplete without axis order, intrinsic/extrinsic interpretation, and angle units.
+$$
+\begin{aligned}
+\mathbf e_x
+&\xrightarrow{\;R_x(90^\circ)\;}\mathbf e_x
+\xrightarrow{\;R_z(90^\circ)\;}\mathbf e_y,\\
+\mathbf e_x
+&\xrightarrow{\;R_z(90^\circ)\;}\mathbf e_y
+\xrightarrow{\;R_x(90^\circ)\;}\mathbf e_z.
+\end{aligned}
+$$
 
-### 6.3 Deriving gimbal lock
+A turn about $x$ does nothing to a vector already on the $x$-axis. After a turn about $z$, however, that vector points along $y$, so a subsequent turn about $x$ does affect it. Thus $\mathbf R_z\mathbf R_x$ and $\mathbf R_x\mathbf R_z$ are generally different.
 
-At pitch $\beta=\pi/2$, the roll-pitch-yaw product simplifies to
+The axes used at each step must also be specified. **Extrinsic** rotations use fixed reference axes; **intrinsic** rotations use axes that move with the body. For example, "turn about the room's vertical axis" names a fixed axis, whereas "turn about the object's current forward axis" names a moving one. The product above is fixed-axis $x$ then $y$ then $z$; it is equivalently moving-axis $z$ then the new $y$ then the new $x$, starting from aligned frames.
+
+There are twelve standard three-axis sequences: six with distinct axes ($XYZ$, $XZY$, $YXZ$, $YZX$, $ZXY$, $ZYX$) and six that repeat the first axis ($XYX$, $XZX$, $YXY$, $YZY$, $ZXZ$, $ZYZ$). The distinct-axis cases are also called _Tait–Bryan angles_. You do not need to memorize the list to use this section; you do need to record the chosen sequence, fixed or moving axes, and angle units.
+
+### 6.3 Gimbal lock: when two angle controls do the same job
+
+Euler angles use three numbers, but at certain orientations those three controls stop producing three independent local changes. A physical gimbal makes this visible: it holds an object in nested rotating rings, and two of the rings' axes can line up. Once aligned, turning either ring rotates about the same line.
+
+![Two gimbal configurations showing separated rotation axes and an aligned-axis singular configuration](poses-slide-50-gimbal-lock.png)
+_The configuration on the right has two aligned gimbal axes. The ring labels belong to this particular mechanism; the roll–yaw calculation below uses our stated Euler convention._
+
+For our convention, this happens when pitch is $\beta=\pi/2$, or $90^\circ$. At that value, $\cos\beta=0$ and $\sin\beta=1$. Substituting them into $\mathbf R_z(\gamma)\mathbf R_y(\beta)\mathbf R_x(\alpha)$ gives
 
 $$
 \mathbf R=
@@ -614,30 +689,86 @@ $$
 \end{bmatrix}.
 $$
 
-Only the difference $\alpha-\gamma$ remains. Consequently, replacing $(\alpha,\gamma)$ by $(\alpha+\delta,\gamma+\delta)$ leaves the orientation unchanged. Roll and yaw no longer create independent local changes. This is **gimbal lock**.
-
-![Two gimbal configurations from the lecture, showing separated rotation axes and an aligned-axis singular configuration](poses-slide-50-gimbal-lock.png)
-_At the singular configuration, two gimbal axes align and their rotations become dependent. Source: Lecture 2, slide 50.[^lecture] The ring labels in the illustration are specific to that mechanism; the formula above establishes the roll–yaw coupling for our chosen convention._
-
-The statement "increasing roll = decreasing yaw" on slide 51 refers to their effect on $\alpha-\gamma$: either change increases that difference. To keep the orientation unchanged, increase roll and yaw by the **same** amount instead.
-
-> [!important] Gimbal lock is a coordinate singularity
-> The rigid body still has three rotational degrees of freedom. At this configuration, the Euler-angle chart cannot describe three independent local changes. Recovering angles or computing updates near the singularity can become unstable even though the physical orientation is perfectly valid.
-
-### 6.4 Axis-angle and the rotation vector
-
-Every proper 3D rotation can be described by a unit axis $\mathbf u$ and an angle $\theta$. The four stored numbers have three degrees of freedom because $\|\mathbf u\|=1$. The **rotation vector**, also called the Euler vector,
+**Roll and yaw appear only as $\alpha-\gamma$**, so they cannot be recovered separately. For example, both triples
 
 $$
-\boldsymbol\omega=\theta\mathbf u,
+(\alpha,\beta,\gamma)=(0^\circ,90^\circ,0^\circ)
 $$
 
-combines them into three numbers: its direction gives the axis and its length gives the angle in radians. A rotation vector is not a triple of Euler angles.
+and
+
+$$
+(\alpha,\beta,\gamma)=(30^\circ,90^\circ,30^\circ)
+$$
+
+produce the same rotation because both have $\alpha-\gamma=0$. Increasing roll and yaw together by any equal amount leaves the orientation unchanged. Increasing roll alone has the same effect as decreasing yaw alone.
+
+Near this singularity, even a small orientation change can require large changes in the reported angles, making estimation and control unstable. The same convention becomes singular at pitch $-90^\circ$, with a different roll–yaw coupling.
+
+> [!important] The object does not lose the ability to rotate
+> A freely moving rigid body still has three rotational degrees of freedom. Its **Euler-angle coordinates** cannot describe three independent infinitesimal changes at gimbal lock. A quaternion or rotation matrix can represent that same orientation without this Euler singularity.
+
+### 6.4 Axis-angle: one axis and one amount of turning
+
+**Axis-angle represents the entire rotation as one turn about one axis.** Every proper 3D rotation admits this description, with the axis passing through the origin. Translation remains separate.
+
+Let $\mathbf u$ be a unit vector along the axis, and let $\theta$ be the right-handed rotation angle. For our running quarter-turn,
+
+$$
+\mathbf u=\begin{bmatrix}0\\0\\1\end{bmatrix},
+\qquad \theta=\frac{\pi}{2}.
+$$
+
+The axis stores three components, but the constraint $\|\mathbf u\|=1$ leaves only two independent parameters. Adding the angle gives three degrees of freedom overall.
+
+The **rotation vector**, also called the Euler vector, combines the axis and angle:
+
+$$
+\boxed{\boldsymbol\omega=\theta\mathbf u.}
+$$
+
+Its direction gives the axis and its length gives the angle. For our example, $\boldsymbol\omega=(0,0,\pi/2)^T$. When $\boldsymbol\omega\ne\mathbf0$, recover the angle as $\theta=\|\boldsymbol\omega\|$ and the axis as $\mathbf u=\boldsymbol\omega/\|\boldsymbol\omega\|$. The zero vector represents no rotation.
+
+A rotation vector is **not** a triple of roll, pitch, and yaw angles. Its components encode one axis scaled by one angle, not three sequential turns.
 
 ![A unit rotation axis, a circular rotation arrow, and a rotation vector aligned with the axis](poses-slide-52-axis-angle.png)
-_The rotation vector points along the rotation axis, with magnitude equal to the angle. Source: Lecture 2, slide 52.[^lecture] The figure labels the angle $\psi$ or $\Psi$; the equations here use $\theta$._
+_The axis sets the direction of the turn. The figure labels its angle $\psi$ or $\Psi$; our equations use $\theta$._
 
-Define the skew-symmetric cross-product matrix
+To rotate a vector about this axis, split it into parallel and perpendicular components:
+
+$$
+\mathbf v_\parallel=(\mathbf u^T\mathbf v)\mathbf u,
+\qquad
+\mathbf v_\perp=\mathbf v-\mathbf v_\parallel.
+$$
+
+The dot product measures the component along the unit axis; multiplying by $\mathbf u$ reconstructs that parallel vector. The remainder lies in the plane of rotation.
+
+The parallel part stays fixed. The perpendicular part turns in a 2D plane. Within that plane, $\mathbf u\times\mathbf v_\perp$ is a $90^\circ$ turn of $\mathbf v_\perp$ with the same length. Just as a planar rotation combines cosine and sine components,
+
+$$
+\boxed{
+\mathbf R\mathbf v
+=\mathbf v_\parallel
++\cos\theta\,\mathbf v_\perp
++\sin\theta\,(\mathbf u\times\mathbf v).
+}
+$$
+
+We used $\mathbf u\times\mathbf v$ because the parallel component contributes zero to that cross product.
+
+For a concrete example, rotate $\mathbf v=(1,0,2)^T$ by $90^\circ$ about $z$. Its parallel part is $(0,0,2)^T$, its perpendicular part is $(1,0,0)^T$, and $\mathbf u\times\mathbf v=(0,1,0)^T$. Since $\cos90^\circ=0$ and $\sin90^\circ=1$,
+
+$$
+\mathbf R\mathbf v
+=\begin{bmatrix}0\\0\\2\end{bmatrix}
++\begin{bmatrix}0\\1\\0\end{bmatrix}
+=\begin{bmatrix}0\\1\\2\end{bmatrix}.
+$$
+
+The height stays fixed while the horizontal part turns. This formula already lets us rotate vectors directly, without first constructing a matrix.
+
+**Rodrigues' formula packages this geometry into a matrix.** Define
 
 $$
 [\mathbf u]_\times=
@@ -646,9 +777,27 @@ $$
 u_z&0&-u_x\\
 -u_y&u_x&0
 \end{bmatrix},
+\qquad
+[\mathbf u]_\times\mathbf v=\mathbf u\times\mathbf v.
 $$
 
-so that $[\mathbf u]_\times\mathbf v=\mathbf u\times\mathbf v$. **Rodrigues' formula** converts axis-angle to a matrix:
+The bracket notation is simply a matrix implementation of "take the cross product with $\mathbf u$." Substituting the parallel and perpendicular components into the vector formula gives
+
+$$
+\mathbf R
+=\cos\theta\,\mathbf I
++(1-\cos\theta)\mathbf u\mathbf u^T
++\sin\theta[\mathbf u]_\times.
+$$
+
+Here $\mathbf u\mathbf u^T$ projects onto the rotation axis. The identity
+
+$$
+\mathbf u\times(\mathbf u\times\mathbf v)
+=\mathbf u(\mathbf u^T\mathbf v)-\mathbf v
+$$
+
+for a unit axis implies $[\mathbf u]_\times^2=\mathbf u\mathbf u^T-\mathbf I$. Using it yields the usual form:
 
 $$
 \boxed{
@@ -657,42 +806,9 @@ $$
 }
 $$
 
-To derive it, decompose a vector into components parallel and perpendicular to the axis:
+**Axis-angle is not unique.** Reversing both the axis and angle sign, or adding $2\pi$ to the angle, leaves the rotation unchanged. At zero angle any axis works; at angle $\pi$, either axis direction works.
 
-$$
-\mathbf v_\parallel=(\mathbf u^T\mathbf v)\mathbf u,
-\qquad
-\mathbf v_\perp=\mathbf v-\mathbf v_\parallel.
-$$
-
-The parallel component stays fixed. In the perpendicular plane, ordinary 2D rotation gives
-
-$$
-\mathbf R\mathbf v
-=\mathbf v_\parallel+\cos\theta\,\mathbf v_\perp
-+\sin\theta\,(\mathbf u\times\mathbf v).
-$$
-
-Substitute the components and collect terms:
-
-$$
-\mathbf R\mathbf v
-=\cos\theta\,\mathbf v
-+(1-\cos\theta)\mathbf u(\mathbf u^T\mathbf v)
-+\sin\theta(\mathbf u\times\mathbf v).
-$$
-
-Thus $\mathbf R=\cos\theta\,\mathbf I+(1-\cos\theta)\mathbf u\mathbf u^T+\sin\theta[\mathbf u]_\times$. The vector triple-product identity gives
-
-$$
-[\mathbf u]_\times^2=\mathbf u\mathbf u^T-\mathbf I,
-$$
-
-which produces Rodrigues' formula. The vector expression above also rotates a vector **without constructing a matrix**, so conversion to a matrix is not compulsory as slide 53 suggests.
-
-Axis-angle is not globally unique. $(\mathbf u,\theta)$ and $(-\mathbf u,-\theta)$ give the same rotation; adding $2\pi$ to the angle changes nothing. At zero rotation the axis is arbitrary. At angle $\pi$, opposite axes give the same rotation. A common canonical rotation-vector range is $\|\boldsymbol\omega\|\le\pi$, with opposite boundary points identified.
-
-This explains the slide's "edges" example:
+A common rotation-vector convention restricts $\|\boldsymbol\omega\|\le\pi$, but opposite points on the boundary represent the same rotation. This creates a numerical seam. Consider two turns about $z$, expressed here in degrees for readability:
 
 $$
 \boldsymbol\omega_1=(0,0,179^\circ)^T,
@@ -700,30 +816,23 @@ $$
 \boldsymbol\omega_2=(0,0,-179^\circ)^T.
 $$
 
-Their coordinate difference is $358^\circ$, but the shortest rotation between them is only $2^\circ$. Averaging the vectors gives zero, which is not the midpoint along that short path. Rotation vectors are useful for local updates, but ordinary global subtraction and averaging can cross a coordinate seam.
+Both are nearly a half-turn, so their actual orientations are only $2^\circ$ apart. Their coordinate difference is nevertheless $358^\circ$. Averaging the vectors gives zero rotation, which is nowhere near the short-path midpoint at $180^\circ$.
 
-### 6.5 Unit quaternions
+Rotation vectors are useful for small local changes. For small $\theta$ in radians, $\sin\theta\approx\theta$ and $1-\cos\theta\approx0$ to first order, so Rodrigues' formula becomes $\mathbf R\approx\mathbf I+[\boldsymbol\omega]_\times$. This approximation helps explain their role in optimization, but it does not make global vector averaging valid.
 
-A quaternion has four real components:
+### 6.5 Unit quaternions: encoding axis-angle in four numbers
 
-$$
-\mathbf q=w+xi+yj+zk=(w,\mathbf v),\qquad \mathbf v=(x,y,z).
-$$
+**A unit quaternion encodes axis-angle using four real numbers.** Starting from that connection lets us understand its geometry before introducing its multiplication rule.
 
-The imaginary units satisfy $i^2=j^2=k^2=ijk=-1$. For example, $ij=k$ but $ji=-k$, so multiplication is noncommutative. We use **scalar-first** order $(w,x,y,z)$; the lecture's axis-angle tuple uses scalar-last order $(x,y,z,w)$.
-
-The conjugate and inverse are
+Using scalar-first order, write
 
 $$
-\mathbf q^*=(w,-\mathbf v),
+\mathbf q=(w,\mathbf v)=(w,x,y,z),
 \qquad
-\mathbf q^{-1}=\frac{\mathbf q^*}{\|\mathbf q\|^2}
-\quad (\mathbf q\ne\mathbf0).
+\mathbf v=\begin{bmatrix}x\\y\\z\end{bmatrix}.
 $$
 
-A unit quaternion satisfies $w^2+\|\mathbf v\|^2=1$, so its inverse equals its conjugate. This unit-norm assumption is needed for the inverse shown on slide 54.
-
-An axis-angle rotation maps to
+The three numbers in $\mathbf v$ point along the rotation axis, but their length is generally not one. Given a unit axis $\mathbf u$ and angle $\theta$, set
 
 $$
 \boxed{
@@ -731,69 +840,132 @@ $$
 }
 $$
 
-The unit norm follows from $\cos^2(\theta/2)+\sin^2(\theta/2)=1$. A $90^\circ$ rotation about $z$, for example, has scalar-first quaternion $(\sqrt2/2,0,0,\sqrt2/2)$.
-
-For $\mathbf q_1=(w_1,\mathbf v_1)$ and $\mathbf q_2=(w_2,\mathbf v_2)$, the **Hamilton product** is
+The scalar part stores the cosine of the half-angle; the vector part stores the axis scaled by the sine of the half-angle. These four numbers satisfy
 
 $$
-\mathbf q_1\otimes\mathbf q_2
-=\left(
-w_1w_2-\mathbf v_1^T\mathbf v_2,
-\;w_1\mathbf v_2+w_2\mathbf v_1+\mathbf v_1\times\mathbf v_2
-\right).
+w^2+x^2+y^2+z^2
+=\cos^2\frac{\theta}{2}+\sin^2\frac{\theta}{2}=1.
 $$
 
-Embed a vector $\mathbf p$ as a pure quaternion $\mathbf p_q=(0,\mathbf p)$. Then
+That is what **unit** means. Four stored numbers minus one constraint leaves three degrees of freedom; there is no fourth physical direction of rotation.
+
+For our $90^\circ$ turn about $z$,
+
+$$
+\mathbf q=\left(\frac{\sqrt2}{2},0,0,\frac{\sqrt2}{2}\right).
+$$
+
+The identity rotation has quaternion $(1,0,0,0)$, and a $180^\circ$ turn about $z$ has quaternion $(0,0,0,1)$. These examples make clear that the vector part is not an ordinary position vector. Some libraries store $(x,y,z,w)$ instead, so component order must be checked.
+
+To compose rotations, quaternions use a multiplication rule called the **Hamilton product**. For $\mathbf q_1=(w_1,\mathbf v_1)$ and $\mathbf q_2=(w_2,\mathbf v_2)$, write the result as $(w_{12},\mathbf v_{12})$, where
+
+$$
+\begin{aligned}
+w_{12}&=w_1w_2-\mathbf v_1\cdot\mathbf v_2,\\
+\mathbf v_{12}&=w_1\mathbf v_2+w_2\mathbf v_1+\mathbf v_1\times\mathbf v_2.
+\end{aligned}
+$$
+
+We denote the result by $\mathbf q_1\otimes\mathbf q_2$. This is not componentwise multiplication: the dot and cross products couple the inputs. Swapping them changes the cross-product sign, making composition order-dependent.
+
+The notation $\mathbf q=w+xi+yj+zk$ describes the same algebra using imaginary units satisfying $i^2=j^2=k^2=ijk=-1$. For instance, $ij=k$ while $ji=-k$. You can compute rotations entirely with the four real components and the Hamilton formula above.
+
+To reverse a rotation, use the quaternion **conjugate**, which negates the vector part:
+
+$$
+\mathbf q^*=(w,-\mathbf v).
+$$
+
+For a unit quaternion this is the inverse, $\mathbf q^{-1}=\mathbf q^*$. Geometrically, the sign change reverses the angle about the same axis. For a general nonzero quaternion, the inverse is instead $\mathbf q^*/\|\mathbf q\|^2$; the unit-norm assumption matters.
+
+To apply the rotation to a 3D vector, package it as a quaternion with scalar part zero, $\mathbf p_q=(0,\mathbf p)$, and compute
 
 $$
 \boxed{\mathbf p'_q=\mathbf q\otimes\mathbf p_q\otimes\mathbf q^{-1}.}
 $$
 
-The vector part is the rotated vector. This two-sided operation produces the full angle $\theta$ from the half-angle terms in $\mathbf q$. Applying $\mathbf q_1$ first and $\mathbf q_2$ second uses $\mathbf q_2\otimes\mathbf q_1$ under this convention.
+The output has zero scalar part and the rotated vector as its remaining components. Both multiplications are needed.
 
-Quaternions avoid Euler gimbal lock, store only four numbers, and support efficient composition. They still have a unit-norm constraint and a **double cover**:
+This also explains the half-angle. Take a rotation about $z$, write $\mathbf q=(c,0,0,s)$ with $c=\cos(\theta/2)$ and $s=\sin(\theta/2)$, and rotate $\mathbf e_x$. The two products give
 
 $$
-\boxed{\mathbf q\text{ and }-\mathbf q\text{ represent the same rotation}.}
+\mathbf q\otimes(0,1,0,0)\otimes\mathbf q^{-1}
+=(0,c^2-s^2,2cs,0)
+=(0,\cos\theta,\sin\theta,0).
 $$
 
-The two minus signs cancel in the vector-rotation formula. Consequently, a continuous orientation trajectory may acquire artificial sign flips if each quaternion is chosen independently. Keep successive signs consistent and renormalize when numerical error causes norm drift.
+The vector part has turned through the full angle $\theta$. At $90^\circ$, it is exactly $(0,1,0)$, agreeing with the matrix and axis-angle examples.
+
+Under this convention, applying $\mathbf q_1$ first and $\mathbf q_2$ second uses $\mathbf q_2\otimes\mathbf q_1$. For example, composing two $90^\circ$ turns about $z$ multiplies $(\sqrt2/2,0,0,\sqrt2/2)$ by itself, giving $(0,0,0,1)$: a $180^\circ$ turn.
+
+The two-sided formula also explains why **$\mathbf q$ and $-\mathbf q$ represent the same rotation**. Negating the quaternion negates its inverse as well, so the two signs cancel:
+
+$$
+(-\mathbf q)\otimes\mathbf p_q\otimes(-\mathbf q)^{-1}
+=\mathbf q\otimes\mathbf p_q\otimes\mathbf q^{-1}.
+$$
+
+Every orientation therefore has two opposite quaternion representatives, a property called a **double cover**. An apparent jump from $\mathbf q$ to $-\mathbf q$ need not mean any physical motion. When processing a sequence, choose signs consistently, and renormalize quaternions if numerical error causes their lengths to drift.
 
 ### 6.6 Interpolating orientations with SLERP
 
-A useful extension to the lecture is spherical linear interpolation, or **SLERP**. Let $\mathbf q_0$ and $\mathbf q_1$ be unit quaternions. If their dot product is negative, negate one to choose the shorter path. Set
+We can now solve the camera-interpolation problem from Section 6.1. Unit quaternions lie on a sphere in four-dimensional space. A straight line between two of them generally passes inside that sphere; **spherical linear interpolation (SLERP)** follows an arc on its surface instead. Let $s\in[0,1]$ measure progress from the starting orientation to the ending orientation.
+
+Start with unit quaternions $\mathbf q_0$ and $\mathbf q_1$. If $\mathbf q_0\cdot\mathbf q_1<0$, replace $\mathbf q_1$ with $-\mathbf q_1$. This leaves its physical orientation unchanged while selecting a shorter arc. Let
 
 $$
 \Omega=\arccos(\mathbf q_0\cdot\mathbf q_1).
 $$
 
-For interpolation parameter $s\in[0,1]$,
+Here $\Omega$ is the angle between the quaternions in four-dimensional space. After this sign choice, the corresponding shortest physical rotation angle is $2\Omega$. For $0\le s\le1$,
 
 $$
+\boxed{
 \mathbf q(s)=
 \frac{\sin((1-s)\Omega)}{\sin\Omega}\mathbf q_0
 +\frac{\sin(s\Omega)}{\sin\Omega}\mathbf q_1.
+}
 $$
 
-The curve stays on the unit-quaternion sphere and gives a shortest rotational path at constant angular speed. When $\Omega$ is very small, use a stable limiting approximation such as normalized linear interpolation. Clamp a numerically computed dot product to $[-1,1]$ before applying $\arccos$.
+The sine weights replace the straight-line weights $1-s$ and $s$. They keep the result on the unit sphere and make angular progress proportional to $s$. At $s=0$ the second weight vanishes and the first is one; at $s=1$ the reverse happens.
+
+For example, interpolate from no rotation, $\mathbf q_0=(1,0,0,0)$, to our $90^\circ$ turn, $\mathbf q_1=(\sqrt2/2,0,0,\sqrt2/2)$. Their dot product is $\sqrt2/2$, so $\Omega=45^\circ$. Halfway through,
+
+$$
+\mathbf q(1/2)=\left(\cos22.5^\circ,0,0,\sin22.5^\circ\right),
+$$
+
+which represents a **$45^\circ$ physical turn** about $z$. If $s$ advances uniformly with time, the camera turns at constant angular speed along this path.
+
+For implementation, clamp the dot product to $[-1,1]$ before applying $\arccos$. When $\Omega$ is very small, dividing by $\sin\Omega$ is numerically awkward. A useful approximation is normalized linear interpolation:
+
+$$
+\mathbf q(s)\approx
+\frac{(1-s)\mathbf q_0+s\mathbf q_1}
+{\|(1-s)\mathbf q_0+s\mathbf q_1\|}.
+$$
+
+Use the same sign choice first. This approximation preserves unit norm, though its angular speed is not exactly constant in general.
 
 ### 6.7 Choosing a representation
 
-| Representation  | Stored values | Main advantage                       | Main caution                                      |
-| --------------- | ------------: | ------------------------------------ | ------------------------------------------------- |
-| Rotation matrix |             9 | Direct action and easy composition   | Redundant; must remain orthogonal                 |
-| Euler angles    |             3 | Human-readable                       | Order-dependent; gimbal lock                      |
-| Axis-angle      |             4 | Geometrically meaningful             | Sign and boundary ambiguities                     |
-| Rotation vector |             3 | Convenient local optimization update | Discontinuous at the angle boundary               |
-| Unit quaternion |             4 | Stable composition and interpolation | Unit-norm constraint; $\mathbf q\equiv-\mathbf q$ |
+Choose a representation according to what you need to do:
 
-A common engineering pattern is to use quaternions or rotation matrices for stored poses, rotation vectors for optimizer updates, and Euler angles only for display.
+| Representation  | Stored values | Useful when                                              | What to watch for                                               |
+| --------------- | ------------: | -------------------------------------------------------- | --------------------------------------------------------------- |
+| Rotation matrix |             9 | Rotating point clouds and composing frame mappings       | Columns must remain orthonormal and right-handed                |
+| Euler angles    |             3 | Displaying understandable roll, pitch, and yaw           | Axis conventions, order, and gimbal lock                        |
+| Axis-angle      |             4 | Explaining a turn geometrically                          | Nonunique axes at zero angle and sign ambiguity at $\pi$        |
+| Rotation vector |             3 | Expressing small rotation updates                        | Global subtraction and averaging can cross a boundary           |
+| Unit quaternion |             4 | Storing orientations, composing turns, and interpolating | Unit norm, component order, and $\mathbf q$ versus $-\mathbf q$ |
+
+A pipeline can store a pose with a quaternion and translation, convert it to a matrix to transform a point cloud, and display Euler angles to a person. These conversions change the representation while preserving the orientation.
 
 ---
 
 ## 7. Uniform Sampling on Curved Spaces
 
-The final slide asks whether uniformly sampled coordinates give uniformly distributed directions or orientations. In both examples the answer is **no**: equal coordinate intervals need not cover equal amounts of geometric area or volume.
+The geometry that complicates interpolation also matters when generating random directions or orientations. Uniformly sampling coordinates does not necessarily produce a uniform geometric distribution: equal coordinate intervals may cover different amounts of area or volume.
 
 ### 7.1 Uniform directions on the sphere
 
@@ -808,7 +980,7 @@ $$
 \end{bmatrix}.
 $$
 
-Here $\theta$ is measured down from the positive $z$-axis. The slide calls it latitude, but its interval corresponds to **polar angle**, not geographic latitude.
+Here $\theta$ is the **polar angle**, measured down from the positive $z$-axis; it differs from geographic latitude.
 
 The sphere's area element is
 
@@ -831,7 +1003,7 @@ z
 }
 $$
 
-Why does this work? Since $z=\cos\theta$, the area element becomes $|dz|\,d\phi$. Equal-height strips of a sphere have equal area. Another valid method is to normalize a vector of three independent standard normal samples: its rotationally symmetric distribution has no preferred direction.
+Since $z=\cos\theta$, the area element becomes $|dz|\,d\phi$: equal-height strips of a sphere have equal area. Another valid method is to normalize a vector of three independent standard normal samples: its rotationally symmetric distribution has no preferred direction.
 
 ### 7.2 Uniform rotations in $SO(3)$
 
@@ -861,7 +1033,7 @@ The normalized Gaussian is uniform on the three-dimensional unit sphere $S^3$ in
 
 ## 8. Implementation Pattern
 
-The following NumPy functions encode the same frame convention used throughout this note:
+The geometry translates directly into NumPy. In variable names, `A_T_B` means the transform from frame B to frame A; the functions below assume valid rigid-transform inputs.
 
 ```python
 import numpy as np
@@ -899,7 +1071,7 @@ def is_rotation_matrix(R: np.ndarray, atol: float = 1e-7) -> bool:
     )
 ```
 
-For valid rigid-transform inputs, the following example checks composition, inversion, point-versus-direction behavior, and distance preservation:
+Reusing the sensor setup from Section 5.1 in 3D lets us check composition, inversion, point-versus-direction behavior, and distance preservation:
 
 ```python
 W_T_B = make_transform(
@@ -927,7 +1099,7 @@ assert np.isclose(
 )
 ```
 
-The sampling algorithms need only NumPy as well. The returned quaternion order below is scalar-first `(w, x, y, z)`:
+One normalization routine implements both Gaussian samplers from Section 7. The four-dimensional result is interpreted in scalar-first `(w, x, y, z)` order:
 
 ```python
 rng = np.random.default_rng(42)
@@ -955,42 +1127,18 @@ quaternions_wxyz = sample_unit_vectors(rng, count=1000, dimension=4)
 
 ---
 
-## 9. Check Your Understanding
+## 9. Summary
 
-Try these before reading the answers:
+Keep frame labels attached to every quantity, then choose the operation that matches the task:
 
-1. A body has no rotation, its origin is at world position $(5,2)$, and a point has body coordinates $(1,3)$. What are the world coordinates?
-2. What changes about a direction vector under pure translation?
-3. If ${}^{A}\mathbf T_B$ maps $B$ to $A$ and ${}^{B}\mathbf T_C$ maps $C$ to $B$, what maps $C$ to $A$?
-4. Why does the inverse translation include $\mathbf R^T$?
-5. At pitch $\pi/2$, what happens if roll and yaw both increase by the same amount?
-6. Do $\mathbf q$ and $-\mathbf q$ encode different orientations?
-7. Why is uniform sampling of polar angle biased toward the poles?
-
-**Answers.** (1) $(6,5)$. (2) Its components do not change. (3) ${}^{A}\mathbf T_B{}^{B}\mathbf T_C$. (4) The reversed displacement must be expressed in the reversed frame. (5) The orientation stays unchanged because $\alpha-\gamma$ stays constant. (6) No. (7) Equal angular intervals cover less surface area near the poles.
-
----
-
-## 10. Summary
-
-The geometry of machine perception rests on a small set of reusable ideas:
-
-1. Coordinates are meaningless without a frame.
-2. A pose relates two frames through orientation and position.
-3. A rigid transform maps source-frame coordinates into a destination frame.
-4. Homogeneous coordinates unify rotation and translation.
-5. Transform labels determine composition order; matching inner frames should cancel.
-6. Inversion uses $\mathbf R^T$ and $-\mathbf R^T\mathbf t$, not a simple matrix transpose.
-7. Rotation matrices, Euler angles, axis-angle vectors, and quaternions describe the same geometry with different tradeoffs.
-8. Interpolation and random sampling must respect rotation geometry; coordinate averages and uniform angle samples can give the wrong result.
-
-Once the notation is disciplined, a complicated multi-sensor system becomes a graph of frames connected by transforms. Perception supplies measurements, calibration connects sensors to the platform, and localization connects the platform to the world.
+- **Convert a point:** ${}^{A}\mathbf p={}^A\mathbf R_B\,{}^B\mathbf p+{}^A\mathbf t_B$.
+- **Chain frames:** ${}^{A}\mathbf T_C={}^A\mathbf T_B\,{}^B\mathbf T_C$; adjacent frame labels must match.
+- **Reverse a mapping:** use $\mathbf R^T$ and $-\mathbf R^T\mathbf t$.
+- **Interpolate, estimate, or sample orientations:** respect the constraints of the chosen representation rather than treating its entries as unconstrained coordinates.
 
 ---
 
 ## References
-
-[^lecture]: Wang, Shenlong (2026). _CS 498 Fall 2026, Lecture 2: Poses, Coordinates, Transforms and Rotations_. University of Illinois Urbana-Champaign, August 28, 2026. The reproduced figures are cropped from slides 13, 19, 43, 50, and 52 of the supplied lecture PDF. The deck credits borrowed materials to Matthew O’Toole, Kris Kitani, Lana Lazebnik, Derek Hoiem, and Sanja Fidler; original image marks are retained where present.
 
 - [3D Rotations - Robotic Systems](http://motion.cs.illinois.edu/RoboticSystems/3DRotations.html).
 - [Visualizing Quaternions](https://eater.net/quaternions/).
