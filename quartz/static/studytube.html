@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>StudyTube</title>
+<title>MinimalTube</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%232E6B4F'/%3E%3Cpath d='M26 20 L46 32 L26 44 Z' fill='white'/%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%232E6B4F'/%3E%3Cpath d='M26 20 L46 32 L26 44 Z' fill='white'/%3E%3C/svg%3E">
 <meta name="theme-color" content="#2E6B4F">
@@ -322,7 +322,7 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
 <header>
   <div class="wrap">
     <div class="brand">
-      <h1 class="logo"><a href="#" class="homeLink" title="StudyTube home"><span class="tri" aria-hidden="true"></span>StudyTube</a></h1>
+      <h1 class="logo"><a href="#" class="homeLink" title="MinimalTube home"><span class="tri" aria-hidden="true"></span>MinimalTube</a></h1>
       <span class="tag">One video at a time, picked from what you're learning now.</span>
       <div class="timer htimer" data-mode="idle" role="timer"><span class="tmLabel vh" aria-live="off"></span><span class="tmFace" aria-hidden="true"><span class="tmMode"></span><span class="tmTime"></span><span class="tmBar"><i></i></span></span><button class="btn tmBtn" type="button">Start</button><button class="linkbtn tmReset" type="button" hidden>Reset</button><span class="tmCount label"></span></div>
     </div>
@@ -362,7 +362,7 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
         <ol>
           <li>Close this tab.</li>
           <li>In the <b>StudyTube</b> folder (inside <b>temp</b>), double-click <b>Open StudyTube</b>.</li>
-          <li>StudyTube opens in your browser at <b>localhost:47321</b>. Videos play right on the page there.</li>
+          <li>MinimalTube opens in your browser at <b>localhost:47321</b>. Videos play right on the page there.</li>
         </ol>
         <div class="row">
           <a class="btn" id="howYT" href="#" target="_blank" rel="noopener">Open this one on YouTube</a>
@@ -373,7 +373,7 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
     </div>
     <section aria-label="Now playing" class="stage" id="playerView" hidden>
       <div class="focusbar">
-        <span class="fbrand"><a href="#" class="homeLink" title="StudyTube home">StudyTube</a> <span class="label">focus</span></span>
+        <span class="fbrand"><a href="#" class="homeLink" title="MinimalTube home">MinimalTube</a> <span class="label">focus</span></span>
         <div class="timer" data-mode="idle" role="timer"><span class="tmLabel vh" aria-live="off"></span><span class="tmFace" aria-hidden="true"><span class="tmMode"></span><span class="tmTime"></span><span class="tmBar"><i></i></span></span><button class="btn tmBtn" type="button">Start</button><button class="linkbtn tmReset" type="button" hidden>Reset</button><span class="tmCount label"></span></div>
         <button class="linkbtn" id="exitFocus" type="button">Show everything</button>
       </div>
@@ -438,7 +438,7 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
     <section aria-label="Video suggestions" class="stage" id="feedView">
       <p class="status" id="status" role="status"></p>
       <div class="hint" id="embedHint" hidden>
-        <p><b>Want to watch videos right on this page?</b> YouTube's player only works when StudyTube runs from a web address. Close this tab and double-click <b>Open StudyTube</b> in the same folder. Until then, videos open on YouTube.</p>
+        <p><b>Want to watch videos right on this page?</b> YouTube's player only works when MinimalTube runs from a web address. Close this tab and double-click <b>Open StudyTube</b> in the same folder. Until then, videos open on YouTube.</p>
         <button class="linkbtn" id="hintClose" type="button">Got it</button>
       </div>
       <div id="paperSlot" hidden></div>
@@ -526,7 +526,7 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
   var KEY = "studytube.v2";
 
   // ---------- One home for your data ----------
-  // Browsers keep saved data separately for each address, so StudyTube always runs from your website.
+  // Browsers keep saved data separately for each address, so MinimalTube always runs from your website.
   // Opening the file (or the launcher) moves you there and carries over what was saved under that address, once.
   var SITE = "https://hchautran.github.io/static/studytube.html";
   var STORE_KEYS = ["studytube.v2", "studytube.live.v1", "studytube.ytkey"];
@@ -1010,7 +1010,7 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
   }
   function errorText(e) {
     var r = e && e.reason;
-    if (r === "network") return "Couldn't reach YouTube from this page. Check your internet connection. If it keeps happening, open StudyTube with the \"Open StudyTube\" launcher in the same folder instead of double-clicking the file.";
+    if (r === "network") return "Couldn't reach YouTube from this page. Check your internet connection. If it keeps happening, open MinimalTube with the \"Open StudyTube\" launcher in the same folder instead of double-clicking the file.";
     if (r === "keyInvalid") return "YouTube says this API key isn't valid. Check that you copied the whole key.";
     if (r === "quotaExceeded" || r === "dailyLimitExceeded" || r === "rateLimitExceeded") return "Today's free YouTube quota is used up. You'll keep getting picks from videos already found; new searches work again after midnight Pacific time.";
     if (r === "accessNotConfigured" || r === "SERVICE_DISABLED" || /has not been used|is disabled/i.test(e.msg)) return "The YouTube Data API v3 isn't turned on for this key's project yet. Enable it in Google Cloud (step 2), wait a minute, then try again.";
@@ -1239,7 +1239,7 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
   function handlePaste(text) {
     var p = parseYouTube(text);
     if (!p.v && !p.list) { liveMsg("That doesn't look like a YouTube video or playlist link.", true); return; }
-    if (!getKey()) { liveMsg("Add your YouTube API key first (below) so StudyTube can look up the playlist.", true); openLive(); return; }
+    if (!getKey()) { liveMsg("Add your YouTube API key first (below) so MinimalTube can look up the playlist.", true); openLive(); return; }
     liveMsg("Looking up the playlist…");
     var work;
     if (p.list && p.v) {
@@ -1287,7 +1287,7 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
   }
 
   // ---------- Watch on this page (YouTube's embedded player) ----------
-  // YouTube's player needs the page to be served from a web address, so it works when StudyTube
+  // YouTube's player needs the page to be served from a web address, so it works when MinimalTube
   // is opened with the "Open StudyTube" launcher (http://localhost) and not from a plain file.
   var canEmbed = location.protocol === "http:" || location.protocol === "https:";
   var yt = { player: null, ready: false, loading: false, current: null, started: false, prevView: "feed", timer: null, queue: [] };
@@ -1326,7 +1326,7 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
     why.textContent = c.plTitle ? "Part " + (c.pos || "") + " of “" + c.plTitle + "”" : (c.w || "");
     var open = document.getElementById("pOpen"); open.href = urlOf(c);
     var sv = document.getElementById("pSave"); sv.textContent = isSaved(c) ? "Saved" : "Save"; sv.setAttribute("aria-pressed", isSaved(c) ? "true" : "false");
-    document.title = c.t + " – StudyTube";
+    document.title = c.t + " – MinimalTube";
   }
 
   var SERIES = { "6s184": "MIT 6.S184: Flow Matching and Diffusion Models (2026)", cme296: "Stanford CME296: Diffusion & Large Vision Models", cs336: "Stanford CS336: Language Modeling from Scratch", gpumode: "GPU MODE lectures", eola: "Essence of linear algebra (3Blue1Brown)", ee364a: "Stanford EE364A: Convex Optimization" };
@@ -1499,7 +1499,7 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
   function closePlayer() {
     clearEndCard();
     if (yt.player && yt.player.pauseVideo) { try { yt.player.pauseVideo(); } catch (e) {} }
-    document.title = "StudyTube";
+    document.title = "MinimalTube";
     showView(yt.prevView === "search" ? "search" : "feed");
     buildFeed();
     if (yt.prevView === "search") renderSearch();
@@ -1633,7 +1633,7 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
   }
 
   // Rabbit-hole guard: autoplay inside a playlist is fine; after two videos in a row picked by autoplay
-  // from outside the playlist, StudyTube checks in before playing more.
+  // from outside the playlist, MinimalTube checks in before playing more.
   function needsCheckIn(next) {
     if (!next) return false;
     var inPlaylist = plIndex(yt.playlist, next.id) !== -1;
@@ -2369,14 +2369,14 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
     else if (currentView() === "search") { showSearch(false); buildFeed(); }
   });
   document.getElementById("pClose").addEventListener("click", closePlayer);
-  // Logo: back to StudyTube's main feed from anywhere.
+  // Logo: back to MinimalTube's main feed from anywhere.
   function goHome(e) {
     if (e) e.preventDefault();
     clearEndCard();
     if (yt.player && yt.player.pauseVideo) { try { yt.player.pauseVideo(); } catch (err) {} }
     ["howDlg"].forEach(function (id) { document.getElementById(id).hidden = true; });
     document.getElementById("q").value = "";
-    document.title = "StudyTube";
+    document.title = "MinimalTube";
     showView("feed"); setStatus(""); buildFeed();
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
