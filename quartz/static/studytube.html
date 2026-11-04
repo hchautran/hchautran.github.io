@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>StudyTube</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%232E6B4F'/%3E%3Cpath d='M26 20 L46 32 L26 44 Z' fill='white'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%232E6B4F'/%3E%3Cpath d='M26 20 L46 32 L26 44 Z' fill='white'/%3E%3C/svg%3E">
+<meta name="theme-color" content="#2E6B4F">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -158,6 +161,18 @@ aside { display: grid; gap: 18px; min-width: 0; }
 .musicline { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; background: var(--music-soft); border-radius: 12px; padding: 10px 14px; font-size: 14px; }
 .musicline a { font-weight: 500; }
 .musicline .label { color: var(--music); }
+/* Sidebar: one card, a simple list of rows that open in place */
+.side { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 2px 16px; }
+.srow + .srow { border-top: 1px solid var(--line); }
+.srow > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 13px 0; font-weight: 600; font-size: 15px; }
+.srow > summary::-webkit-details-marker { display: none; }
+.srow > summary > span:first-child { flex: 1; }
+.srow > summary::after { content: ""; width: 7px; height: 7px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(-45deg); transition: transform .15s; margin-right: 4px; }
+.srow[open] > summary::after { transform: rotate(45deg); }
+.srow > summary:hover { color: var(--accent); }
+.count { font-family: var(--mono); font-size: 12px; font-weight: 400; color: var(--muted); }
+.count.on { color: var(--accent); }
+.sbody { display: grid; gap: 10px; padding: 0 0 14px; min-width: 0; }
 details.panel > summary { cursor: pointer; font-family: var(--display); font-weight: 600; font-size: 19px; list-style: none; display: flex; justify-content: space-between; align-items: baseline; }
 details.panel > summary::-webkit-details-marker { display: none; }
 details.panel > summary::after { content: "Show"; font-family: var(--body); font-weight: 400; font-size: 13px; color: var(--muted); }
@@ -233,11 +248,23 @@ a.btn { text-decoration: none; display: inline-flex; align-items: center; }
 .pldur { grid-column: 4; font-family: var(--mono); font-size: 12px; color: var(--muted); }
 @media (max-width: 560px) { .plrow { grid-template-columns: 96px minmax(0, 1fr); } .plrow img { width: 96px; height: 54px; grid-row: span 2; } .plpart, .pltitle, .pldur { grid-column: 2; } .pldur { display: none; } }
 /* Focus tools */
-.timer { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 14px; }
-.timer .tmLabel { font-family: var(--mono); font-size: 13px; font-variant-numeric: tabular-nums; }
-.timer[data-mode="work"] .tmLabel { color: var(--accent); font-weight: 500; }
-.timer[data-mode="break"] .tmLabel { color: var(--music); font-weight: 500; }
+.timer { display: inline-flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 14px; }
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.tmFace { display: grid; gap: 3px; min-width: 6.2ch; }
+.tmMode { font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.tmTime { font-family: var(--mono); font-size: 26px; font-weight: 500; line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.tmBar { display: block; height: 3px; border-radius: 2px; background: var(--line); overflow: hidden; }
+.tmBar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .9s linear; }
+.timer[data-mode="work"] .tmTime, .timer[data-mode="work"] .tmMode { color: var(--accent); }
+.timer[data-mode="break"] .tmTime, .timer[data-mode="break"] .tmMode { color: var(--music); }
+.timer[data-mode="break"] .tmBar i { background: var(--music); }
+.timer[data-mode^="paused"] .tmTime { opacity: .55; }
 .timer .tmBtn { padding: 6px 12px; }
+.focusbar .tmTime { font-size: 40px; }
+.htimer { margin-left: auto; align-self: center; }
+.htimer .tmTime { font-size: 32px; }
+.htimer .tmCount { display: none; }
+.focusbar .tmFace { min-width: 6.5ch; }
 .focusbar { display: none; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .homeLink { color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
 .homeLink:hover { opacity: .8; }
@@ -297,6 +324,7 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
     <div class="brand">
       <h1 class="logo"><a href="#" class="homeLink" title="StudyTube home"><span class="tri" aria-hidden="true"></span>StudyTube</a></h1>
       <span class="tag">One video at a time, picked from what you're learning now.</span>
+      <div class="timer htimer" data-mode="idle" role="timer"><span class="tmLabel vh" aria-live="off"></span><span class="tmFace" aria-hidden="true"><span class="tmMode"></span><span class="tmTime"></span><span class="tmBar"><i></i></span></span><button class="btn tmBtn" type="button">Start</button><button class="linkbtn tmReset" type="button" hidden>Reset</button><span class="tmCount label"></span></div>
     </div>
     <div>
       <div class="label" style="margin-bottom:6px">Learning now · tap to pause a topic</div>
@@ -313,7 +341,6 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
       </form>
       <select class="btn" id="filter" aria-label="Show videos for"></select>
       <button class="btn" id="shuffle" type="button">Refresh picks</button>
-      <div class="timer" data-mode="idle"><span class="tmLabel"></span><button class="btn tmBtn" type="button">Start</button><button class="linkbtn tmReset" type="button" hidden>Reset</button><span class="tmCount label"></span></div>
       <button class="btn primary" id="fetchTop" type="button" hidden>Find new videos</button>
     </div>
   </div>
@@ -347,7 +374,7 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
     <section aria-label="Now playing" class="stage" id="playerView" hidden>
       <div class="focusbar">
         <span class="fbrand"><a href="#" class="homeLink" title="StudyTube home">StudyTube</a> <span class="label">focus</span></span>
-        <div class="timer" data-mode="idle"><span class="tmLabel"></span><button class="btn tmBtn" type="button">Start</button><button class="linkbtn tmReset" type="button" hidden>Reset</button><span class="tmCount label"></span></div>
+        <div class="timer" data-mode="idle" role="timer"><span class="tmLabel vh" aria-live="off"></span><span class="tmFace" aria-hidden="true"><span class="tmMode"></span><span class="tmTime"></span><span class="tmBar"><i></i></span></span><button class="btn tmBtn" type="button">Start</button><button class="linkbtn tmReset" type="button" hidden>Reset</button><span class="tmCount label"></span></div>
         <button class="linkbtn" id="exitFocus" type="button">Show everything</button>
       </div>
       <div class="playerbox">
@@ -431,62 +458,64 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
       </div>
     </section>
     <aside>
-      <details class="panel" id="livePanel">
-        <summary>Live YouTube search</summary>
-        <p class="livestate" id="liveState"></p>
-        <p class="note" id="liveMsg" role="status"></p>
-        <form class="keyrow" id="keyForm">
-          <input id="ytKey" type="password" autocomplete="off" spellcheck="false" placeholder="Paste your YouTube API key" aria-label="YouTube API key">
-          <button class="btn" type="submit">Save</button>
-        </form>
-        <div class="row" id="liveActions" hidden>
-          <button class="btn" id="fetchNow" type="button">Find new videos now</button>
-          <button class="linkbtn" id="forgetKey" type="button">Remove key</button>
-        </div>
-        <details class="howto">
-          <summary>How to get a free key (about 3 minutes)</summary>
-          <ol class="note">
-            <li>Go to <a href="https://console.cloud.google.com/" target="_blank" rel="noopener">console.cloud.google.com</a> and create a project (any name).</li>
-            <li>Open <b>APIs &amp; Services → Library</b>, search <b>YouTube Data API v3</b>, and click <b>Enable</b>.</li>
-            <li>Open <b>APIs &amp; Services → Credentials → Create credentials → API key</b>, then copy the key.</li>
-            <li>Recommended: edit the key, choose <b>Restrict key</b> under API restrictions, and pick YouTube Data API v3. Leave application restrictions on None.</li>
-            <li>Paste it above. It stays in this browser only. The free quota allows roughly 15–20 "Find new videos" runs a day.</li>
-          </ol>
+      <nav class="side" aria-label="More">
+        <details class="srow" id="newsPanel">
+          <summary><span>AI news</span></summary>
+          <div class="sbody">
+            <ul class="list" id="newsList"></ul>
+            <p class="empty" id="newsEmpty">Loading the top stories…</p>
+          </div>
         </details>
-      </details>
-      <div class="panel">
-        <h2 class="small">Watching something else?</h2>
-        <form class="keyrow" id="pasteForm">
-          <input id="pasteLink" type="url" autocomplete="off" placeholder="YouTube video or playlist link" aria-label="YouTube video or playlist link">
-          <button class="btn" type="submit">Next part</button>
-        </form>
-        <p class="note">StudyTube finds the playlist it belongs to and puts the next video at the top.</p>
-      </div>
-      <details class="panel" id="newsPanel">
-        <summary>AI news</summary>
-        <ul class="list" id="newsList"></ul>
-        <p class="empty" id="newsEmpty">Loading the top stories…</p>
-        <p class="note">The 3 most-discussed AI stories on Hacker News from the last 3 days.</p>
-      </details>
-      <details class="panel">
-        <summary>Study music</summary>
-        <div class="moods" id="moods"></div>
-        <ul class="list" id="musicList"></ul>
-      </details>
-      <details class="panel" id="savedPanel">
-        <summary>Saved for later</summary>
-        <ul class="list" id="savedList"></ul>
-        <p class="empty" id="savedEmpty">Tap Save on any video to keep it here.</p>
-      </details>
-      <details class="panel" id="notesPanel">
-        <summary>What I learned <span class="label" id="notesCount"></span></summary>
-        <ul class="list notes" id="notesList"></ul>
-        <p class="empty" id="notesEmpty">Your take-aways from each video collect here.</p>
-        <button class="btn" id="notesCopy" type="button" hidden>Copy all notes</button>
-      </details>
-      <div class="panel">
-        <p class="note">The built-in videos were checked on YouTube on Nov 2, 2026; live search adds more as you go. If one has been taken down, use "Find similar" on its card. When you come back from a video, the next pick moves up on its own, and topics you watch more get suggested more. Your topics, saved and watched videos stay in this browser. <button class="linkbtn" id="resetHidden" type="button">Bring back hidden videos</button></p>
-      </div>
+        <details class="srow" id="musicPanel">
+          <summary><span>Study music</span></summary>
+          <div class="sbody">
+            <div class="moods" id="moods"></div>
+            <ul class="list" id="musicList"></ul>
+          </div>
+        </details>
+        <details class="srow" id="savedPanel">
+          <summary><span>Saved</span><span class="count" id="savedCount"></span></summary>
+          <div class="sbody">
+            <ul class="list" id="savedList"></ul>
+            <p class="empty" id="savedEmpty">Tap Save on any video to keep it here.</p>
+          </div>
+        </details>
+        <details class="srow" id="notesPanel">
+          <summary><span>What I learned</span><span class="count" id="notesCount"></span></summary>
+          <div class="sbody">
+            <ul class="list notes" id="notesList"></ul>
+            <p class="empty" id="notesEmpty">Your take-aways from each video collect here.</p>
+            <button class="btn" id="notesCopy" type="button" hidden>Copy all notes</button>
+          </div>
+        </details>
+        <details class="srow" id="livePanel">
+          <summary><span>Settings</span><span class="count" id="liveBadge"></span></summary>
+          <div class="sbody">
+            <span class="label">YouTube live search</span>
+            <p class="livestate" id="liveState"></p>
+            <p class="note" id="liveMsg" role="status"></p>
+            <form class="keyrow" id="keyForm">
+              <input id="ytKey" type="password" autocomplete="off" spellcheck="false" placeholder="Paste your YouTube API key" aria-label="YouTube API key">
+              <button class="btn" type="submit">Save</button>
+            </form>
+            <div class="row" id="liveActions" hidden>
+              <button class="btn" id="fetchNow" type="button">Find new videos now</button>
+              <button class="linkbtn" id="forgetKey" type="button">Remove key</button>
+            </div>
+            <details class="howto">
+              <summary>How to get a free key (about 3 minutes)</summary>
+              <ol class="note">
+                <li>Go to <a href="https://console.cloud.google.com/" target="_blank" rel="noopener">console.cloud.google.com</a> and create a project (any name).</li>
+                <li>Open <b>APIs &amp; Services → Library</b>, search <b>YouTube Data API v3</b>, and click <b>Enable</b>.</li>
+                <li>Open <b>APIs &amp; Services → Credentials → Create credentials → API key</b>, then copy the key.</li>
+                <li>Recommended: edit the key, choose <b>Restrict key</b> under API restrictions, and pick YouTube Data API v3. Leave application restrictions on None.</li>
+                <li>Paste it above. It stays in this browser only.</li>
+              </ol>
+            </details>
+            <p class="note">Your topics, notes and history stay in this browser. <button class="linkbtn" id="resetHidden" type="button">Bring back hidden videos</button></p>
+          </div>
+        </details>
+      </nav>
     </aside>
   </div>
 </main>
@@ -1244,6 +1273,8 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
   function openLive() { var d = document.getElementById("livePanel"); if (d) d.open = true; }
   function renderLive() {
     var on = !!getKey();
+    var badge = document.getElementById("liveBadge");
+    badge.textContent = on ? "Live search on" : "Live search off"; badge.classList.toggle("on", on);
     document.getElementById("liveState").textContent = on
       ? "On · " + live.items.length + " videos found so far · about " + Math.max(0, Math.floor((10000 - unitsToday()) / 101)) + " searches left today"
       : "Off · add a free key to search all of YouTube";
@@ -1493,6 +1524,13 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
   // Study timer
   function timerRender() {
     var label, btn, now = Date.now();
+    var left = tm.mode === "work" || tm.mode === "break" ? tm.endsAt - now : tm.mode.indexOf("paused") === 0 ? tm.left : state.work * 60000;
+    var total = tm.mode.indexOf("break") !== -1 ? state.brk * 60000 : state.work * 60000;
+    var modeWord = tm.mode === "work" ? "Focus" : tm.mode === "break" ? "Break" : tm.mode.indexOf("paused") === 0 ? "Paused" : "Study timer";
+    var done = tm.mode === "idle" ? 0 : Math.max(0, Math.min(1, 1 - left / total));
+    document.querySelectorAll(".tmMode").forEach(function (el) { el.textContent = modeWord; });
+    document.querySelectorAll(".tmTime").forEach(function (el) { el.textContent = fmtClock(left); });
+    document.querySelectorAll(".tmBar i").forEach(function (el) { el.style.width = (done * 100).toFixed(1) + "%"; });
     if (tm.mode === "work") { label = "Focus " + fmtClock(tm.endsAt - now); btn = "Pause"; }
     else if (tm.mode === "break") { label = "Break " + fmtClock(tm.endsAt - now); btn = "Pause"; }
     else if (tm.mode === "paused-work") { label = "Focus " + fmtClock(tm.left) + " (paused)"; btn = "Resume"; }
@@ -1585,7 +1623,7 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
     });
     document.getElementById("notesEmpty").hidden = ids.length > 0;
     document.getElementById("notesCopy").hidden = !ids.length;
-    document.getElementById("notesCount").textContent = ids.length ? "(" + ids.length + ")" : "";
+    document.getElementById("notesCount").textContent = ids.length ? String(ids.length) : "";
   }
   function notesAsText() {
     return Object.keys(state.notes).sort(function (a, b) { return state.notes[a].at - state.notes[b].at; }).map(function (id) {
@@ -2244,6 +2282,7 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
       list.appendChild(h("li", null, [h("a", { href: urlOf(c), target: "_blank", rel: "noopener", text: c.t }), rm]));
     });
     document.getElementById("savedEmpty").hidden = state.saved.length > 0;
+    document.getElementById("savedCount").textContent = state.saved.length ? String(state.saved.length) : "";
   }
 
   function toggleSave(c) {
@@ -2388,7 +2427,6 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
   document.getElementById("howAlways").addEventListener("click", function () { state.fileOk = true; save(); document.getElementById("howDlg").hidden = true; });
   document.getElementById("hintClose").addEventListener("click", function () { state.hintSeen = true; save(); document.getElementById("embedHint").hidden = true; });
   document.getElementById("embedHint").hidden = canEmbed || !!state.hintSeen;
-  document.getElementById("pasteForm").addEventListener("submit", function (e) { e.preventDefault(); handlePaste(document.getElementById("pasteLink").value); document.getElementById("pasteLink").value = ""; });
 
   // When you come back from YouTube, the next pick moves up on its own.
   function maybeAdvance() {
@@ -2405,7 +2443,7 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
   renderMoods();
   buildFeed();
   renderLive();
-  if (!getKey()) { if (!live.items.length) openLive(); }
+  if (!getKey()) { /* live search is optional; Settings shows "Live search off" */ }
   else if (Date.now() - live.last > 12 * 3600e3) fetchMore();
   else fetchMore({ onlyLow: true });
 
