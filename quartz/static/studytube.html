@@ -264,12 +264,17 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
 .paper .why { margin: 0; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .paper .actions { padding: 4px 0 0; }
 .paper.done { opacity: .7; }
+.paperask { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
+.paperask input { flex: 1 1 240px; min-width: 0; width: 0; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 8px 12px; font-size: 14px; }
+.paperask input:focus { border-color: var(--spark); outline: none; box-shadow: 0 0 0 3px var(--spark-soft); }
+.paperask .btn { padding: 7px 12px; }
 .paper .worth { margin: 0; font-size: 13px; color: var(--ink); }
 .paperNone { margin: 0; }
 .newsitem { display: grid !important; gap: 2px; justify-content: stretch !important; }
 .newsitem > a { font-size: 14px; font-weight: 500; }
 .newsitem .label { text-transform: none; letter-spacing: 0; font-family: var(--body); font-size: 12px; }
 .newsitem .label a { font-size: 12px; text-decoration: underline; }
+.morerow { display: flex; justify-content: center; margin-top: 14px; }
 .mini .meta { margin: 0; font-size: 12.5px; color: var(--muted); }
 /* Real thumbnails */
 .thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -418,6 +423,7 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
       <div id="queueWrap">
         <div class="sec-h"><h2>Up next</h2></div>
         <div class="queue" id="queue"></div>
+        <div class="morerow"><button class="btn" id="showMore" type="button" hidden>Show 6 more</button></div>
       </div>
       <div id="sparkWrap">
         <div class="sec-h"><h2>Something different</h2></div>
@@ -845,7 +851,7 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
         chans: s.chans && typeof s.chans === "object" ? s.chans : {},
         autoplay: s.autoplay !== false, hintSeen: !!s.hintSeen, fileOk: !!s.fileOk,
         notes: s.notes && typeof s.notes === "object" ? s.notes : {}, focus: s.focus !== false, takeaway: s.takeaway !== false,
-        work: +s.work || 25, brk: +s.brk || 5, rate: +s.rate || 1, pomos: s.pomos || null,
+        work: +s.work || 25, brk: +s.brk || 5, rate: +s.rate || 1, pomos: s.pomos || null, paperPrompt: typeof s.paperPrompt === "string" ? s.paperPrompt : "",
         goal: typeof s.goal === "string" ? s.goal : ""
       };
     } catch (e) { return clone(DEFAULT); }
@@ -1624,6 +1630,9 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
       return { name: i.name, queries: k ? PAPER_Q[k] : [plainName(i.name)], re: k ? TOPIC_RE[k] : phraseRe([plainName(i.name).toLowerCase()]) };
     });
   }
+  var STOP = new Set("a an and are as at be by for from how in into is it of on or that the this to with using via about what which new paper papers recent latest best good".split(" "));
+  function promptWords(text) { return String(text).toLowerCase().split(/[^a-z0-9+#-]+/).filter(function (w) { return w.length > 1 && !STOP.has(w); }); }
+  function promptTopic(text) { return { name: text, prompt: true, queries: [text], words: promptWords(text), phrase: phraseRe([text.toLowerCase().trim()])[0] }; }
   function fromHF(x, topic) {
     var p = x.paper || {};
     return { id: p.id, t: x.title || p.title || "", sum: p.ai_summary || "", abs: (p.summary || x.summary || "").replace(/\s+/g, " "), up: +p.upvotes || 0,
@@ -1632,6 +1641,19 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
   }
   // A paper is about a topic if its title names it, or Hugging Face's keywords name it twice.
   function matchTopic(pp, topics) {
+    if (topics.length === 1 && topics[0].prompt) {
+      // Your own topic. Papers the topic search returned need most of your words (title, keywords or abstract);
+      // other trending papers need all of them in the title or keywords.
+      var tp = topics[0];
+      var has = function (text) { return tp.words.filter(function (w) { return new RegExp("(^|[^a-z0-9])" + w.replace(/[-+#]/g, "\\$&"), "i").test(text); }).length; };
+      var head = (pp.t + " " + pp.kw).toLowerCase(), headHits = has(head), allHits = pp.topic ? has(head + " " + pp.abs.toLowerCase()) : headHits;
+      var n = tp.words.length || 1, titlePhrase = tp.phrase.test(pp.t), kwPhrase = tp.phrase.test(pp.kw);
+      var titleHits = has(pp.t.toLowerCase()), kwHits = kwPhrase ? n : has(pp.kw);
+      var ok = titlePhrase || kwPhrase || (pp.topic ? allHits / n >= 0.6 : headHits === n);
+      // How closely the paper is about your words: the title counts most, then keywords.
+      var fit = titlePhrase ? 1 : 0.75 * titleHits / n + 0.25 * kwHits / n;
+      return { topic: tp.name, ok: ok, n: headHits, head: titlePhrase ? 1 : 0, fit: fit };
+    }
     var best = null, bestT = 0, bestK = 0;
     topics.forEach(function (tp) {
       var t = tp.re.filter(function (r) { return r.test(pp.t); }).length;
@@ -1649,8 +1671,14 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
   function isoDay(d) { return new Date(Date.now() - d * 864e5).toISOString().slice(0, 10); }
   function pickPaper(force) {
     var today = new Date().toDateString(), cached = readJSON(PKEY) || { seen: [] };
-    if (!force && cached.d === today && "paper" in cached) { renderPaper(cached.paper, cached); return; }
-    var topics = paperTopics();
+    var prompt = (state.paperPrompt || "").trim();
+    // One pick per topic per day: coming back to a topic you already looked at today shows the same paper.
+    var picks = cached.d === today && cached.picks ? cached.picks : {};
+    if (Object.prototype.hasOwnProperty.call(picks, prompt)) {
+      cached.paper = picks[prompt]; cached.prompt = prompt; writeJSON(PKEY, cached);
+      renderPaper(cached.paper, cached); return;
+    }
+    var topics = prompt ? [promptTopic(prompt)] : paperTopics();
     if (!topics.length) { renderPaper(null); return; }
     var reqs = [];
     for (var d = 0; d < POOL_DAYS; d++) {
@@ -1667,15 +1695,24 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
       [].concat.apply([], lists).forEach(function (pp) {
         if (!pp.id || !pp.t) return;
         var age = (Date.now() - Date.parse(pp.pub)) / 864e5;
-        if (!(age >= -1 && age <= POOL_DAYS + 3)) return;
+        if (!(age >= -1 && age <= (prompt && pp.topic ? 365 : POOL_DAYS + 3))) return;   // your own topic may reach back a year
+        pp.recent = age <= POOL_DAYS + 3;
         if (!byId[pp.id] || (pp.topic && !byId[pp.id].topic)) byId[pp.id] = pp;
         else byId[pp.id].up = Math.max(byId[pp.id].up, pp.up);
       });
       var pool = Object.keys(byId).map(function (k) { return byId[k]; });
       if (!pool.length) { renderPaper(null); return; }
-      var ups = pool.map(function (x) { return x.up; }).sort(function (a, b) { return b - a; });
+      // The bar is set by the recent top papers, so older papers on your topic must beat it too.
+      var ups = pool.filter(function (x) { return x.recent; }).map(function (x) { return x.up; }).sort(function (a, b) { return b - a; });
+      if (!ups.length) ups = [25];
       var q = function (f) { return ups[Math.min(ups.length - 1, Math.floor(f * ups.length))]; };
       var p75 = Math.max(25, q(0.25)), p90 = Math.max(40, q(0.10));
+      if (prompt) {
+        // Your own topic: compare papers on that topic with each other, not with this week's trending papers.
+        var rel = pool.filter(function (pp) { return matchTopic(pp, topics).ok; }).map(function (x) { return x.up; }).sort(function (a, b) { return b - a; });
+        var rq = function (f) { return rel.length ? rel[Math.min(rel.length - 1, Math.floor(f * rel.length))] : 0; };
+        p75 = Math.max(15, rq(0.25)); p90 = Math.max(30, rq(0.10));
+      }
       var seen = new Set(cached.seen || []);
       var good = [];
       pool.forEach(function (pp) {
@@ -1684,7 +1721,7 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
         if (!m.ok) return;                                          // clearly about one of your topics
         if (pp.up < p75) return;                                    // well received
         var why = [];
-        if (pp.up >= p90) why.push("top 10% of the last 3 weeks");
+        if (pp.up >= p90) why.push(prompt ? "among the most upvoted papers on this topic" : "top 10% of the last 3 weeks");
         if (pp.gh) why.push("code is public" + (pp.stars >= 50 ? " (" + (pp.stars >= 1000 ? (pp.stars / 1000).toFixed(1) + "k" : pp.stars) + " stars)" : ""));
         if (pp.cm >= 3) why.push(pp.cm + " comments");
         if (!why.length) return;                                    // needs at least one more signal
@@ -1692,28 +1729,58 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
         var age = Math.max(0, (Date.now() - Date.parse(pp.pub)) / 864e5);
         pp.topic = m.topic;
         pp.why = why;
-        pp.score = pp.up * (1 + 0.15 * why.length) * (1 + 0.2 * Math.min(m.n, 3)) * Math.exp(-age / 30);
+        pp.score = prompt
+          ? pp.up * Math.pow(0.1 + m.fit, 3) * (1 + 0.15 * why.length) * Math.exp(-age / 120)   // closest to your words first
+          : pp.up * (1 + 0.15 * why.length) * (1 + 0.2 * Math.min(m.n, 3)) * Math.exp(-age / 30);
         good.push(pp);
       });
       good.sort(function (a, b) { return b.score - a.score; });
-      var turn = topics[Math.floor(Date.now() / 864e5) % topics.length].name;
+      var turn = prompt ? prompt : topics[Math.floor(Date.now() / 864e5) % topics.length].name;
       var best = good[0] || null, mine = good.filter(function (x) { return x.topic === turn; })[0];
       var paper = mine && best && mine.score >= 0.5 * best.score ? mine : best;
       var seenArr = (cached.seen || []).slice(-300);
       if (paper) seenArr.push(paper.id);
-      var rec = { d: today, paper: paper, seen: seenArr, read: false, poolSize: pool.length };
+      picks[prompt] = paper;
+      var rec = { d: today, paper: paper, seen: seenArr, read: false, poolSize: pool.length, prompt: prompt, picks: picks };
       writeJSON(PKEY, rec);
       renderPaper(paper, rec);
     }).catch(function () { renderPaper(null); });
   }
+  function paperAsk() {
+    var prompt = state.paperPrompt || "";
+    var input = h("input", { id: "paperPrompt", type: "text", maxlength: "120", autocomplete: "off", "aria-label": "Topic for Paper of the day", placeholder: "Any topic, e.g. efficient video diffusion sampling" });
+    input.value = prompt;
+    var form = h("form", { class: "paperask" }, [
+      h("label", { class: "label", for: "paperPrompt", text: "Paper topic" }), input,
+      h("button", { class: "btn", type: "submit", text: "Find paper" }),
+      prompt ? h("button", { class: "linkbtn", type: "button", id: "paperReset", text: "Use my topics" }) : null
+    ]);
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      state.paperPrompt = input.value.trim().slice(0, 120); save();
+      paperLoading(); pickPaper(true);
+    });
+    var rb = form.querySelector("#paperReset");
+    if (rb) rb.addEventListener("click", function () { state.paperPrompt = ""; save(); paperLoading(); pickPaper(true); });
+    return form;
+  }
+  function paperLoading() {
+    var slot = document.getElementById("paperSlot"); slot.textContent = ""; slot.hidden = false;
+    slot.appendChild(paperAsk());
+    slot.appendChild(h("p", { class: "note paperNone", text: state.paperPrompt ? "Looking for the best paper on \u201c" + state.paperPrompt + "\u201d\u2026" : "Looking for today's paper\u2026" }));
+  }
   function renderPaper(pp, rec) {
     var slot = document.getElementById("paperSlot"); slot.textContent = "";
     if (!pp) {
-      slot.hidden = !(rec && rec.poolSize);
-      if (rec && rec.poolSize) slot.appendChild(h("p", { class: "note paperNone", text: "No paper about your topics cleared the bar today, so there's no Paper of the day. Better nothing than a weak one." }));
+      slot.hidden = !(rec && rec.poolSize) && !state.paperPrompt;
+      slot.appendChild(paperAsk());
+      if (rec && rec.poolSize) slot.appendChild(h("p", { class: "note paperNone", text: state.paperPrompt
+        ? "No paper on \u201c" + state.paperPrompt + "\u201d cleared the bar (well upvoted, plus code, discussion or top-10% interest). Try broader words, like the main method or field name."
+        : "No paper about your topics cleared the bar today, so there's no Paper of the day. Better nothing than a weak one." }));
       return;
     }
     slot.hidden = false;
+    slot.appendChild(paperAsk());
     var days = Math.floor((Date.now() - Date.parse(pp.pub)) / 864e5);
     var when = days <= 0 ? "today" : days === 1 ? "yesterday" : days + " days ago";
     var read = rec && rec.read;
@@ -1943,7 +2010,30 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
     return out;
   }
 
-  var view = { hero: null, queue: [], spark: null, music: null };
+  // Mix the ranked list across topics (round-robin, best first in each topic) and avoid
+  // showing the same channel twice within a few cards.
+  function interleave(list, hero) {
+    var groups = {}, order = [];
+    list.forEach(function (c) { var t = c.interest || ""; if (!groups[t]) { groups[t] = []; order.push(t); } groups[t].push(c); });
+    var out = [], recent = hero && hero.by ? [hero.by] : [];
+    var total = list.length;
+    while (out.length < total) {
+      var progressed = false;
+      order.forEach(function (t) {
+        var g = groups[t]; if (!g.length) return;
+        var i = g.findIndex(function (c) { return !c.by || recent.indexOf(c.by) === -1; });
+        if (i === -1) i = 0;                                  // only repeats left in this topic
+        var c = g.splice(i, 1)[0];
+        out.push(c); progressed = true;
+        if (c.by) { recent.push(c.by); if (recent.length > 5) recent.shift(); }
+      });
+      if (!progressed) break;
+    }
+    return out;
+  }
+  var QUEUE_STEP = 6, queueShown = QUEUE_STEP;
+
+  var view = { hero: null, queue: [], more: [], sparks: [], spark: null, music: null };
 
   function buildFeed() {
     var act = activeInterests();
@@ -1955,16 +2045,26 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
       ordered = [withKind(pn, "learn", pn.interest)].concat(ordered.filter(function (c) { return keyOf(c) !== keyOf(pn); }));
     }
     view.hero = ordered[0] || null;
-    view.queue = diversify(ordered.slice(1), 3, view.hero);
+    view.more = interleave(ordered.slice(1).filter(function (c) { return !isWatched(c) || c.kind === "search"; }), view.hero);
+    view.queue = view.more.slice(0, queueShown);
 
-    // One spark: near your topics most of the time, a wildcard now and then.
+    // Three sparks: two near your topics (from different topics when possible) and one wildcard.
     var near = [];
     act.forEach(function (i) { var cat = catFor(i.name); if (cat) cat.spark.forEach(function (c) { near.push(withKind(c, "spark", i.name)); }); });
     var wild = WILD.map(function (c) { return withKind(c, "spark", null); })
       .concat(live.items.filter(function (x) { return x.kind === "spark"; }).map(function (x) { return withKind(x, "spark", null); }));
     var claudeSpark = claudeCards.filter(function (c) { return c.kind === "spark"; })[0];
     var pickFrom = function (arr) { return freshFirst(arr.filter(function (c) { return !isHidden(c) && !seen.has(keyOf(c)); }))[0]; };
-    view.spark = claudeSpark || (Math.random() < 0.7 ? pickFrom(near) || pickFrom(wild) : pickFrom(wild) || pickFrom(near)) || null;
+    var sparks = [], used = new Set(), topicsUsed = new Set();
+    var take = function (c) { if (c && !used.has(keyOf(c)) && sparks.length < 3) { used.add(keyOf(c)); sparks.push(c); if (c.interest) topicsUsed.add(c.interest); } };
+    take(claudeSpark);
+    var nearFresh = freshFirst(near.filter(function (c) { return !isHidden(c) && !seen.has(keyOf(c)); }));
+    nearFresh.forEach(function (c) { if (sparks.length < 2 && !topicsUsed.has(c.interest)) take(c); });
+    nearFresh.forEach(function (c) { if (sparks.length < 2) take(c); });
+    freshFirst(wild.filter(function (c) { return !isHidden(c) && !seen.has(keyOf(c)); })).forEach(function (c) { if (sparks.length < 3) take(c); });
+    nearFresh.forEach(function (c) { if (sparks.length < 3) take(c); });
+    view.sparks = sparks;
+    view.spark = sparks[0] || null;
 
     // Music only sometimes (about half the time), as one quiet line.
     var claudeMusic = claudeCards.filter(function (c) { return c.kind === "music"; })[0];
@@ -2046,7 +2146,11 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
     if (view.hero) hero.appendChild(cardEl(view.hero, "hero"));
     view.queue.forEach(function (c) { queue.appendChild(cardEl(c, "mini")); });
     document.getElementById("queueWrap").hidden = !view.queue.length;
-    if (view.spark && !isHidden(view.spark)) sparks.appendChild(cardEl(view.spark, "mini"));
+    var left = view.more.length - view.queue.length;
+    var moreBtn = document.getElementById("showMore");
+    moreBtn.hidden = left <= 0;
+    moreBtn.textContent = left > QUEUE_STEP ? "Show " + QUEUE_STEP + " more" : "Show " + left + " more";
+    view.sparks.forEach(function (c) { if (!isHidden(c)) sparks.appendChild(cardEl(c, "mini")); });
     document.getElementById("sparkWrap").hidden = !sparks.childNodes.length;
     if (view.music && !isHidden(view.music)) {
       musicSlot.appendChild(h("div", { class: "musicline" }, [
@@ -2187,7 +2291,15 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
   });
   document.getElementById("goalForm").addEventListener("submit", function (e) { e.preventDefault(); clearTimeout(goalTimer); buildFeed(); });
   document.getElementById("filter").addEventListener("change", function (e) { filter = e.target.value; claudeCards = []; setStatus(""); buildFeed(); });
-  document.getElementById("shuffle").addEventListener("click", function () { claudeCards = []; setStatus(""); buildFeed(); });
+  document.getElementById("shuffle").addEventListener("click", function () { claudeCards = []; queueShown = QUEUE_STEP; setStatus(""); buildFeed(); });
+  document.getElementById("showMore").addEventListener("click", function () {
+    var first = view.queue.length;
+    queueShown += QUEUE_STEP;
+    view.queue = view.more.slice(0, queueShown);
+    render();
+    var cards = document.querySelectorAll("#queue .card");
+    if (cards[first]) { var a = cards[first].querySelector("h3 a"); if (a) a.focus({ preventScroll: true }); cards[first].scrollIntoView({ behavior: "smooth", block: "nearest" }); }
+  });
   document.getElementById("resetHidden").addEventListener("click", function () { state.hidden = []; save(); setStatus("Hidden videos are back in the mix.", false, true); buildFeed(); });
 
   document.getElementById("keyForm").addEventListener("submit", function (e) {
