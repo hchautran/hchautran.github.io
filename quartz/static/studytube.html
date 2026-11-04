@@ -314,6 +314,48 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
 .thumb:has(img) .badge { left: 8px; right: auto; top: 8px; }
 .musicline { padding: 8px 10px; }
 .musicline img { width: 64px; height: 36px; object-fit: cover; border-radius: 6px; flex: none; }
+.ts { font: 600 12.5px var(--mono); color: var(--accent); background: var(--accent-soft); border: 0; border-radius: 5px; padding: 1px 6px; margin: 0 2px; cursor: pointer; }
+.ts:hover { text-decoration: underline; }
+.notetools { align-items: center; gap: 10px; }
+.moments { display: grid; gap: 4px; font-size: 13.5px; color: var(--muted); }
+.moment { white-space: pre-wrap; overflow-wrap: anywhere; }
+.pbar { position: absolute; left: 0; right: 0; bottom: 0; height: 4px; background: rgba(255,255,255,.35); z-index: 2; }
+.pbar i { display: block; height: 100%; background: #E5484D; }
+#topSlot { display: grid; gap: 12px; }
+.topcard { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 14px; padding: 14px 16px; display: grid; gap: 8px; }
+.topcard h3 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 17px; line-height: 1.25; }
+.topcard .actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 0; }
+.topcard .note { margin: 0; }
+.topcard.cont { grid-template-columns: 200px minmax(0, 1fr); align-items: center; gap: 14px; }
+.cthumb { position: relative; aspect-ratio: 16 / 9; border: 0; padding: 0; border-radius: 10px; overflow: hidden; background: #000; cursor: pointer; }
+.cthumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.cbody { display: grid; gap: 8px; min-width: 0; }
+.topcard.recap { border-left-color: var(--spark); }
+.ntext.big { font-size: 15px; color: var(--ink); }
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.stats > div { display: grid; gap: 2px; background: var(--bg); border-radius: 10px; padding: 8px 10px; }
+.stats b { font-family: var(--display); font-size: 20px; }
+.tbars { display: grid; gap: 6px; }
+.tbar { display: grid; grid-template-columns: minmax(0, 9em) minmax(0, 1fr) auto; gap: 8px; align-items: center; font-size: 13px; }
+.tname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tfill { height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden; }
+.tfill i { display: block; height: 100%; background: var(--accent); border-radius: 4px; }
+.rnotes { display: grid; gap: 6px; }
+#weekBody { display: grid; gap: 10px; }
+#weekBody .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ppaper { margin: 0; display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; font-size: 14px; }
+.ppaper a { font-weight: 500; }
+.explainer { display: grid; grid-template-columns: 120px minmax(0, 1fr); column-gap: 12px; row-gap: 2px; align-items: center; text-decoration: none; color: inherit; border-top: 1px solid var(--line); padding-top: 10px; margin-top: 4px; }
+.explainer img { width: 120px; height: 68px; object-fit: cover; border-radius: 8px; grid-column: 1; grid-row: 1 / span 3; }
+.explainer > span { grid-column: 2; }
+.explainer .etitle { font-weight: 500; }
+.explainer:hover .etitle { text-decoration: underline; }
+.keys { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 0; font-size: 14px; }
+.keys dt { white-space: nowrap; } .keys dd { margin: 0; color: var(--muted); }
+kbd { font: 600 12px var(--mono); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 5px; padding: 1px 6px; background: var(--bg); }
+.wander { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); z-index: 60; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 12px 40px rgba(0,0,0,.2); padding: 14px 16px; display: grid; gap: 10px; width: min(460px, calc(100vw - 32px)); }
+.wander p { margin: 0; font-size: 14.5px; }
+@media (max-width: 640px) { .topcard.cont { grid-template-columns: minmax(0, 1fr); } .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } .explainer { grid-template-columns: 96px minmax(0, 1fr); } .explainer img { width: 96px; height: 54px; } }
 </style>
 </head>
 <body>
@@ -371,6 +413,26 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
         </div>
       </div>
     </div>
+    <div class="dlg" id="keysDlg" hidden role="dialog" aria-modal="true" aria-labelledby="keysTitle">
+      <div class="dlgbox">
+        <h2 id="keysTitle">Keyboard shortcuts</h2>
+        <dl class="keys">
+          <dt><kbd>Space</kbd> or <kbd>K</kbd></dt><dd>Play / pause</dd>
+          <dt><kbd>J</kbd> / <kbd>L</kbd></dt><dd>Back / forward 10 seconds</dd>
+          <dt><kbd>&larr;</kbd> / <kbd>&rarr;</kbd></dt><dd>Back / forward 5 seconds</dd>
+          <dt><kbd>N</kbd></dt><dd>Timestamp in your notes</dd>
+          <dt><kbd>Shift</kbd> + <kbd>N</kbd></dt><dd>Next video</dd>
+          <dt><kbd>1</kbd>&ndash;<kbd>4</kbd></dt><dd>Speed 1x, 1.25x, 1.5x, 2x</dd>
+          <dt><kbd>F</kbd></dt><dd>Focus mode on / off</dd>
+          <dt><kbd>S</kbd></dt><dd>Save the video</dd>
+          <dt><kbd>/</kbd></dt><dd>Search</dd>
+          <dt><kbd>Esc</kbd></dt><dd>Back to the feed</dd>
+          <dt><kbd>?</kbd></dt><dd>This list</dd>
+        </dl>
+        <div class="row"><button class="btn primary" id="keysClose" type="button">OK</button></div>
+      </div>
+    </div>
+    <div class="wander" id="wander" hidden role="status"></div>
     <section aria-label="Now playing" class="stage" id="playerView" hidden>
       <div class="focusbar">
         <span class="fbrand"><a href="#" class="homeLink" title="MinimalTube home">MinimalTube</a> <span class="label">focus</span></span>
@@ -404,6 +466,8 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
         <h2 class="ptitle" id="pTitle"></h2>
         <p class="by" id="pBy"></p>
         <p class="why" id="pWhy"></p>
+        <p class="ppaper" id="pPaper" hidden></p>
+        <p class="note" id="pResume" hidden></p>
         <p class="note" id="playerNote" role="status"></p>
         <div class="row">
           <button class="btn primary" id="pNext" type="button">Next video</button>
@@ -417,7 +481,8 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
         <div class="notebox">
           <label class="label" for="pNote">Notes for this video</label>
           <textarea id="pNote" rows="3" placeholder="Key ideas, questions, timestamps like 12:30 …"></textarea>
-          <span class="label" id="pNoteSaved"></span>
+          <div class="row notetools"><button class="btn" id="pStamp" type="button" title="Add the current time to your notes (N)">+ Timestamp</button><span class="label" id="pNoteSaved"></span></div>
+          <div id="pMoments" class="moments" hidden></div>
         </div>
       </div>
       <div id="plWrap" hidden>
@@ -441,6 +506,7 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
         <p><b>Want to watch videos right on this page?</b> YouTube's player only works when MinimalTube runs from a web address. Close this tab and double-click <b>Open StudyTube</b> in the same folder. Until then, videos open on YouTube.</p>
         <button class="linkbtn" id="hintClose" type="button">Got it</button>
       </div>
+      <div id="topSlot" hidden></div>
       <div id="paperSlot" hidden></div>
       <div>
         <div class="sec-h"><h2>Watch this now</h2><span class="streak" id="streak"></span></div>
@@ -488,6 +554,10 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
             <button class="btn" id="notesCopy" type="button" hidden>Copy all notes</button>
           </div>
         </details>
+        <details class="srow" id="weekPanel">
+          <summary><span>This week</span></summary>
+          <div class="sbody" id="weekBody"></div>
+        </details>
         <details class="srow" id="livePanel">
           <summary><span>Settings</span><span class="count" id="liveBadge"></span></summary>
           <div class="sbody">
@@ -512,6 +582,7 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
                 <li>Paste it above. It stays in this browser only.</li>
               </ol>
             </details>
+            <p class="note"><button class="linkbtn" id="keysOpen" type="button">Keyboard shortcuts</button> (press ?)</p>
             <p class="note">Your topics, notes and history stay in this browser. <button class="linkbtn" id="resetHidden" type="button">Bring back hidden videos</button></p>
           </div>
         </details>
@@ -1353,7 +1424,8 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
     if (!pl) return;
     var cur = yt.current ? plIndex(pl, yt.current.id) : -1;
     document.getElementById("plTitle").textContent = pl.title;
-    document.getElementById("plMeta").textContent = (cur !== -1 ? "Part " + (pl.all[cur].pos || cur + 1) + " of " : "") + pl.all.length + " videos" + (pl.more ? " (first 200 shown)" : "");
+    var nSeen = pl.all.filter(function (x) { return x.id && (isWatched(x) || (learn.prog[x.id] && learn.prog[x.id].done)); }).length;
+    document.getElementById("plMeta").textContent = (cur !== -1 ? "Part " + (pl.all[cur].pos || cur + 1) + " of " : "") + pl.all.length + " videos" + (nSeen ? " \u00b7 " + nSeen + " watched" : "") + (pl.more ? " (first 200 shown)" : "");
     var curRow = null;
     pl.all.forEach(function (x, i) {
       if (isHidden(x)) return;
@@ -1383,12 +1455,16 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
     showView("player"); setPlayerInfo(c); playerNote("");
     document.getElementById("pNote").value = noteFor(c);
     document.getElementById("pNoteSaved").textContent = "";
+    var startAt = c.startAt != null ? c.startAt : resumePoint(c.id); delete c.startAt;
+    startAt = Math.floor(startAt || 0);
+    showResume(c, startAt); renderMoments(); findPaperForVideo(c);
+    if (!progTimer) progTimer = setInterval(sampleProgress, 5000);
     window.scrollTo({ top: 0 });
     loadYTApi(function () {
       if (!yt.player) {
         yt.player = new YT.Player("ytplayer", {
           videoId: c.id,
-          playerVars: { autoplay: 1, rel: 0, playsinline: 1, modestbranding: 1, origin: location.origin },
+          playerVars: { autoplay: 1, rel: 0, playsinline: 1, modestbranding: 1, origin: location.origin, start: startAt },
           events: {
             onReady: function () { yt.ready = true; },
             onStateChange: onPlayerState,
@@ -1396,9 +1472,9 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
           }
         });
       } else if (yt.ready) {
-        yt.player.loadVideoById(c.id);
+        yt.player.loadVideoById({ videoId: c.id, startSeconds: startAt });
       } else {
-        setTimeout(function () { if (yt.player && yt.player.loadVideoById) yt.player.loadVideoById(c.id); }, 800);
+        setTimeout(function () { if (yt.player && yt.player.loadVideoById) yt.player.loadVideoById({ videoId: c.id, startSeconds: startAt }); }, 800);
       }
     });
     renderPlaylistRow();
@@ -1413,7 +1489,7 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
       if (tm.mode === "idle") timerStart("work", state.work);   // the study timer starts with your first video
       pendingAdvance = false;                                  // we handle "what's next" right here
     }
-    if (e.data === 0) showEndCard();                           // ended
+    if (e.data === 0) { if (yt.current) markDone(yt.current); showEndCard(); }   // ended
   }
   function onPlayerError(e) {
     var c = yt.current;
@@ -1577,6 +1653,7 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
     var d = todayKey();
     state.pomos = state.pomos && state.pomos.d === d ? { d: d, n: state.pomos.n + 1 } : { d: d, n: 1 };
     save();
+    logDay().focus += 1; saveLearn();
     pauseVideo(); chime();
     timerStart("break", state.brk);
     var dlg = document.getElementById("breakDlg");
@@ -1607,8 +1684,8 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
   function saveNote(c, text) {
     if (!c || !c.id) return;
     text = String(text || "").trim();
-    if (!text) { delete state.notes[c.id]; } else state.notes[c.id] = { t: c.t, by: c.by || "", text: text.slice(0, 2000), at: Date.now() };
-    save(); renderNotes();
+    if (!text) { delete state.notes[c.id]; delete learn.rev[c.id]; } else { state.notes[c.id] = { t: c.t, by: c.by || "", text: text.slice(0, 2000), at: Date.now() }; scheduleReview(c.id, c.t, Date.now()); }
+    save(); saveLearn(); renderNotes();
   }
   function renderNotes() {
     var list = document.getElementById("notesList"); list.textContent = "";
@@ -1617,7 +1694,7 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
       var n = state.notes[id];
       list.appendChild(h("li", null, [
         h("a", { href: "https://www.youtube.com/watch?v=" + id, target: "_blank", rel: "noopener", class: "ntitle", text: n.t }),
-        h("p", { class: "ntext", text: n.text }),
+        h("p", { class: "ntext" }, [richNote(n.text, function (sec) { openVideoAt(id, sec); })]),
         h("span", { class: "label", text: new Date(n.at).toLocaleDateString() })
       ]));
     });
@@ -1839,6 +1916,7 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
         vidBtn, readBtn
       ])
     ]));
+    attachExplainer(pp, slot);
   }
 
   function loadNews(force) {
@@ -1872,6 +1950,412 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
     });
     document.getElementById("newsEmpty").hidden = !!(items && items.length);
   }
+
+  // ---------- Learning tools ----------
+  // Timestamped notes, spaced review, resume where you left off, keyboard shortcuts,
+  // "you wandered off" check, weekly recap, and paper <-> video links.
+  // Their data lives in its own localStorage key so the main settings stay small.
+  var LEARN_KEY = "studytube.learn.v1";
+  var learn = (function () {
+    try {
+      var s = JSON.parse(localStorage.getItem(LEARN_KEY) || "null");
+      if (s && typeof s === "object") return { prog: s.prog || {}, rev: s.rev || {}, log: s.log || {}, bridge: s.bridge || {}, recapSeen: s.recapSeen || "" };
+    } catch (e) {}
+    return { prog: {}, rev: {}, log: {}, bridge: {}, recapSeen: "" };
+  })();
+  function saveLearn() {
+    try { localStorage.setItem(LEARN_KEY, JSON.stringify(learn)); }
+    catch (e) {   // storage full: drop the oldest half of the progress entries and try again
+      var ids = Object.keys(learn.prog).sort(function (a, b) { return (learn.prog[a].at || 0) - (learn.prog[b].at || 0); });
+      ids.slice(0, Math.ceil(ids.length / 2)).forEach(function (id) { delete learn.prog[id]; });
+      try { localStorage.setItem(LEARN_KEY, JSON.stringify(learn)); } catch (e2) {}
+    }
+  }
+  function dayKey(t) { var d = new Date(t || Date.now()); return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate()); }
+  function logDay() { var k = dayKey(); return learn.log[k] || (learn.log[k] = { watch: 0, focus: 0, done: [], topics: {}, away: 0 }); }
+  (function pruneLogs() { var cut = dayKey(Date.now() - 70 * 864e5); Object.keys(learn.log).forEach(function (k) { if (k < cut) delete learn.log[k]; }); })();
+  function slim(c) { return { id: c.id, t: c.t, by: c.by || "", d: c.d || "", kind: c.kind || "learn", interest: c.interest || null, plTitle: c.plTitle || null, pos: c.pos || null, list: c.list || null, s: c.s || null, n: c.n || null }; }
+  function itemById(id) {
+    var found = null;
+    Object.keys(CAT).forEach(function (k) { CAT[k].learn.concat(CAT[k].spark).forEach(function (c) { if (!found && c.id === id && !c.list) found = withKind(c, "learn", CAT[k].label); }); });
+    if (!found) live.items.forEach(function (c) { if (!found && c.id === id) found = withKind(c, c.kind || "learn", c.interest || null); });
+    if (!found && learn.prog[id] && learn.prog[id].item) found = withKind(learn.prog[id].item, "learn", learn.prog[id].item.interest);
+    if (!found && state.notes[id]) found = { id: id, t: state.notes[id].t, by: state.notes[id].by || "", kind: "learn", interest: null };
+    return found;
+  }
+  function curTime() { try { return yt.player && yt.player.getCurrentTime ? yt.player.getCurrentTime() || 0 : 0; } catch (e) { return 0; } }
+  function isPlaying() { try { return yt.player && yt.player.getPlayerState && yt.player.getPlayerState() === 1; } catch (e) { return false; } }
+  function fmtTs(sec) { sec = Math.max(0, Math.floor(sec)); var hh = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60), s = sec % 60; return (hh ? hh + ":" + pad2(m) : m) + ":" + pad2(s); }
+  function fmtMin(sec) { var m = Math.round(sec / 60); return m >= 60 ? Math.floor(m / 60) + "h " + (m % 60) + "m" : m + "m"; }
+  function ago(t) { var d = Math.floor((Date.now() - t) / 864e5); return d <= 0 ? "today" : d === 1 ? "yesterday" : d + " days ago"; }
+
+  // Open a video on the page at a given second (or on YouTube when the page can't play videos).
+  function openVideoAt(id, sec) {
+    if (yt.current && yt.current.id === id && currentView() === "player" && yt.player) { seekTo(sec || 0); window.scrollTo({ top: 0 }); return; }
+    var c = itemById(id) || { id: id, t: "Video", kind: "learn" };
+    if (canEmbed) { c.startAt = sec || 0; playInPage(c); return; }
+    window.open("https://www.youtube.com/watch?v=" + id + (sec ? "&t=" + Math.floor(sec) + "s" : ""), "_blank", "noopener");
+    markWatched(c);
+  }
+
+  // 1. Timestamped notes ---------------------------------------------------------
+  var TS_RE = /\[?\b(\d{1,2}):([0-5]\d)(?::([0-5]\d))?\b\]?/g;
+  function tsToSec(m) { return m[3] != null ? (+m[1]) * 3600 + (+m[2]) * 60 + (+m[3]) : (+m[1]) * 60 + (+m[2]); }
+  function insertTimestamp() {
+    if (!yt.current) return;
+    var ta = document.getElementById("pNote");
+    var stamp = "[" + fmtTs(curTime()) + "] ";
+    ta.value = ta.value + (ta.value && !/\n$/.test(ta.value) ? "\n" : "") + stamp;
+    ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length);
+    ta.dispatchEvent(new Event("input"));
+  }
+  // Note text with each timestamp turned into a button that jumps there.
+  function richNote(text, onJump) {
+    var frag = document.createDocumentFragment(), last = 0, m;
+    var re = new RegExp(TS_RE.source, "g");
+    while ((m = re.exec(text))) {
+      frag.appendChild(document.createTextNode(text.slice(last, m.index)));
+      var b = h("button", { type: "button", class: "ts", title: "Jump to this moment", text: m[0].replace(/[\[\]]/g, "") });
+      (function (sec) { b.addEventListener("click", function () { onJump(sec); }); })(tsToSec(m));
+      frag.appendChild(b);
+      last = re.lastIndex;
+    }
+    frag.appendChild(document.createTextNode(text.slice(last)));
+    return frag;
+  }
+  function seekTo(sec) { try { yt.player.seekTo(sec, true); yt.player.playVideo(); } catch (e) {} }
+  function renderMoments() {
+    var box = document.getElementById("pMoments"); box.textContent = "";
+    var lines = document.getElementById("pNote").value.split("\n").filter(function (l) { return new RegExp(TS_RE.source).test(l); });
+    lines.slice(0, 30).forEach(function (l) { box.appendChild(h("div", { class: "moment" }, [richNote(l.trim(), seekTo)])); });
+    box.hidden = !lines.length;
+  }
+
+  // 2. Spaced review -------------------------------------------------------------
+  var REVIEW_DAYS = [1, 3, 7];
+  var reviewSkip = {};   // "Later" for this visit only
+  function scheduleReview(id, title, at) {
+    if (learn.rev[id]) return;
+    learn.rev[id] = { step: 0, due: (at || Date.now()) + REVIEW_DAYS[0] * 864e5, t: title };
+    saveLearn();
+  }
+  Object.keys(state.notes).forEach(function (id) { scheduleReview(id, state.notes[id].t, state.notes[id].at); });
+  function dueReviews() {
+    var now = Date.now();
+    return Object.keys(learn.rev).filter(function (id) {
+      var r = learn.rev[id];
+      return !r.done && r.due <= now && state.notes[id] && !reviewSkip[id];
+    }).sort(function (a, b) { return learn.rev[a].due - learn.rev[b].due; });
+  }
+  function reviewCard() {
+    var due = dueReviews();
+    if (!due.length) return null;
+    var id = due[0], r = learn.rev[id], n = state.notes[id];
+    var got = h("button", { class: "act go", type: "button", text: "Got it" });
+    got.addEventListener("click", function () {
+      r.step += 1;
+      if (r.step >= REVIEW_DAYS.length) r.done = true; else r.due = Date.now() + REVIEW_DAYS[r.step] * 864e5;
+      saveLearn(); renderTop();
+    });
+    var fuzzy = h("button", { class: "act", type: "button", text: "Fuzzy, rewatch it" });
+    fuzzy.addEventListener("click", function () {
+      r.due = Date.now() + 864e5; saveLearn();
+      var m = new RegExp(TS_RE.source).exec(n.text);
+      openVideoAt(id, m ? tsToSec(m) : resumePoint(id));
+    });
+    var later = h("button", { class: "linkbtn", type: "button", text: "Later" });
+    later.addEventListener("click", function () { reviewSkip[id] = true; renderTop(); });
+    return h("article", { class: "topcard review" }, [
+      h("div", { class: "kind" }, [h("span", { class: "pill", text: "Quick review" }), h("span", { class: "from", text: "you noted this " + ago(n.at) + (due.length > 1 ? " · " + due.length + " to review" : "") })]),
+      h("h3", null, [h("span", { text: n.t })]),
+      h("p", { class: "ntext big" }, [richNote(n.text, function (sec) { openVideoAt(id, sec); })]),
+      h("p", { class: "note" , text: "Can you still explain it in your own words?" }),
+      h("div", { class: "actions" }, [got, fuzzy, later])
+    ]);
+  }
+
+  // 3. Resume where you left off -------------------------------------------------
+  var progTimer = null;
+  function resumePoint(id) {
+    var p = learn.prog[id];
+    return p && !p.done && p.t > 30 && (!p.d || p.t < p.d - 30) ? p.t : 0;
+  }
+  function sampleProgress() {
+    if (!yt.player || !yt.current || currentView() !== "player" || !isPlaying()) return;
+    var c = yt.current, t = curTime(), d = 0;
+    try { d = yt.player.getDuration() || 0; } catch (e) {}
+    var p = learn.prog[c.id] || {};
+    var done = p.done || (d > 0 && t / d >= 0.95);
+    learn.prog[c.id] = { t: t, d: d || p.d || 0, at: Date.now(), done: done, item: slim(c) };
+    if (done && !p.done) markDone(c);
+    var L = logDay(); L.watch += 5;
+    var topic = c.interest || "Other"; L.topics[topic] = (L.topics[topic] || 0) + 5;
+    saveLearn();
+  }
+  function markDone(c) {
+    var p = learn.prog[c.id] || {};
+    p.done = true; p.at = Date.now(); p.item = slim(c); learn.prog[c.id] = p;
+    var L = logDay(); if (L.done.indexOf(c.id) === -1) L.done.push(c.id);
+    saveLearn();
+  }
+  function continueCard() {
+    var best = null;
+    Object.keys(learn.prog).forEach(function (id) {
+      var p = learn.prog[id];
+      if (!p || p.done || !p.item || !p.d || p.t < 30 || p.t > p.d - 30) return;
+      if (Date.now() - p.at > 21 * 864e5 || isHidden({ id: id })) return;
+      if (yt.current && yt.current.id === id && currentView() === "player") return;
+      if (!best || p.at > learn.prog[best].at) best = id;
+    });
+    if (!best) return null;
+    var p = learn.prog[best], c = withKind(p.item, "learn", p.item.interest);
+    var go = h("button", { class: "act go", type: "button", text: "Continue at " + fmtTs(p.t) });
+    go.addEventListener("click", function () { openVideoAt(best, p.t); });
+    var thumb = h("button", { class: "cthumb", type: "button", "aria-label": "Continue " + c.t }, [
+      (function () { var im = h("img", { src: thumbUrl(best), alt: "", referrerpolicy: "no-referrer" }); im.addEventListener("error", function () { im.remove(); }); return im; })(),
+      h("span", { class: "pbar" }, [h("i", { style: "width:" + Math.round(100 * p.t / p.d) + "%" })])
+    ]);
+    thumb.addEventListener("click", function () { openVideoAt(best, p.t); });
+    var left = Math.max(0, p.d - p.t);
+    return h("article", { class: "topcard cont" }, [
+      thumb,
+      h("div", { class: "cbody" }, [
+        h("div", { class: "kind" }, [h("span", { class: "pill", text: "Continue" }), h("span", { class: "from", text: fmtMin(left) + " left" + (c.plTitle ? " · part " + (c.pos || "") + " of “" + c.plTitle + "”" : "") })]),
+        h("h3", null, [h("span", { text: c.t })]),
+        h("div", { class: "actions" }, [go])
+      ])
+    ]);
+  }
+
+  // 6. Weekly recap -------------------------------------------------------------
+  function weekStart(t) { var d = new Date(t || Date.now()); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return d; }
+  function weekStats(endT) {
+    var end = new Date(endT || Date.now()), s = { watch: 0, focus: 0, done: 0, away: 0, topics: {}, notes: [], days: 0 };
+    for (var i = 0; i < 7; i++) {
+      var L = learn.log[dayKey(end.getTime() - i * 864e5)];
+      if (!L) continue;
+      s.days += L.watch > 0 || L.focus > 0 ? 1 : 0;
+      s.watch += L.watch; s.focus += L.focus; s.done += L.done.length; s.away += L.away || 0;
+      Object.keys(L.topics).forEach(function (k) { s.topics[k] = (s.topics[k] || 0) + L.topics[k]; });
+    }
+    var to = new Date(end); to.setHours(23, 59, 59, 999);
+    var from = to.getTime() - 7 * 864e5;
+    s.notes = Object.keys(state.notes).filter(function (id) { return state.notes[id].at > from && state.notes[id].at <= to.getTime(); })
+      .sort(function (a, b) { return state.notes[b].text.length - state.notes[a].text.length; }).slice(0, 3)
+      .map(function (id) { return { id: id, t: state.notes[id].t, text: state.notes[id].text }; });
+    return s;
+  }
+  function recapText(s) {
+    var topics = Object.keys(s.topics).sort(function (a, b) { return s.topics[b] - s.topics[a]; }).slice(0, 4)
+      .map(function (k) { return k + " " + fmtMin(s.topics[k]); }).join(", ");
+    var lines = ["MinimalTube · week ending " + new Date().toLocaleDateString(undefined, { month: "short", day: "numeric" }),
+      "Focused: " + s.focus + " block" + (s.focus === 1 ? "" : "s") + " · Watched: " + fmtMin(s.watch) + " · Finished: " + s.done + " video" + (s.done === 1 ? "" : "s") + " · Active days: " + s.days + "/7"];
+    if (topics) lines.push("Topics: " + topics);
+    if (s.notes.length) { lines.push("Best notes:"); s.notes.forEach(function (n) { lines.push("- " + n.t + ": " + n.text.replace(/\s+/g, " ").slice(0, 180)); }); }
+    return lines.join("\n");
+  }
+  function recapBody(s) {
+    var topics = Object.keys(s.topics).sort(function (a, b) { return s.topics[b] - s.topics[a]; }).slice(0, 4);
+    var max = topics.length ? s.topics[topics[0]] : 1;
+    var copy = h("button", { class: "btn", type: "button", text: "Copy recap" });
+    copy.addEventListener("click", function () {
+      var text = recapText(s);
+      var done = function () { copy.textContent = "Copied"; setTimeout(function () { copy.textContent = "Copy recap"; }, 1500); };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, fb); else fb();
+      function fb() { var ta = h("textarea", { style: "position:fixed;left:-9999px" }); ta.value = text; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); done(); } catch (e) {} ta.remove(); }
+    });
+    return [
+      h("div", { class: "stats" }, [
+        h("div", null, [h("b", { text: String(s.focus) }), h("span", { class: "label", text: "focus blocks" })]),
+        h("div", null, [h("b", { text: fmtMin(s.watch) }), h("span", { class: "label", text: "watched" })]),
+        h("div", null, [h("b", { text: String(s.done) }), h("span", { class: "label", text: "finished" })]),
+        h("div", null, [h("b", { text: s.days + "/7" }), h("span", { class: "label", text: "active days" })])
+      ]),
+      topics.length ? h("div", { class: "tbars" }, topics.map(function (k) {
+        return h("div", { class: "tbar" }, [h("span", { class: "tname", text: k }), h("span", { class: "tfill" }, [h("i", { style: "width:" + Math.max(4, Math.round(100 * s.topics[k] / max)) + "%" })]), h("span", { class: "label", text: fmtMin(s.topics[k]) })]);
+      })) : null,
+      s.notes.length ? h("div", { class: "rnotes" }, [h("span", { class: "label", text: "Best notes" })].concat(s.notes.map(function (n) {
+        return h("p", { class: "ntext" }, [h("b", { text: n.t + ": " }), richNote(n.text.slice(0, 220), function (sec) { openVideoAt(n.id, sec); })]);
+      }))) : null,
+      h("div", { class: "actions" }, [copy])
+    ];
+  }
+  function recapCard() {
+    var d = new Date().getDay(), wk = dayKey(weekStart().getTime());
+    if (!(d === 0 || d === 1) || learn.recapSeen === wk) return null;
+    var s = weekStats(d === 1 ? Date.now() - 864e5 : Date.now());   // on Monday, recap the week that just ended
+    if (!s.watch && !s.focus) return null;
+    var close = h("button", { class: "linkbtn", type: "button", text: "Done" });
+    close.addEventListener("click", function () { learn.recapSeen = wk; saveLearn(); renderTop(); });
+    return h("article", { class: "topcard recap" }, [
+      h("div", { class: "kind" }, [h("span", { class: "pill", text: "Your week" }), h("span", { class: "from", text: "last 7 days" })])
+    ].concat(recapBody(s)).concat([h("div", { class: "actions" }, [close])]));
+  }
+  function renderWeekPanel() {
+    var root = document.getElementById("weekBody"); if (!root) return;
+    root.textContent = "";
+    var s = weekStats();
+    if (!s.watch && !s.focus && !s.notes.length) { root.appendChild(h("p", { class: "empty", text: "Watch a video or finish a focus block and your week shows up here." })); return; }
+    recapBody(s).forEach(function (el) { if (el) root.appendChild(el); });
+  }
+
+  // Top of the feed: at most one of each, in this order: continue, review, weekly recap.
+  function renderTop() {
+    var slot = document.getElementById("topSlot"); if (!slot) return;
+    slot.textContent = "";
+    [continueCard(), reviewCard(), recapCard()].forEach(function (el) { if (el) slot.appendChild(el); });
+    slot.hidden = !slot.childNodes.length;
+  }
+
+  // 5. "You wandered off" --------------------------------------------------------
+  var awayInfo = null, lastOutClick = 0;
+  document.addEventListener("click", function (e) {
+    var a = e.target && e.target.closest ? e.target.closest("a[target=_blank]") : null;
+    if (a) lastOutClick = Date.now();   // leaving on purpose (a paper, YouTube, news) doesn't count
+  }, true);
+  function onVisibility() {
+    if (document.hidden) {
+      if (tm.mode === "work" && Date.now() - lastOutClick > 3000) {
+        awayInfo = { at: Date.now(), pos: currentView() === "player" && yt.current ? curTime() : null, id: yt.current ? yt.current.id : null };
+        timerToggle();   // pause the focus timer while you're away
+      } else awayInfo = null;
+      return;
+    }
+    if (!awayInfo) return;
+    var a = awayInfo, ms = Date.now() - a.at; awayInfo = null;
+    if (tm.mode !== "paused-work") return;
+    if (ms < 60000) { timerToggle(); return; }   // a quick glance: just carry on
+    logDay().away += Math.round(ms / 60000); saveLearn();
+    showWander(ms, a);
+  }
+  function showWander(ms, a) {
+    var box = document.getElementById("wander"); box.textContent = "";
+    var mins = Math.round(ms / 60000);
+    var resume = function () { box.hidden = true; if (tm.mode === "paused-work") timerToggle(); };
+    var pick = a.pos != null && a.id && yt.current && yt.current.id === a.id
+      ? h("button", { class: "btn primary", type: "button", text: "Pick up at " + fmtTs(a.pos) }) : null;
+    if (pick) pick.addEventListener("click", function () { seekTo(a.pos); resume(); });
+    var go = h("button", { class: "btn" + (pick ? "" : " primary"), type: "button", text: "Resume focus" });
+    go.addEventListener("click", resume);
+    box.appendChild(h("p", null, [h("b", { text: "You were away " + mins + " minute" + (mins === 1 ? "" : "s") + "." }), " Your focus timer paused while you were gone."]));
+    box.appendChild(h("div", { class: "row" }, [pick, go]));
+    box.hidden = false;
+    (pick || go).focus();
+  }
+
+  // 7. Paper <-> video ----------------------------------------------------------
+  var STOPW = new Set("the a an of for and to in on with via from by is are at as into towards toward using explained lecture paper video introduction intro part tutorial course talk how what why your you we our this that new".split(" "));
+  function sigWords(t) { return String(t || "").toLowerCase().replace(/[^a-z0-9+\- ]/g, " ").split(/\s+/).filter(function (w) { return w.length > 3 && !STOPW.has(w); }); }
+  function namePart(t) { var m = /^([^:|–—-]{3,40})\s*[:|–—]/.exec(t || ""); return m ? m[1].trim() : ""; }
+  function hasWord(hay, w) { return new RegExp("(^|[^a-z0-9])" + w.toLowerCase().replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") + "($|[^a-z0-9])").test(hay.toLowerCase()); }
+  // Does this paper title clearly match this video title?
+  function paperMatchesVideo(paperTitle, videoTitle) {
+    var name = namePart(paperTitle);
+    if (name && name.length >= 4 && !/\s/.test(name) && hasWord(videoTitle, name)) return true;   // e.g. "DreamerV3", "FlashAttention"
+    var ws = sigWords(paperTitle); if (ws.length < 3) return false;
+    var hit = ws.filter(function (w) { return hasWord(videoTitle, w); }).length;
+    return hit / ws.length >= 0.6;
+  }
+  function findPaperForVideo(c) {
+    var box = document.getElementById("pPaper"); box.textContent = ""; box.hidden = true;
+    if (!c || !c.id || c.kind === "music") return;
+    var show = function (pp) {
+      if (!pp || !yt.current || yt.current.id !== c.id) return;
+      box.textContent = "";
+      box.appendChild(h("span", { class: "label", text: "Paper" }));
+      box.appendChild(h("a", { href: "https://arxiv.org/abs/" + pp.id, target: "_blank", rel: "noopener", text: pp.t }));
+      if (pp.up) box.appendChild(h("span", { class: "label", text: "▲ " + pp.up }));
+      box.hidden = false;
+    };
+    var cached = learn.bridge["v:" + c.id];
+    if (cached && Date.now() - cached.at < 14 * 864e5) { show(cached.p); return; }
+    var q = c.t.replace(/\(.*?\)|\[.*?\]/g, " ").split(/[|–—]/)[0].replace(/\b(explained|paper|lecture|tutorial|from scratch|clearly|visually)\b/gi, " ").trim();
+    if (q.split(/\s+/).length < 2) return;
+    getJSON("https://huggingface.co/api/papers/search?q=" + encodeURIComponent(q)).then(function (arr) {
+      var best = null;
+      (arr || []).slice(0, 20).forEach(function (x) {
+        var p = x.paper || {}, t = x.title || p.title || "";
+        if (!p.id || !paperMatchesVideo(t, c.t)) return;
+        if (!best || (+p.upvotes || 0) > best.up) best = { id: p.id, t: t, up: +p.upvotes || 0 };
+      });
+      learn.bridge["v:" + c.id] = { p: best, at: Date.now() }; saveLearn();
+      show(best);
+    }).catch(function () {});
+  }
+  // Paper of the day -> an explainer video (uses your YouTube key; about 1% of the daily quota, once per paper).
+  function attachExplainer(pp, slot) {
+    if (!pp || !getKey()) return;
+    var key = "p:" + pp.id, cached = learn.bridge[key];
+    var put = function (v) {
+      if (!v || !slot.isConnected) return;
+      var old = slot.querySelector(".explainer"); if (old) old.remove();
+      var c = withKind(v, "learn", pp.topic || null);
+      var row = linkTo(c, { class: "explainer" }, [
+        (function () { var im = h("img", { src: thumbUrl(v.id), alt: "", referrerpolicy: "no-referrer" }); im.addEventListener("error", function () { im.remove(); }); return im; })(),
+        h("span", { class: "label", text: "Explainer video" }),
+        h("span", { class: "etitle", text: v.t }),
+        h("span", { class: "label", text: [v.by, v.d].filter(Boolean).join(" · ") })
+      ]);
+      var paper = slot.querySelector(".paper"); if (paper) paper.appendChild(row);
+    };
+    if (cached && Date.now() - cached.at < 30 * 864e5) { put(cached.v); return; }
+    if (unitsToday() > 9500) return;
+    var name = namePart(pp.t), q = name && name.length >= 4 ? name + " " + sigWords(pp.t.slice(name.length)).slice(0, 3).join(" ") : pp.t;
+    api("search", { part: "snippet", type: "video", maxResults: "10", q: q, safeSearch: "moderate", relevanceLanguage: "en" }).then(function (s) {
+      addUnits(100);
+      var ids = (s.items || []).map(function (it) { return it.id && it.id.videoId; }).filter(Boolean);
+      if (!ids.length) return null;
+      return api("videos", { part: "snippet,contentDetails,statistics", id: ids.join(",") }).then(function (v) {
+        addUnits(1);
+        var best = null;
+        (v.items || []).forEach(function (it) {
+          var sn = it.snippet || {}, sec = isoDur(it.contentDetails && it.contentDetails.duration);
+          if (sec < 180 || sn.liveBroadcastContent !== "none") return;
+          if (!paperMatchesVideo(pp.t, sn.title || "") && !(name && hasWord(sn.title || "", name))) return;
+          var o = toItem(it, { kind: "learn", a: "Explainer" });
+          if (!best || o.v > best.v) best = o;
+        });
+        return best;
+      });
+    }).then(function (best) {
+      learn.bridge[key] = { v: best, at: Date.now() }; saveLearn(); saveLive();
+      put(best);
+    }).catch(function () {});
+  }
+
+  // 4. Keyboard shortcuts -------------------------------------------------------
+  function typingIn(el) { return el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.tagName === "SELECT" || el.isContentEditable); }
+  function anyDialogOpen() { return ["howDlg", "breakDlg", "keysDlg"].some(function (id) { var d = document.getElementById(id); return d && !d.hidden; }); }
+  document.addEventListener("keydown", function (e) {
+    if (e.metaKey || e.ctrlKey || e.altKey || typingIn(e.target)) return;
+    if (e.key === "Escape" && !document.getElementById("keysDlg").hidden) { e.stopImmediatePropagation(); document.getElementById("keysDlg").hidden = true; return; }
+    if (anyDialogOpen()) return;
+    var inPlayer = currentView() === "player" && yt.player && yt.current;
+    var k = e.key;
+    if (k === "?") { e.preventDefault(); document.getElementById("keysDlg").hidden = false; document.getElementById("keysClose").focus(); return; }
+    if (k === "/") { e.preventDefault(); if (state.focus !== false && document.body.classList.contains("focus")) { state.focus = false; applyFocus(); } document.getElementById("q").focus(); return; }
+    if (!inPlayer) return;
+    var st = isPlaying();
+    if (k === " " || k === "k") { e.preventDefault(); try { st ? yt.player.pauseVideo() : yt.player.playVideo(); } catch (err) {} }
+    else if (k === "j") seekTo(Math.max(0, curTime() - 10));
+    else if (k === "l") seekTo(curTime() + 10);
+    else if (k === "ArrowLeft") { e.preventDefault(); seekTo(Math.max(0, curTime() - 5)); }
+    else if (k === "ArrowRight") { e.preventDefault(); seekTo(curTime() + 5); }
+    else if (k === "N") { var nx = computeNext(); if (nx) playInPage(nx, true); }
+    else if (k === "n") { e.preventDefault(); insertTimestamp(); }
+    else if (k === "f") document.getElementById("pFocus").click();
+    else if (k === "s") document.getElementById("pSave").click();
+    else if (k >= "1" && k <= "4") { var r = document.querySelector('.rate[data-r="' + ["1", "1.25", "1.5", "2"][+k - 1] + '"]'); if (r) r.click(); }
+  });
+  function showResume(c, at) {
+    var p = document.getElementById("pResume"); p.textContent = "";
+    if (!(at >= 1)) { p.hidden = true; return; }
+    var b = h("button", { class: "linkbtn", type: "button", text: "Start over" });
+    b.addEventListener("click", function () { seekTo(0); p.hidden = true; });
+    p.appendChild(document.createTextNode("Starting at " + fmtTs(at) + " \u00b7 "));
+    p.appendChild(b); p.hidden = false;
+  }
+  document.addEventListener("visibilitychange", onVisibility);
 
   // ---------- Search box ----------
   var srch = { q: "", token: null, items: [], busy: false };
@@ -2143,6 +2627,8 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
       else if (c.s && c.n) thumbKids.push(h("span", { class: "badge", text: "Part " + c.n }));
       if (isWatched(c)) thumbKids.push(h("span", { class: "seen", text: "Watched" }));
       if (c.d) thumbKids.push(h("span", { class: "dur", text: c.d }));
+      var pg = learn.prog[c.id];
+      if (pg && !pg.done && pg.d && pg.t > 30) thumbKids.push(h("span", { class: "pbar", title: fmtTs(pg.t) + " watched" }, [h("i", { style: "width:" + Math.min(100, Math.round(100 * pg.t / pg.d)) + "%" })]));
     } else {
       thumbKids = [h("span", { class: "angle", text: c.a || "" }), h("span", { class: "play", "aria-hidden": "true" }),
         h("span", { class: "big", text: c.kind === "spark" ? "What if…" : shortName(c.interest) })];
@@ -2182,6 +2668,7 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
     var hero = document.getElementById("hero"), queue = document.getElementById("queue"), sparks = document.getElementById("sparks"), musicSlot = document.getElementById("musicSlot");
     hero.textContent = ""; queue.textContent = ""; sparks.textContent = ""; musicSlot.textContent = "";
     if (view.hero) hero.appendChild(cardEl(view.hero, "hero"));
+    renderTop();
     view.queue.forEach(function (c) { queue.appendChild(cardEl(c, "mini")); });
     document.getElementById("queueWrap").hidden = !view.queue.length;
     var left = view.more.length - view.queue.length;
@@ -2395,6 +2882,12 @@ body.focus main .wrap { grid-template-columns: minmax(0, 1fr); max-width: 1060px
   document.getElementById("guardBreak").addEventListener("click", function () { clearEndCard(); workDone(); });
   document.getElementById("guardFeed").addEventListener("click", function () { clearEndCard(); closePlayer(); });
   var noteTimer = null;
+  document.getElementById("pNote").addEventListener("input", function () { renderMoments(); });
+  document.getElementById("pStamp").addEventListener("click", insertTimestamp);
+  document.getElementById("keysClose").addEventListener("click", function () { document.getElementById("keysDlg").hidden = true; });
+  document.getElementById("keysOpen").addEventListener("click", function () { document.getElementById("keysDlg").hidden = false; document.getElementById("keysClose").focus(); });
+  document.getElementById("keysDlg").addEventListener("click", function (e) { if (e.target === this) this.hidden = true; });
+  document.getElementById("weekPanel").addEventListener("toggle", function () { if (this.open) renderWeekPanel(); });
   document.getElementById("pNote").addEventListener("input", function (e) {
     clearTimeout(noteTimer);
     var c = yt.current, v = e.target.value;
