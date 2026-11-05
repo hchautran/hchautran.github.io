@@ -356,6 +356,27 @@ kbd { font: 600 12px var(--mono); border: 1px solid var(--line); border-bottom-w
 .wander { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); z-index: 60; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 12px 40px rgba(0,0,0,.2); padding: 14px 16px; display: grid; gap: 10px; width: min(460px, calc(100vw - 32px)); }
 .wander p { margin: 0; font-size: 14.5px; }
 @media (max-width: 640px) { .topcard.cont { grid-template-columns: minmax(0, 1fr); } .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } .explainer { grid-template-columns: 96px minmax(0, 1fr); } .explainer img { width: 96px; height: 54px; } }
+.brief { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--ink); border-radius: 14px; padding: 14px 16px; display: grid; gap: 10px; }
+.brief .kind { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.brief .grow { flex: 1; }
+.blist { margin: 0; padding: 0 0 0 20px; display: grid; gap: 10px; }
+.blist li { padding-left: 2px; }
+.btitle { font-weight: 600; font-size: 15.5px; line-height: 1.3; text-decoration: none; display: block; }
+.btitle:hover { text-decoration: underline; }
+.bmeta { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 3px; font-size: 12.5px; color: var(--muted); align-items: center; }
+.bmeta a { color: var(--muted); }
+.btag { font: 600 11px var(--mono); letter-spacing: .04em; text-transform: uppercase; padding: 1px 6px; border-radius: 4px; background: var(--bg); color: var(--muted); }
+.btag.mine { background: var(--accent-soft); color: var(--accent); }
+.xrow { margin: 0; display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; font-size: 13.5px; }
+.followbar { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; border-top: 1px solid var(--line); padding-top: 10px; }
+.followbar input { flex: 1 1 220px; min-width: 0; width: 0; border: 1px solid var(--line); background: var(--bg); border-radius: 10px; padding: 7px 11px; font-size: 14px; }
+.followbar input:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px var(--accent-soft); }
+.followbar .btn { padding: 6px 12px; }
+.fchip { display: inline-flex; align-items: center; gap: 2px; border: 1px solid var(--line); border-radius: 999px; padding: 3px 4px 3px 11px; font-size: 13.5px; font-weight: 500; background: var(--bg); }
+.fchip .x { border: 0; background: none; cursor: pointer; color: var(--muted); font-size: 15px; padding: 0 6px; line-height: 1; }
+.fchip .x:hover { color: var(--danger); }
+.fnone { font-size: 13.5px; color: var(--muted); }
+.briefdone { margin: 0; display: flex; gap: 10px; align-items: baseline; }
 </style>
 </head>
 <body>
@@ -507,6 +528,7 @@ kbd { font: 600 12px var(--mono); border: 1px solid var(--line); border-bottom-w
         <button class="linkbtn" id="hintClose" type="button">Got it</button>
       </div>
       <div id="topSlot" hidden></div>
+      <div id="briefSlot" hidden></div>
       <div id="paperSlot" hidden></div>
       <div>
         <div class="sec-h"><h2>Watch this now</h2><span class="streak" id="streak"></span></div>
@@ -525,13 +547,6 @@ kbd { font: 600 12px var(--mono); border: 1px solid var(--line); border-bottom-w
     </section>
     <aside>
       <nav class="side" aria-label="More">
-        <details class="srow" id="newsPanel">
-          <summary><span>AI news</span></summary>
-          <div class="sbody">
-            <ul class="list" id="newsList"></ul>
-            <p class="empty" id="newsEmpty">Loading the top stories…</p>
-          </div>
-        </details>
         <details class="srow" id="musicPanel">
           <summary><span>Study music</span></summary>
           <div class="sbody">
@@ -600,7 +615,7 @@ kbd { font: 600 12px var(--mono); border: 1px solid var(--line); border-bottom-w
   // Browsers keep saved data separately for each address, so MinimalTube always runs from your website.
   // Opening the file (or the launcher) moves you there and carries over what was saved under that address, once.
   var SITE = "https://hchautran.github.io/static/studytube.html";
-  var STORE_KEYS = ["studytube.v2", "studytube.live.v1", "studytube.ytkey"];
+  var STORE_KEYS = ["studytube.v2", "studytube.live.v1", "studytube.ytkey", "studytube.learn.v1"];
   if ((location.protocol === "file:" || /^(localhost|127\.0\.0\.1)$/.test(location.hostname)) && navigator.onLine !== false && !/[?&]stay=1/.test(location.search)) {
     var pack = {}, moved = false;
     try {
@@ -951,8 +966,10 @@ kbd { font: 600 12px var(--mono); border: 1px solid var(--line); border-bottom-w
         chans: s.chans && typeof s.chans === "object" ? s.chans : {},
         autoplay: s.autoplay !== false, hintSeen: !!s.hintSeen, fileOk: !!s.fileOk,
         notes: s.notes && typeof s.notes === "object" ? s.notes : {}, focus: s.focus !== false, takeaway: s.takeaway !== false,
-        work: +s.work || 25, brk: +s.brk || 5, rate: +s.rate || 1, pomos: s.pomos || null, paperPrompt: typeof s.paperPrompt === "string" ? s.paperPrompt : "",
-        goal: typeof s.goal === "string" ? s.goal : ""
+        work: +s.work || 25, brk: +s.brk || 5, rate: +s.rate || 1, pomos: s.pomos || null, paperPrompt: "",
+        goal: typeof s.goal === "string" ? s.goal : "",
+        subs: Array.isArray(s.subs) ? s.subs.filter(function (x) { return x && typeof x.q === "string" && x.q.trim(); }).map(function (x) { return { q: x.q.trim().slice(0, 80), on: x.on !== false }; })
+          : (typeof s.paperPrompt === "string" && s.paperPrompt.trim() ? [{ q: s.paperPrompt.trim().slice(0, 80), on: true }] : [])
       };
     } catch (e) { return clone(DEFAULT); }
   }
@@ -1747,12 +1764,17 @@ kbd { font: 600 12px var(--mono); border: 1px solid var(--line); border-bottom-w
   }
   var STOP = new Set("a an and are as at be by for from how in into is it of on or that the this to with using via about what which new paper papers recent latest best good".split(" "));
   function promptWords(text) { return String(text).toLowerCase().split(/[^a-z0-9+#-]+/).filter(function (w) { return w.length > 1 && !STOP.has(w); }); }
-  function promptTopic(text) { return { name: text, prompt: true, queries: [text], words: promptWords(text), phrase: phraseRe([text.toLowerCase().trim()])[0] }; }
+  // Plurals don't matter: "world models" matches "world model" and the other way round.
+  function stem(w) { return w.length > 3 && /[^s]s$/.test(w) ? w.slice(0, -1) : w; }
+  function promptTopic(text) {
+    var toks = text.toLowerCase().trim().split(/\s+/).map(function (w) { return stem(w).replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") + "s?"; });
+    return { name: text, prompt: true, queries: [text], words: promptWords(text).map(stem), phrase: new RegExp("(^|[^a-z0-9])" + toks.join("[\\s-]+") + "($|[^a-z0-9])", "i") };
+  }
   function fromHF(x, topic) {
     var p = x.paper || {};
     return { id: p.id, t: x.title || p.title || "", sum: p.ai_summary || "", abs: (p.summary || x.summary || "").replace(/\s+/g, " "), up: +p.upvotes || 0,
       pub: (p.publishedAt || x.publishedAt || "").slice(0, 10), thumb: x.thumbnail || "", stars: +p.githubStars || 0, gh: p.githubRepo || "", org: (p.organization && p.organization.fullname) || "", topic: topic || null,
-      kw: (p.ai_keywords || []).join(" ").toLowerCase(), cm: +x.numComments || 0, proj: p.projectPage || "" };
+      kw: (p.ai_keywords || []).join(" ").toLowerCase(), cm: +x.numComments || 0, proj: p.projectPage || "", src: topic || null };
   }
   // A paper is about a topic if its title names it, or Hugging Face's keywords name it twice.
   function matchTopic(pp, topics) {
@@ -1761,10 +1783,11 @@ kbd { font: 600 12px var(--mono); border: 1px solid var(--line); border-bottom-w
       // other trending papers need all of them in the title or keywords.
       var tp = topics[0];
       var has = function (text) { return tp.words.filter(function (w) { return new RegExp("(^|[^a-z0-9])" + w.replace(/[-+#]/g, "\\$&"), "i").test(text); }).length; };
-      var head = (pp.t + " " + pp.kw).toLowerCase(), headHits = has(head), allHits = pp.topic ? has(head + " " + pp.abs.toLowerCase()) : headHits;
+      var fromSearch = pp.src === tp.name || (pp.srcs && pp.srcs.indexOf(tp.name) !== -1);
+      var head = (pp.t + " " + pp.kw).toLowerCase(), headHits = has(head), allHits = fromSearch ? has(head + " " + pp.abs.toLowerCase()) : headHits;
       var n = tp.words.length || 1, titlePhrase = tp.phrase.test(pp.t), kwPhrase = tp.phrase.test(pp.kw);
       var titleHits = has(pp.t.toLowerCase()), kwHits = kwPhrase ? n : has(pp.kw);
-      var ok = titlePhrase || kwPhrase || (pp.topic ? allHits / n >= 0.6 : headHits === n);
+      var ok = titlePhrase || kwPhrase || (fromSearch ? allHits / n >= 0.6 : headHits === n);
       // How closely the paper is about your words: the title counts most, then keywords.
       var fit = titlePhrase ? 1 : 0.75 * titleHits / n + 0.25 * kwHits / n;
       return { topic: tp.name, ok: ok, n: headHits, head: titlePhrase ? 1 : 0, fit: fit };
@@ -1777,23 +1800,108 @@ kbd { font: 600 12px var(--mono); border: 1px solid var(--line); border-bottom-w
     });
     return { topic: best, ok: bestT >= 1 || bestK >= 2, n: bestT + bestK, head: bestT };
   }
-  // Paper of the day: one paper that is clearly worth your time.
-  //  1. Pool: each day's top papers on Hugging Face for the last 21 days, plus searches for your topics.
-  //  2. On topic: the title or keywords must mention one of your active topics.
-  //  3. Well received: in the top quarter of the pool by upvotes (and at least 25 upvotes).
-  //  4. Backed by something else too: public code, active discussion, or top 10% upvotes.
+  // ---------- Following: anything you type (a research topic, a company, a person, r/subreddit) ----------
+  // Paper of the day and Today's essentials both follow this list. With nothing followed, they use your learning topics.
+  var ALIASES = {
+    anthropic: ["claude"], openai: ["chatgpt", "sora", "codex", "sam altman"], "google deepmind": ["deepmind", "gemini"],
+    google: ["gemini", "deepmind"], deepmind: ["gemini"], meta: ["llama", "meta ai"], "meta ai": ["llama"], xai: ["grok"],
+    alibaba: ["qwen"], qwen: ["alibaba"], moonshot: ["kimi"], "moonshot ai": ["kimi"], nvidia: ["jensen huang"], microsoft: ["copilot"]
+  };
+  function subList() { return (state.subs || []).filter(function (s) { return s && s.q && s.on !== false; }); }
+  function isSubreddit(q) { return /^\/?r\/[A-Za-z0-9_]{2,21}$/.test(String(q).trim()); }
+  function subredditName(q) { return String(q).trim().replace(/^\/?r\//, ""); }
+  function wordRe(w) { return new RegExp("(^|[^a-z0-9])" + w.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") + "($|[^a-z0-9])", "i"); }
+  // Does a headline clearly mention what you follow?
+  function subMatcher(q) {
+    if (isSubreddit(q)) { var name = subredditName(q).toLowerCase(); return function (title, srcs) { return srcs.indexOf("r/" + name) !== -1; }; }
+    var base = q.toLowerCase().trim(), phrases = [base].concat(ALIASES[base] || []).map(wordRe);
+    var words = promptWords(q).map(wordRe);
+    return function (title) {
+      if (phrases.some(function (r) { return r.test(title); })) return true;
+      return words.length >= 2 && words.every(function (r) { return r.test(title); });   // all your words, in any order
+    };
+  }
+  function addSub(q) {
+    q = String(q || "").replace(/\s+/g, " ").trim().slice(0, 80);
+    if (!q) return;
+    state.subs = state.subs || [];
+    if (state.subs.some(function (s) { return s.q.toLowerCase() === q.toLowerCase(); })) return;
+    if (state.subs.length >= 12) state.subs.shift();
+    state.subs.push({ q: q, on: true });
+    save(); followChanged();
+  }
+  function removeSub(q) { state.subs = (state.subs || []).filter(function (s) { return s.q !== q; }); save(); followChanged(); }
+  function followChanged() { briefLoading(); paperLoading(); loadBrief(true); pickPaper(true); }
+
+  // ---------- Reddit (through the Arctic Shift archive, which allows requests from web pages) ----------
+  var ARCTIC = "https://arctic-shift.photon-reddit.com/api/posts/search";
+  var RFIELDS = "id,title,score,created_utc,link_flair_text,url,num_comments,over_18,subreddit,selftext";
+  var REDDIT_SUBS = ["MachineLearning", "LocalLLaMA", "singularity", "OpenAI", "artificial"];
+  // A post needs this many upvotes before it can count as big news in its community.
+  var REDDIT_FLOOR = { MachineLearning: 60, LocalLLaMA: 300, singularity: 300, OpenAI: 200, artificial: 60 };
+  function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  function arxivIn(text) { var m = /(?:arxiv\.org\/(?:abs|pdf|html)\/|huggingface\.co\/papers\/)(\d{4}\.\d{4,5})/.exec(text || ""); return m ? m[1] : ""; }
+  function redditPosts(sub, hours, pages) {
+    var after = Math.floor(Date.now() / 1000) - hours * 3600, out = [];
+    function page(before, n) {
+      var u = ARCTIC + "?subreddit=" + encodeURIComponent(sub) + "&after=" + after + (before ? "&before=" + before : "") + "&limit=100&sort=desc&fields=" + RFIELDS;
+      return getJSON(u).then(function (j) {
+        var d = (j && j.data) || [];
+        d.forEach(function (x) {
+          if (!x || !x.id || !x.title || x.over_18) return;
+          out.push({ id: x.id, t: x.title, score: +x.score || 0, cm: +x.num_comments || 0, at: (+x.created_utc || 0) * 1000, flair: x.link_flair_text || "",
+            url: x.url || "", sub: x.subreddit || sub, arxiv: arxivIn((x.url || "") + " " + String(x.selftext || "").slice(0, 4000)) });
+        });
+        if (d.length >= 100 && n + 1 < pages) return wait(350).then(function () { return page(Math.min.apply(null, d.map(function (x) { return x.created_utc; })), n + 1); });
+        return out;
+      });
+    }
+    return page(null, 0).catch(function () { return out; });
+  }
+  // One community at a time, so the archive doesn't ask us to slow down.
+  var redditMem = {};
+  function redditMany(subs, hours, pages) {
+    var mk = subs.join(",") + "/" + hours + "/" + pages, mem = redditMem[mk];
+    if (mem && Date.now() - mem.at < 30 * 60000) return Promise.resolve(mem.posts);
+    var all = [];
+    return subs.reduce(function (p, s, i) {
+      return p.then(function () { return (i ? wait(300) : Promise.resolve()).then(function () { return redditPosts(s, hours, pages); }).then(function (d) { all = all.concat(d); }); });
+    }, Promise.resolve()).then(function () { if (all.length) redditMem[mk] = { at: Date.now(), posts: all }; return all; });
+  }
+  function redditLink(x) { return "https://www.reddit.com/r/" + x.sub + "/comments/" + x.id + "/"; }
+  // Papers people discussed on r/MachineLearning in the last 3 weeks (kept for 12 hours).
+  var RPKEY = "studytube.redditpapers.v1";
+  function redditPaperSignal() {
+    var c = readJSON(RPKEY);
+    if (c && Date.now() - c.at < 12 * 3600e3) return Promise.resolve(c.map || {});
+    return redditPosts("MachineLearning", 21 * 24, 4).then(function (posts) {
+      var map = {};
+      posts.forEach(function (x) { if (x.arxiv && (!map[x.arxiv] || map[x.arxiv].score < x.score)) map[x.arxiv] = { score: x.score, cm: x.cm, link: redditLink(x) }; });
+      writeJSON(RPKEY, { at: Date.now(), map: map });
+      return map;
+    }).catch(function () { return {}; });
+  }
+
+  // ---------- Paper of the day: one paper that is clearly worth your time ----------
+  //  1. Pool: each day's top papers on Hugging Face for the last 21 days, plus searches for what you follow.
+  //  2. On topic: clearly about one thing you follow (or one of your learning topics).
+  //  3. Well received: in the top quarter by upvotes (at least 25, or 15 for a niche topic you typed).
+  //  4. Backed by something else too: public code, active discussion (Hugging Face or r/MachineLearning), or top 10% upvotes.
+  //  With several things followed, each day starts with the next one in your list.
   var POOL_DAYS = 21;
   function isoDay(d) { return new Date(Date.now() - d * 864e5).toISOString().slice(0, 10); }
+  function paperSubs() { return subList().filter(function (s) { return !isSubreddit(s.q); }).map(function (s) { return s.q; }).slice(0, 8); }
   function pickPaper(force) {
     var today = new Date().toDateString(), cached = readJSON(PKEY) || { seen: [] };
-    var prompt = (state.paperPrompt || "").trim();
-    // One pick per topic per day: coming back to a topic you already looked at today shows the same paper.
+    var subs = paperSubs(), key = subs.join("|");
+    // One pick per list per day: coming back with the same list shows the same paper.
     var picks = cached.d === today && cached.picks ? cached.picks : {};
-    if (Object.prototype.hasOwnProperty.call(picks, prompt)) {
-      cached.paper = picks[prompt]; cached.prompt = prompt; writeJSON(PKEY, cached);
+    if (Object.prototype.hasOwnProperty.call(picks, key)) {
+      cached.paper = picks[key]; cached.key = key; writeJSON(PKEY, cached);
       renderPaper(cached.paper, cached); return;
     }
-    var topics = prompt ? [promptTopic(prompt)] : paperTopics();
+    var mine = subs.length > 0;
+    var topics = mine ? subs.map(promptTopic) : paperTopics();
     if (!topics.length) { renderPaper(null); return; }
     var reqs = [];
     for (var d = 0; d < POOL_DAYS; d++) {
@@ -1801,19 +1909,20 @@ kbd { font: 600 12px var(--mono); border: 1px solid var(--line); border-bottom-w
     }
     reqs.push(getJSON("https://huggingface.co/api/daily_papers?limit=100").then(function (arr) { return arr.map(function (x) { return fromHF(x, null); }); }).catch(function () { return []; }));
     topics.forEach(function (tp) {
-      tp.queries.slice(0, 2).forEach(function (q) {
+      tp.queries.slice(0, mine ? 1 : 2).forEach(function (q) {
         reqs.push(getJSON("https://huggingface.co/api/papers/search?q=" + encodeURIComponent(q)).then(function (arr) { return arr.map(function (x) { return fromHF(x, tp.name); }); }).catch(function () { return []; }));
       });
     });
-    Promise.all(reqs).then(function (lists) {
+    Promise.all([Promise.all(reqs), redditPaperSignal()]).then(function (res) {
+      var lists = res[0], rsig = res[1] || {};
       var byId = {};
       [].concat.apply([], lists).forEach(function (pp) {
         if (!pp.id || !pp.t) return;
         var age = (Date.now() - Date.parse(pp.pub)) / 864e5;
-        if (!(age >= -1 && age <= (prompt && pp.topic ? 365 : POOL_DAYS + 3))) return;   // your own topic may reach back a year
+        if (!(age >= -1 && age <= (mine && pp.src ? 365 : POOL_DAYS + 3))) return;   // a topic you typed may reach back a year
         pp.recent = age <= POOL_DAYS + 3;
-        if (!byId[pp.id] || (pp.topic && !byId[pp.id].topic)) byId[pp.id] = pp;
-        else byId[pp.id].up = Math.max(byId[pp.id].up, pp.up);
+        if (!byId[pp.id]) byId[pp.id] = pp;
+        else { byId[pp.id].up = Math.max(byId[pp.id].up, pp.up); if (pp.src) byId[pp.id].srcs = (byId[pp.id].srcs || [byId[pp.id].src]).concat(pp.src); }
       });
       var pool = Object.keys(byId).map(function (k) { return byId[k]; });
       if (!pool.length) { renderPaper(null); return; }
@@ -1821,81 +1930,72 @@ kbd { font: 600 12px var(--mono); border: 1px solid var(--line); border-bottom-w
       var ups = pool.filter(function (x) { return x.recent; }).map(function (x) { return x.up; }).sort(function (a, b) { return b - a; });
       if (!ups.length) ups = [25];
       var q = function (f) { return ups[Math.min(ups.length - 1, Math.floor(f * ups.length))]; };
-      var p75 = Math.max(25, q(0.25)), p90 = Math.max(40, q(0.10));
-      if (prompt) {
-        // Your own topic: compare papers on that topic with each other, not with this week's trending papers.
-        var rel = pool.filter(function (pp) { return matchTopic(pp, topics).ok; }).map(function (x) { return x.up; }).sort(function (a, b) { return b - a; });
-        var rq = function (f) { return rel.length ? rel[Math.min(rel.length - 1, Math.floor(f * rel.length))] : 0; };
-        p75 = Math.max(15, rq(0.25)); p90 = Math.max(30, rq(0.10));
+      var shownToday = new Set(Object.keys(picks).map(function (k) { return picks[k] && picks[k].id; }).filter(Boolean));
+      var seen = new Set((cached.seen || []).filter(function (id) { return !shownToday.has(id); }));   // earlier days only
+      function rank(tps, promptMode) {
+        var p75 = Math.max(25, q(0.25)), p90 = Math.max(40, q(0.10));
+        if (promptMode) {
+          // A topic you typed: compare papers on that topic with each other, not with this week's trending papers.
+          var rel = pool.filter(function (pp) { return matchTopic(pp, tps).ok; }).map(function (x) { return x.up; }).sort(function (a, b) { return b - a; });
+          var rq = function (f) { return rel.length ? rel[Math.min(rel.length - 1, Math.floor(f * rel.length))] : 0; };
+          p75 = Math.max(15, rq(0.25)); p90 = Math.max(30, rq(0.10));
+        }
+        var good = [];
+        pool.forEach(function (pp) {
+          if (seen.has(pp.id)) return;
+          var m = matchTopic(pp, tps);
+          if (!m.ok) return;                                          // clearly about what you follow
+          if (pp.up < p75) return;                                    // well received
+          var why = [], rd = rsig[pp.id] && rsig[pp.id].score >= 30 ? rsig[pp.id] : null;
+          if (pp.up >= p90) why.push(promptMode ? "among the most upvoted papers on this topic" : "top 10% of the last 3 weeks");
+          if (pp.gh) why.push("code is public" + (pp.stars >= 50 ? " (" + (pp.stars >= 1000 ? (pp.stars / 1000).toFixed(1) + "k" : pp.stars) + " stars)" : ""));
+          if (rd) why.push("discussed on r/MachineLearning (" + rd.score + " upvotes)");
+          if (pp.cm >= 3) why.push(pp.cm + " comments on Hugging Face");
+          if (!why.length) return;                                    // needs at least one more signal
+          if (pp.org) why.push("from " + pp.org);
+          var age = Math.max(0, (Date.now() - Date.parse(pp.pub)) / 864e5);
+          var score = promptMode
+            ? pp.up * Math.pow(0.1 + m.fit, 3) * (1 + 0.15 * why.length) * Math.exp(-age / 120)   // closest to your words first
+            : pp.up * (1 + 0.15 * why.length) * (1 + 0.2 * Math.min(m.n, 3)) * Math.exp(-age / 30);
+          var o = {}; for (var k in pp) o[k] = pp[k];
+          o.topic = m.topic; o.why = why; o.score = score; o.rd = rd ? rd.link : "";
+          good.push(o);
+        });
+        return good.sort(function (a, b) { return b.score - a.score; });
       }
-      var seen = new Set(cached.seen || []);
-      var good = [];
-      pool.forEach(function (pp) {
-        if (seen.has(pp.id)) return;
-        var m = matchTopic(pp, topics);
-        if (!m.ok) return;                                          // clearly about one of your topics
-        if (pp.up < p75) return;                                    // well received
-        var why = [];
-        if (pp.up >= p90) why.push(prompt ? "among the most upvoted papers on this topic" : "top 10% of the last 3 weeks");
-        if (pp.gh) why.push("code is public" + (pp.stars >= 50 ? " (" + (pp.stars >= 1000 ? (pp.stars / 1000).toFixed(1) + "k" : pp.stars) + " stars)" : ""));
-        if (pp.cm >= 3) why.push(pp.cm + " comments");
-        if (!why.length) return;                                    // needs at least one more signal
-        if (pp.org) why.push("from " + pp.org);
-        var age = Math.max(0, (Date.now() - Date.parse(pp.pub)) / 864e5);
-        pp.topic = m.topic;
-        pp.why = why;
-        pp.score = prompt
-          ? pp.up * Math.pow(0.1 + m.fit, 3) * (1 + 0.15 * why.length) * Math.exp(-age / 120)   // closest to your words first
-          : pp.up * (1 + 0.15 * why.length) * (1 + 0.2 * Math.min(m.n, 3)) * Math.exp(-age / 30);
-        good.push(pp);
-      });
-      good.sort(function (a, b) { return b.score - a.score; });
-      var turn = prompt ? prompt : topics[Math.floor(Date.now() / 864e5) % topics.length].name;
-      var best = good[0] || null, mine = good.filter(function (x) { return x.topic === turn; })[0];
-      var paper = mine && best && mine.score >= 0.5 * best.score ? mine : best;
+      var paper = null, dayN = Math.floor(Date.now() / 864e5);
+      if (mine) {
+        for (var i = 0; i < topics.length && !paper; i++) paper = rank([topics[(dayN + i) % topics.length]], true)[0] || null;
+      } else {
+        var good = rank(topics, false);
+        var turn = topics[dayN % topics.length].name;
+        var best = good[0] || null, mineT = good.filter(function (x) { return x.topic === turn; })[0];
+        paper = mineT && best && mineT.score >= 0.5 * best.score ? mineT : best;
+      }
       var seenArr = (cached.seen || []).slice(-300);
-      if (paper) seenArr.push(paper.id);
-      picks[prompt] = paper;
-      var rec = { d: today, paper: paper, seen: seenArr, read: false, poolSize: pool.length, prompt: prompt, picks: picks };
+      if (paper && seenArr.indexOf(paper.id) === -1) seenArr.push(paper.id);
+      picks[key] = paper;
+      var rec = { d: today, paper: paper, seen: seenArr, read: false, poolSize: pool.length, key: key, picks: picks };
       writeJSON(PKEY, rec);
       renderPaper(paper, rec);
     }).catch(function () { renderPaper(null); });
   }
-  function paperAsk() {
-    var prompt = state.paperPrompt || "";
-    var input = h("input", { id: "paperPrompt", type: "text", maxlength: "120", autocomplete: "off", "aria-label": "Topic for Paper of the day", placeholder: "Any topic, e.g. efficient video diffusion sampling" });
-    input.value = prompt;
-    var form = h("form", { class: "paperask" }, [
-      h("label", { class: "label", for: "paperPrompt", text: "Paper topic" }), input,
-      h("button", { class: "btn", type: "submit", text: "Find paper" }),
-      prompt ? h("button", { class: "linkbtn", type: "button", id: "paperReset", text: "Use my topics" }) : null
-    ]);
-    form.addEventListener("submit", function (e) {
-      e.preventDefault();
-      state.paperPrompt = input.value.trim().slice(0, 120); save();
-      paperLoading(); pickPaper(true);
-    });
-    var rb = form.querySelector("#paperReset");
-    if (rb) rb.addEventListener("click", function () { state.paperPrompt = ""; save(); paperLoading(); pickPaper(true); });
-    return form;
-  }
   function paperLoading() {
     var slot = document.getElementById("paperSlot"); slot.textContent = ""; slot.hidden = false;
-    slot.appendChild(paperAsk());
-    slot.appendChild(h("p", { class: "note paperNone", text: state.paperPrompt ? "Looking for the best paper on \u201c" + state.paperPrompt + "\u201d\u2026" : "Looking for today's paper\u2026" }));
+    var subs = paperSubs();
+    slot.appendChild(h("p", { class: "note paperNone", text: subs.length ? "Looking for the best paper on what you follow…" : "Looking for today's paper…" }));
   }
   function renderPaper(pp, rec) {
     var slot = document.getElementById("paperSlot"); slot.textContent = "";
+    var subs = paperSubs();
     if (!pp) {
-      slot.hidden = !(rec && rec.poolSize) && !state.paperPrompt;
-      slot.appendChild(paperAsk());
-      if (rec && rec.poolSize) slot.appendChild(h("p", { class: "note paperNone", text: state.paperPrompt
-        ? "No paper on \u201c" + state.paperPrompt + "\u201d cleared the bar (well upvoted, plus code, discussion or top-10% interest). Try broader words, like the main method or field name."
+      slot.hidden = !(rec && rec.poolSize);
+      if (rec && rec.poolSize) slot.appendChild(h("p", { class: "note paperNone", text: subs.length
+        ? "No paper on what you follow cleared the bar today (well upvoted, plus code, discussion or top-10% interest). Better nothing than a weak one."
         : "No paper about your topics cleared the bar today, so there's no Paper of the day. Better nothing than a weak one." }));
       return;
     }
     slot.hidden = false;
-    slot.appendChild(paperAsk());
     var days = Math.floor((Date.now() - Date.parse(pp.pub)) / 864e5);
     var when = days <= 0 ? "today" : days === 1 ? "yesterday" : days + " days ago";
     var read = rec && rec.read;
@@ -1912,6 +2012,7 @@ kbd { font: 600 12px var(--mono); border: 1px solid var(--line); border-bottom-w
       h("div", { class: "actions" }, [
         h("a", { class: "act go", href: "https://arxiv.org/abs/" + pp.id, target: "_blank", rel: "noopener", text: "Read on arXiv" }),
         h("a", { class: "act", href: "https://huggingface.co/papers/" + pp.id, target: "_blank", rel: "noopener", text: "Discussion" }),
+        pp.rd ? h("a", { class: "act", href: pp.rd, target: "_blank", rel: "noopener", text: "Reddit thread" }) : null,
         pp.gh ? h("a", { class: "act", href: pp.gh, target: "_blank", rel: "noopener", text: "Code" }) : null,
         vidBtn, readBtn
       ])
@@ -1919,36 +2020,157 @@ kbd { font: 600 12px var(--mono); border: 1px solid var(--line); border-bottom-w
     attachExplainer(pp, slot);
   }
 
-  function loadNews(force) {
-    var cached = readJSON(NKEY);
-    if (!force && cached && Date.now() - cached.at < 3 * 3600e3) { renderNews(cached.items); return; }
-    var since = Math.floor(Date.now() / 1000) - 3 * 86400;
-    var words = ["AI", "LLM", "OpenAI", "Anthropic", "DeepMind", "GPU"];
-    paperTopics().forEach(function (tp) { var k = topicKeyFor(tp.name); if (k === "diffusion") words.push("diffusion"); if (k === "world") words.push("world model"); });
-    Promise.all(words.map(function (w) {
-      return getJSON("https://hn.algolia.com/api/v1/search?tags=story&hitsPerPage=20&query=" + encodeURIComponent(w) + "&numericFilters=" + encodeURIComponent("created_at_i>" + since + ",points>80"))
-        .then(function (r) { return r.hits || []; }).catch(function () { return []; });
-    })).then(function (lists) {
-      var byId = {};
-      [].concat.apply([], lists).forEach(function (x) {
-        if (!x.title || byId[x.objectID]) return;
-        if (!/\b(ai|llm|llms|gpt|model|models|openai|anthropic|claude|gemini|deepmind|nvidia|gpu|neural|agent|agents|diffusion|transformer|machine learning|robot)\b/i.test(x.title)) return;
-        byId[x.objectID] = { id: x.objectID, t: x.title, url: x.url || "https://news.ycombinator.com/item?id=" + x.objectID, pts: x.points, at: x.created_at, site: x.url ? x.url.replace(/^https?:\/\/(www\.)?/, "").split("/")[0] : "news.ycombinator.com" };
-      });
-      var items = Object.keys(byId).map(function (k) { return byId[k]; }).sort(function (a, b) { return b.pts - a.pts; }).slice(0, 3);
-      writeJSON(NKEY, { at: Date.now(), items: items });
-      renderNews(items);
-    });
+  // ---------- Today's essentials: the few stories worth knowing today (Hacker News + Reddit) ----------
+  //  - Each story is compared with its own community: it must be in that community's top 10% today
+  //    (or, for something you follow, clearly about it and well upvoted).
+  //  - Memes, screenshots, questions and opinion threads are left out.
+  //  - The same story on several sites is shown once, with all its discussions.
+  //  - At most 5: what you follow first, then at most 2 stories that are big across AI.
+  var BKEY = "studytube.brief.v1", BDONE = "studytube.briefdone";
+  var NOISE_FLAIR = /meme|funny|humou?r|shitpost|image|video|gpts|question|help|prompt|jailbreak|other|comedy|educational|serious replies|discussion|tutorial|resources|showcase|use case/i;
+  var AI_RE = /\b(ai|a\.i\.|llm|llms|gpt|gpt-\d|model|models|openai|anthropic|claude|gemini|deepmind|nvidia|gpu|gpus|neural|agent|agents|diffusion|transformer|machine learning|robot|robots|robotics|humanoid|qwen|llama|mistral|deepseek|kimi|grok|chatbot|open-weights?|open weights|weights|benchmark|inference|training|altman|hugging face|humanoids?|datacenters?|data centers?)\b/i;
+  function normUrl(u) { return String(u || "").replace(/^https?:\/\/(www\.|old\.|m\.)?/, "").replace(/[?#].*$/, "").replace(/\/$/, "").toLowerCase(); }
+  function isRedditUrl(u) { return /^https?:\/\/([a-z]+\.)?(reddit\.com|redd\.it)\//i.test(u || ""); }
+  function isMediaUrl(u) { return /^https?:\/\/(i\.redd\.it|v\.redd\.it|i\.imgur\.com|preview\.redd\.it)\//i.test(u || "") || /reddit\.com\/gallery\//i.test(u || ""); }
+  function kfmt(n) { return n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(/\.0$/, "") + "k" : String(n); }
+  function briefKey() { return subList().map(function (s) { return s.q; }).join("|") + "#" + paperTopics().map(function (t) { return t.name; }).join("|"); }
+  function briefLoading() {
+    var slot = document.getElementById("briefSlot"); slot.hidden = false; slot.textContent = "";
+    slot.appendChild(h("article", { class: "brief" }, [h("div", { class: "kind" }, [h("span", { class: "pill", text: "Today's essentials" })]), h("p", { class: "note", text: "Checking Hacker News and Reddit…" }), followBar()]));
   }
-  function renderNews(items) {
-    var list = document.getElementById("newsList"); list.textContent = "";
-    (items || []).forEach(function (n) {
-      list.appendChild(h("li", { class: "newsitem" }, [
-        h("a", { href: n.url, target: "_blank", rel: "noopener", text: n.t }),
-        h("span", { class: "label", text: n.site + " · " + n.pts + " points · " }, [h("a", { href: "https://news.ycombinator.com/item?id=" + n.id, target: "_blank", rel: "noopener", text: "discussion" })])
-      ]));
-    });
-    document.getElementById("newsEmpty").hidden = !!(items && items.length);
+  function loadBrief(force) {
+    var cached = readJSON(BKEY), key = briefKey();
+    if (!force && cached && cached.key === key && Date.now() - cached.at < 2 * 3600e3) { renderBrief(cached); return; }
+    var subs = subList(), sinceS = Math.floor(Date.now() / 1000) - 30 * 3600;
+    var hnQ = function (query, minPts) {
+      return getJSON("https://hn.algolia.com/api/v1/search?tags=story&hitsPerPage=30&query=" + encodeURIComponent(query) + "&numericFilters=" + encodeURIComponent("created_at_i>" + sinceS + ",points>" + minPts))
+        .then(function (r) { return r.hits || []; }).catch(function () { return []; });
+    };
+    var hnWords = ["AI", "LLM", "OpenAI", "Anthropic", "DeepMind", "GPU", "model"];
+    var hnReqs = hnWords.map(function (w) { return hnQ(w, 60); }).concat(subs.filter(function (s) { return !isSubreddit(s.q); }).map(function (s) { return hnQ(s.q, 20); }));
+    var rsubs = REDDIT_SUBS.concat(subs.filter(function (s) { return isSubreddit(s.q); }).map(function (s) { return subredditName(s.q); }))
+      .filter(function (s, i, a) { return a.map(function (x) { return x.toLowerCase(); }).indexOf(s.toLowerCase()) === i; });
+    Promise.all([Promise.all(hnReqs), redditMany(rsubs, 30, 2)]).then(function (res) {
+      var r = rankBrief([].concat.apply([], res[0]), res[1], subs, paperTopics(), sinceS);
+      var rec = { at: Date.now(), key: key, items: r.items, n: r.n };
+      writeJSON(BKEY, rec);
+      renderBrief(rec);
+    }).catch(function () { renderBrief({ at: Date.now(), items: [], n: 0 }); });
+  }
+  // Pure ranking step (no network), so it can be checked on its own.
+  function rankBrief(hnHits, rposts, subs, topicRes, sinceS) {
+      var items = [];
+      var hnSeen = {};
+      hnHits.forEach(function (x) {
+        if (!x.title || hnSeen[x.objectID] || /^(ask|tell) hn/i.test(x.title)) return;
+        hnSeen[x.objectID] = 1;
+        items.push({ src: "HN", t: x.title, url: x.url || "", disc: "https://news.ycombinator.com/item?id=" + x.objectID, score: +x.points || 0, cm: +x.num_comments || 0, at: Date.parse(x.created_at) || Date.now(), show: /^show hn/i.test(x.title) });
+      });
+      rposts.forEach(function (x) {
+        if (x.at < sinceS * 1000 || NOISE_FLAIR.test(x.flair) || x.cm < 5) return;
+        if (/\?\s*$/.test(x.t) || /(^|\s)\[d\](\s|$)/i.test(x.t)) return;            // questions and discussion threads
+        var media = isMediaUrl(x.url);                                                   // a photo or clip: only if it's huge
+        items.push({ src: "r/" + x.sub, t: x.t.replace(/\s*\[(r|n|p)\]\s*/ig, " ").trim(), url: isRedditUrl(x.url) || media ? "" : x.url, disc: redditLink(x), score: x.score, cm: x.cm, at: x.at, media: media });
+      });
+      // Compare each story with its own community today.
+      var bySrc = {};
+      items.forEach(function (it) { (bySrc[it.src] = bySrc[it.src] || []).push(it.score); });
+      var p90 = {};
+      Object.keys(bySrc).forEach(function (s) {
+        var a = bySrc[s].sort(function (x, y) { return y - x; }), v = a[Math.min(a.length - 1, Math.floor(0.1 * a.length))] || 0;
+        var floor = s === "HN" ? 150 : REDDIT_FLOOR[s.slice(2)] || 50;
+        p90[s] = Math.max(v, floor);
+      });
+      items.forEach(function (it) { it.str = it.score / p90[it.src]; it.words = sigWords(it.t); it.nu = it.url ? normUrl(it.url) : ""; });
+      // The same story on several sites becomes one entry.
+      items.sort(function (a, b) { return b.str - a.str; });
+      var clusters = [];
+      items.forEach(function (it) {
+        var c = clusters.filter(function (c) {
+          if (it.nu && c.nus.indexOf(it.nu) !== -1) return true;
+          if (it.words.length < 3) return false;
+          var inter = it.words.filter(function (w) { return c.words.indexOf(w) !== -1; }).length;
+          return inter / (it.words.length + c.words.length - inter) >= 0.5;
+        })[0];
+        if (!c) clusters.push({ lead: it, all: [it], nus: it.nu ? [it.nu] : [], words: it.words.slice() });
+        else { c.all.push(it); if (it.nu) c.nus.push(it.nu); }
+      });
+      var matchers = subs.map(function (s) { return { q: s.q, m: subMatcher(s.q) }; });
+      var out = clusters.map(function (c) {
+        var srcs = c.all.map(function (x) { return x.src; });
+        var str = c.lead.str + 0.3 * c.all.slice(1).reduce(function (s, x) { return s + Math.min(1, x.str); }, 0);
+        var titles = c.all.map(function (x) { return x.t; }).join(" \n ");
+        var follows = matchers.filter(function (m) { return m.m(titles, srcs); }).map(function (m) { return m.q; });
+        var topic = !follows.length && !subs.length ? (topicRes.filter(function (tp) { return tp.re.some(function (r) { return r.test(titles); }); })[0] || {}).name : null;
+        var disc = {}; c.all.forEach(function (x) { if (!disc[x.src] || disc[x.src].score < x.score) disc[x.src] = { u: x.disc, score: x.score }; });
+        var ext = c.all.filter(function (x) { return x.url; })[0];
+        return { t: c.lead.t, url: ext ? ext.url : c.lead.disc, site: ext ? ext.url.replace(/^https?:\/\/(www\.)?/, "").split("/")[0] : "", str: str,
+          srcs: Object.keys(disc).map(function (s) { return { s: s, n: disc[s].score, u: disc[s].u }; }).sort(function (a, b) { return b.n - a.n; }),
+          at: Math.min.apply(null, c.all.map(function (x) { return x.at; })), follows: follows, topic: topic || null, ai: AI_RE.test(titles),
+          show: c.all.every(function (x) { return x.show; }), media: c.all.every(function (x) { return x.media; }), maxScore: Math.max.apply(null, c.all.map(function (x) { return x.score; })) };
+      });
+      out = out.filter(function (x) { return !x.media || x.str >= 1.5; });
+      var followed = out.filter(function (x) { return (x.follows.length || x.topic) && x.str >= 0.35 && x.maxScore >= 20; })
+        .sort(function (a, b) { return b.str - a.str; }).slice(0, 4);
+      var big = out.filter(function (x) { return followed.indexOf(x) === -1 && x.ai && !x.show && x.str >= 1; })
+        .sort(function (a, b) { return b.str - a.str; }).slice(0, followed.length ? 2 : 4);
+      return { items: followed.concat(big).slice(0, 5), n: items.length };
+  }
+  function ageText(t) { var hrs = Math.max(1, Math.round((Date.now() - t) / 3600e3)); return hrs < 24 ? hrs + "h ago" : Math.round(hrs / 24) + "d ago"; }
+  function xLink(q) {
+    var since = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
+    var query = (q ? (/\s/.test(q) ? "\"" + q + "\"" : q) : "(AI OR LLM)") + " min_faves:" + (q ? 200 : 2000) + " since:" + since;
+    return "https://x.com/search?q=" + encodeURIComponent(query) + "&f=top";
+  }
+  function followBar() {
+    var subs = state.subs || [];
+    var input = h("input", { id: "followInput", type: "text", maxlength: "80", autocomplete: "off", "aria-label": "Follow a topic", placeholder: "Follow a topic, company, person or r/subreddit" });
+    var form = h("form", { class: "followbar" }, [
+      h("span", { class: "label", text: "Following" }),
+      subs.length ? null : h("span", { class: "fnone", text: "your learning topics" })
+    ].concat(subs.map(function (s) {
+      var x = h("button", { class: "x", type: "button", "aria-label": "Stop following " + s.q, text: "×" });
+      x.addEventListener("click", function () { removeSub(s.q); });
+      return h("span", { class: "fchip" }, [h("span", { text: s.q }), x]);
+    })).concat([input, h("button", { class: "btn", type: "submit", text: "Follow" })]));
+    form.addEventListener("submit", function (e) { e.preventDefault(); addSub(input.value); });
+    return form;
+  }
+  function renderBrief(rec) {
+    var slot = document.getElementById("briefSlot"); slot.textContent = ""; slot.hidden = false;
+    var doneToday = readJSON(BDONE) === new Date().toDateString();
+    if (doneToday) {
+      var show = h("button", { class: "linkbtn", type: "button", text: "Show" });
+      show.addEventListener("click", function () { writeJSON(BDONE, ""); renderBrief(rec); });
+      slot.appendChild(h("p", { class: "briefdone" }, [h("span", { class: "label", text: "Today's essentials ✓" }), show]));
+      return;
+    }
+    var items = rec.items || [], subs = subList();
+    var list = h("ol", { class: "blist" }, items.map(function (x) {
+      var tag = x.follows && x.follows.length ? x.follows[0] : x.topic ? x.topic : "Big in AI today";
+      return h("li", null, [
+        h("a", { class: "btitle", href: x.url, target: "_blank", rel: "noopener", text: x.t }),
+        h("span", { class: "bmeta" }, [
+          h("span", { class: "btag" + (x.follows && x.follows.length || x.topic ? " mine" : ""), text: tag }),
+          x.site ? h("span", { text: x.site }) : null
+        ].concat(x.srcs.map(function (s) { return h("a", { href: s.u, target: "_blank", rel: "noopener", title: "Discussion on " + s.s, text: s.s + " " + kfmt(s.n) }); }))
+          .concat([h("span", { text: ageText(x.at) })]))
+      ]);
+    }));
+    var done = h("button", { class: "linkbtn", type: "button", text: "Done for today" });
+    done.addEventListener("click", function () { writeJSON(BDONE, new Date().toDateString()); renderBrief(rec); });
+    var refresh = h("button", { class: "linkbtn", type: "button", text: "Refresh" });
+    refresh.addEventListener("click", function () { briefLoading(); loadBrief(true); });
+    var xq = subs.filter(function (s) { return !isSubreddit(s.q); }).map(function (s) { return s.q; }).slice(0, 6);
+    var xrow = h("p", { class: "xrow" }, [h("span", { class: "label", text: "Top posts on X" })].concat((xq.length ? xq : [""]).map(function (q) {
+      return h("a", { href: xLink(q), target: "_blank", rel: "noopener", text: q || "AI today" });
+    })));
+    slot.appendChild(h("article", { class: "brief" }, [
+      h("div", { class: "kind" }, [h("span", { class: "pill", text: "Today's essentials" }), h("span", { class: "from", text: "Hacker News + Reddit · " + ageText(rec.at).replace(/^1h ago$/, "just now") }), h("span", { class: "grow" }), refresh, done]),
+      items.length ? list : h("p", { class: "note", text: rec.n ? "Nothing big on what you follow today. A good day to just focus." : "Couldn't reach Hacker News or Reddit right now. Try Refresh in a bit." }),
+      xrow,
+      followBar()
+    ]));
   }
 
   // ---------- Learning tools ----------
@@ -2915,7 +3137,7 @@ kbd { font: 600 12px var(--mono); border: 1px solid var(--line); border-bottom-w
   });
   document.addEventListener("visibilitychange", timerTick);
   renderNotes(); timerRender(); applyFocus();
-  pickPaper(); loadNews();
+  briefLoading(); pickPaper(); loadBrief();
   document.getElementById("howClose").addEventListener("click", function () { document.getElementById("howDlg").hidden = true; });
   document.getElementById("howAlways").addEventListener("click", function () { state.fileOk = true; save(); document.getElementById("howDlg").hidden = true; });
   document.getElementById("hintClose").addEventListener("click", function () { state.hintSeen = true; save(); document.getElementById("embedHint").hidden = true; });
