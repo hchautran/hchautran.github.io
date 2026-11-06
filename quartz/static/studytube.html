@@ -377,6 +377,10 @@ kbd { font: 600 12px var(--mono); border: 1px solid var(--line); border-bottom-w
 .fchip .x:hover { color: var(--danger); }
 .fnone { font-size: 13.5px; color: var(--muted); }
 .briefdone { margin: 0; display: flex; gap: 10px; align-items: baseline; }
+.desc { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; display: grid; gap: 6px; }
+.dtext { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 14px; line-height: 1.5; max-height: 6em; overflow: hidden; }
+.desc.open .dtext { max-height: none; }
+.desc .linkbtn { justify-self: start; }
 </style>
 </head>
 <body>
@@ -499,6 +503,11 @@ kbd { font: 600 12px var(--mono); border: 1px solid var(--line); border-bottom-w
           <button class="btn" id="pClose" type="button">Back</button>
         </div>
         <div class="rates" role="group" aria-label="Playback speed"><span class="label">Speed</span><button class="rate" type="button" data-r="1">1x</button><button class="rate" type="button" data-r="1.25">1.25x</button><button class="rate" type="button" data-r="1.5">1.5x</button><button class="rate" type="button" data-r="2">2x</button></div>
+        <div class="desc" id="pDesc" hidden>
+          <span class="label">Description</span>
+          <div class="dtext" id="pDescText"></div>
+          <button class="linkbtn" id="pDescMore" type="button" hidden>Show more</button>
+        </div>
         <div class="notebox">
           <label class="label" for="pNote">Notes for this video</label>
           <textarea id="pNote" rows="3" placeholder="Key ideas, questions, timestamps like 12:30 …"></textarea>
@@ -1474,7 +1483,7 @@ kbd { font: 600 12px var(--mono); border: 1px solid var(--line); border-bottom-w
     document.getElementById("pNoteSaved").textContent = "";
     var startAt = c.startAt != null ? c.startAt : resumePoint(c.id); delete c.startAt;
     startAt = Math.floor(startAt || 0);
-    showResume(c, startAt); renderMoments(); findPaperForVideo(c);
+    showResume(c, startAt); renderMoments(); findPaperForVideo(c); showDesc(c);
     if (!progTimer) progTimer = setInterval(sampleProgress, 5000);
     window.scrollTo({ top: 0 });
     loadYTApi(function () {
@@ -2172,6 +2181,60 @@ kbd { font: 600 12px var(--mono); border: 1px solid var(--line); border-bottom-w
       followBar()
     ]));
   }
+
+  // ---------- Video description (from YouTube, with your key: 1 unit per video, kept for the last 60 videos) ----------
+  var DKEY = "studytube.desc.v1";
+  function descCache() { return readJSON(DKEY) || {}; }
+  // Links open in a new tab; times like 12:30 jump the video there (chapters, for example).
+  function richDesc(text) {
+    var frag = document.createDocumentFragment(), re = /(https?:\/\/[^\s<>"]+[^\s<>".,;:!?')\]])|(\b(?:\d{1,2}:)?\d{1,2}:[0-5]\d\b)/g, last = 0, m;
+    while ((m = re.exec(text))) {
+      frag.appendChild(document.createTextNode(text.slice(last, m.index)));
+      if (m[1]) frag.appendChild(h("a", { href: m[1], target: "_blank", rel: "noopener", text: m[1].length > 60 ? m[1].slice(0, 57) + "…" : m[1] }));
+      else {
+        var parts = m[2].split(":").map(Number), sec = parts.length === 3 ? parts[0] * 3600 + parts[1] * 60 + parts[2] : parts[0] * 60 + parts[1];
+        var b = h("button", { type: "button", class: "ts", title: "Jump to " + m[2], text: m[2] });
+        (function (s2) { b.addEventListener("click", function () { seekTo(s2); window.scrollTo({ top: 0, behavior: "smooth" }); }); })(sec);
+        frag.appendChild(b);
+      }
+      last = re.lastIndex;
+    }
+    frag.appendChild(document.createTextNode(text.slice(last)));
+    return frag;
+  }
+  function showDesc(c) {
+    var box = document.getElementById("pDesc"), txt = document.getElementById("pDescText"), more = document.getElementById("pDescMore");
+    box.hidden = true; box.classList.remove("open"); txt.textContent = ""; more.hidden = true; more.textContent = "Show more";
+    if (!c || !c.id) return;
+    var put = function (d) {
+      if (!yt.current || yt.current.id !== c.id) return;
+      d = String(d || "").trim();
+      if (!d) return;
+      txt.textContent = ""; txt.appendChild(richDesc(d)); box.hidden = false;
+      requestAnimationFrame(function () { more.hidden = txt.scrollHeight <= txt.clientHeight + 2; });
+    };
+    var hit = descCache()[c.id];
+    if (hit) { put(hit.d); return; }
+    if (!getKey()) {
+      txt.textContent = ""; box.hidden = false;
+      txt.appendChild(h("span", { class: "note", text: "Add your free YouTube key in Settings to see descriptions here, or " }));
+      txt.appendChild(h("a", { href: "https://www.youtube.com/watch?v=" + c.id, target: "_blank", rel: "noopener", text: "read it on YouTube" }));
+      txt.appendChild(document.createTextNode("."));
+      return;
+    }
+    api("videos", { part: "snippet", id: c.id }).then(function (v) {
+      addUnits(1); saveLive();
+      var it = (v.items || [])[0], d = it && it.snippet ? it.snippet.description || "" : "";
+      var cache = descCache(); cache[c.id] = { d: d.slice(0, 5000), at: Date.now() };
+      Object.keys(cache).sort(function (a, b) { return cache[b].at - cache[a].at; }).slice(60).forEach(function (k) { delete cache[k]; });
+      writeJSON(DKEY, cache);
+      put(d);
+    }).catch(function () {});
+  }
+  document.getElementById("pDescMore").addEventListener("click", function () {
+    var box = document.getElementById("pDesc"), open = box.classList.toggle("open");
+    this.textContent = open ? "Show less" : "Show more";
+  });
 
   // ---------- Learning tools ----------
   // Timestamped notes, spaced review, resume where you left off, keyboard shortcuts,
